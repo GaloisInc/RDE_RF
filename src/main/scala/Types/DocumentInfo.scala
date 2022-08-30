@@ -19,7 +19,7 @@ abstract class DocumentInfo {
   require(documentName.nonEmpty)
   require(filePath.contains(documentName))
   //All reference names must be unique
-  require(getAllReferences.map(ref => ref.referenceName.reference).size == getAllReferences.size, s"Non unique references in $documentName")
+  require(getAllReferences.map(ref => ref.referenceName.reference).sizeIs == getAllReferences.sizeIs, s"Non unique references in $documentName")
 
 }
 

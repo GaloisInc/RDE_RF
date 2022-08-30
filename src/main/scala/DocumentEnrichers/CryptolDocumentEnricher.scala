@@ -21,7 +21,7 @@ class CryptolDocumentEnricher extends DocumentEnricher {
   def formatLine(line: String, documentInfo: DocumentInfo): String = {
     def searchCriteria = (ref: DocReference, srcLine: String) => ref.originalLine == srcLine
 
-    def extractor = (ref: DocReference) => ref.enrichedLine.get
+    def extractor = (ref: DocReference) => ref.enrichedLine.fold("")(i => i)
 
     val references = documentInfo.getAllReferences
 

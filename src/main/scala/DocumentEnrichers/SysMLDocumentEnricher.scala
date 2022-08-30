@@ -1,7 +1,8 @@
 package DocumentEnrichers
 
-import Types.{DocReference, DocumentInfo, FileType, ReferenceName, ReferenceType, SysMLDocumentInfo, DocumentType}
+import Types.{DocReference, DocumentInfo, DocumentType, FileType, ReferenceName, ReferenceType, SysMLDocumentInfo}
 
+import java.util.Locale
 import scala.util.matching.Regex
 
 class SysMLDocumentEnricher extends DocumentEnricher {
@@ -20,7 +21,7 @@ class SysMLDocumentEnricher extends DocumentEnricher {
     val imports: Set[DocReference] = Set.empty[DocReference]
     val views: Set[DocReference] = extractViews(filePath)
     val items: Set[DocReference] = extractItems(filePath)
- 
+
     SysMLDocumentInfo(fileName, filePath, packages, parts, connections, usecases, requirements, actions, imports, views, items)
   }
 
@@ -102,7 +103,7 @@ class SysMLDocumentEnricher extends DocumentEnricher {
   }
 
   def extractTypeDependency(str: String, sysMLType: ReferenceType): String = {
-    val strippedLine = str.replace(sysMLType.toString.toLowerCase, "").strip()
+    val strippedLine = str.replace(sysMLType.toString.toLowerCase(Locale.US), "").strip()
     val cleanLine = removeSysMLMetadata(strippedLine)
     if cleanLine.contains(":>")
     then
@@ -121,7 +122,7 @@ class SysMLDocumentEnricher extends DocumentEnricher {
   }
 
   def extractName(str: String, sysMLType: ReferenceType): String = {
-    val strippedLine = str.replace(sysMLType.toString.toLowerCase, "").strip()
+    val strippedLine = str.replace(sysMLType.toString.toLowerCase(Locale.US), "").strip()
     val acronymRegex = new Regex("'.*'")
     val referenceName = acronymRegex findFirstIn strippedLine
     if referenceName.isDefined then
@@ -132,7 +133,7 @@ class SysMLDocumentEnricher extends DocumentEnricher {
 
   // So far only support for lando types
   private def sysmlType(line: String): Option[ReferenceType] = {
-    val lowerCaseLine = removeSysMLMetadata(line).toLowerCase.strip()
+    val lowerCaseLine = removeSysMLMetadata(line).toLowerCase(Locale.US).strip()
     if lowerCaseLine.startsWith("action") then
       Some(ReferenceType.Action)
     else if lowerCaseLine.startsWith("package") then
@@ -173,10 +174,10 @@ class SysMLDocumentEnricher extends DocumentEnricher {
   } ensuring ((res: String) => res.length <= line.length)
 
   def getFileType(path: String): FileType = {
-    if (fileUtil.isFileType(path, "action")) return FileType.EventFile
-    if (fileUtil.isFileType(path, "requirement")) return FileType.RequirementFile
-    if (fileUtil.isFileType(path, "use case")) return FileType.ScenarioFile
-    if (fileUtil.isFileType(path, "view")) return FileType.ViewFile
+    if (fileUtil.isFileType(path, "action")) FileType.EventFile
+    else if (fileUtil.isFileType(path, "requirement")) FileType.RequirementFile
+    else if (fileUtil.isFileType(path, "use case")) FileType.ScenarioFile
+    else if (fileUtil.isFileType(path, "view")) FileType.ViewFile
     FileType.ComponentFile
   }
 }

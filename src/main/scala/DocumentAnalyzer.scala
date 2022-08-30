@@ -71,9 +71,9 @@ object DocumentAnalyzer {
           document.filePath,
           specializedReference.filter(ref => Set(ReferenceType.Component, ReferenceType.System, ReferenceType.SubSystem).contains(ref.referenceType)),
           document.getRelations,
-          specializedReference.filter(_.referenceType == ReferenceType.Event),
-          specializedReference.filter(_.referenceType == ReferenceType.Requirement),
-          specializedReference.filter(_.referenceType == ReferenceType.Scenario)
+          specializedReference.filter(_.referenceType.equals(ReferenceType.Event)),
+          specializedReference.filter(_.referenceType.equals(ReferenceType.Requirement)),
+          specializedReference.filter(_.referenceType.equals(ReferenceType.Scenario))
         )
       } else {
         document
@@ -101,8 +101,6 @@ object DocumentAnalyzer {
     assert(landoDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).toSet.size == landoDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).length)
     assert(cryptolDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).toSet.size == cryptolDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).length)
     assert(sysMLDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).toSet.size == sysMLDocuments.flatMap(_.getAllReferences.map(_.referenceName.reference)).length)
-
-
 
     val enrichedCryptolDocuments = cryptolDocuments.map(doc => cryptolReferencer.addSpecializationAndAbstract(doc, sysMLDocuments.map(_.asInstanceOf[DocumentInfo]), Array.empty[DocumentInfo]))
     val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addSpecializationAndAbstract(doc, landoDocuments.map(_.asInstanceOf[DocumentInfo]), enrichedCryptolDocuments))

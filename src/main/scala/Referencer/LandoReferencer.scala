@@ -17,26 +17,26 @@ class LandoReferencer extends Referencer {
     require(sysMLDocuments.forall(_.documentType == DocumentType.SysML))
     require(documentInfo.documentType == DocumentType.Lando)
 
-    val sysmlReferences = sysMLDocuments.flatMap(doc => doc.getAllReferences().filter(ref => ref.specializes.nonEmpty))
-    val updatedReferences = documentInfo.getAllReferences().map(landoRef => addSpecializations(landoRef, sysmlReferences.toSet))
+    val sysmlReferences = sysMLDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.specializes.nonEmpty))
+    val updatedReferences = documentInfo.getAllReferences.map(landoRef => addSpecializations(landoRef, sysmlReferences.toSet))
 
     val componentSet = Set(ReferenceType.Component, ReferenceType.SubSystem, ReferenceType.System)
     LandoDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
       updatedReferences.filter(ref => componentSet.contains(ref.referenceType)),
-      documentInfo.getRelations(),
+      documentInfo.getRelations,
       updatedReferences.filter(_.referenceType == ReferenceType.Event),
       updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
       updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
     )
   } ensuring ((resDoc: LandoDocumentInfo) => resDoc.documentName == documentInfo.documentName
     && resDoc.filePath == documentInfo.filePath
-    && resDoc.getRelations().size == documentInfo.getRelations().size
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences().size == documentInfo.getAllReferences().size
+    && resDoc.getRelations.size == documentInfo.getRelations.size
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
+    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
     )
 }
 

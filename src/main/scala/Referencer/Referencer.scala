@@ -3,6 +3,8 @@ package Referencer
 import DocumentEnrichers.LatexFormatter
 import Types.*
 
+import java.util.Locale
+
 abstract class Referencer() {
   protected val latexFormatter = new LatexFormatter()
 
@@ -43,9 +45,12 @@ abstract class Referencer() {
       && ref.specializes == reference.specializes)
 
   private def isSpecialization(referenceName: String, ref: DocReference) = {
-    val referenceNameToMatch = ref.referenceName.name.toLowerCase()
+    val referenceNameToMatch = ref.referenceName.name.toLowerCase(Locale.US)
+    val referenceNameAcronym = ref.referenceName.acronym.getOrElse("XXXXXXXXXXX").toLowerCase()
     val referenceNameLower = referenceName.toLowerCase()
-    referenceNameToMatch.equals(referenceNameLower) || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equals(referenceNameLower)
+    referenceNameToMatch.equals(referenceNameLower)
+      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equals(referenceNameLower)
+      || referenceNameAcronym.equals(referenceNameLower)
   }
 
   protected def enrichAbstractionWithSpecialization(reference: DocReference, specializations: Set[DocReference]): DocReference = {

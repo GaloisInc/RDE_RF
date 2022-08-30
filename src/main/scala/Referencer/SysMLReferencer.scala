@@ -16,8 +16,8 @@ class SysMLReferencer extends Referencer {
     require(landoDocuments.forall(_.documentType == DocumentType.Lando))
     require(documentInfo.documentType == DocumentType.SysML)
 
-    val landoReferences = landoDocuments.flatMap(doc => doc.getAllReferences())
-    val updatedReferences = documentInfo.getAllReferences().map(sysmlReference => addAbstractions(sysmlReference, landoReferences.toSet))
+    val landoReferences = landoDocuments.flatMap(doc => doc.getAllReferences)
+    val updatedReferences = documentInfo.getAllReferences.map(sysmlReference => addAbstractions(sysmlReference, landoReferences.toSet))
 
     SysMLDocumentInfo(
       documentInfo.documentName,
@@ -34,20 +34,20 @@ class SysMLReferencer extends Referencer {
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
     && resDoc.filePath == documentInfo.filePath
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.UseCase) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.UseCase)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Item) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Item)
-    && resDoc.getAllReferences().size == documentInfo.getAllReferences().size
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.UseCase) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.UseCase)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Item) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Item)
+    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
     )
 
   override def addSpecializationsToDocument(documentInfo: DocumentInfo, cryptolDocuments: Array[DocumentInfo]): DocumentInfo = {
     require(cryptolDocuments.forall(_.documentType == DocumentType.Cryptol))
     require(documentInfo.documentType == DocumentType.SysML)
 
-    val cryptolReferences = cryptolDocuments.flatMap(doc => doc.getAllReferences().filter(ref => ref.specializes.nonEmpty))
-    val updatedReferences = documentInfo.getAllReferences().map(sysmlRef => addSpecializations(sysmlRef, cryptolReferences.toSet))
+    val cryptolReferences = cryptolDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.specializes.nonEmpty))
+    val updatedReferences = documentInfo.getAllReferences.map(sysmlRef => addSpecializations(sysmlRef, cryptolReferences.toSet))
 
     SysMLDocumentInfo(
       documentInfo.documentName,
@@ -64,9 +64,9 @@ class SysMLReferencer extends Referencer {
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
     && resDoc.filePath == documentInfo.filePath
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences().count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences().count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences().size == documentInfo.getAllReferences().size
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
+    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
     )
 }

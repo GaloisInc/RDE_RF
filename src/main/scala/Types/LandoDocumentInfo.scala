@@ -29,9 +29,9 @@ class LandoDocumentInfo(
   lazy val getRelations: Set[DocRelation] = relations
 
   override def getFileType: FileType = {
-    if (fileUtil.isFileType(filePath, "events")) return FileType.EventFile
-    if (fileUtil.isFileType(filePath, "requirements")) return FileType.RequirementFile
-    if (fileUtil.isFileType(filePath, "scenarios")) return FileType.ScenarioFile
+    if (fileUtil.isFileType(filePath, "events")) FileType.EventFile
+    else if (fileUtil.isFileType(filePath, "requirements")) FileType.RequirementFile
+    else if (fileUtil.isFileType(filePath, "scenarios")) FileType.ScenarioFile
     FileType.ComponentFile
   }
 }

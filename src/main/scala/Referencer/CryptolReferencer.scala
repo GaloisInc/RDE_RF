@@ -13,8 +13,8 @@ class CryptolReferencer extends Referencer {
     require(sysMlDocuments.forall(_.documentType == DocumentType.SysML))
     require(documentInfo.documentType == DocumentType.Cryptol)
 
-    val sysmlReferences = sysMlDocuments.flatMap(doc => doc.getAllReferences())
-    val updatedReferences = documentInfo.getAllReferences().map(reference => addAbstractions(reference, sysmlReferences.toSet))
+    val sysmlReferences = sysMlDocuments.flatMap(doc => doc.getAllReferences)
+    val updatedReferences = documentInfo.getAllReferences.map(reference => addAbstractions(reference, sysmlReferences.toSet))
 
     CryptolDocumentInfo(
       documentInfo.documentName,

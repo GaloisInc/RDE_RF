@@ -20,18 +20,24 @@ abstract class DocumentEnricher {
     val decoratedFilePath = fileUtil.decorateFileName(filePath)
     val decoratedFile = new File(decoratedFilePath) // Temporary File
     val writer = new PrintWriter(decoratedFile)
+    var lastLine = ""
     Control.using(io.Source.fromFile(filePath)) { source => {
       source.getLines()
         .map(line => {
           formatLine(line, documentInfo)
         }
-        ).foreach(line => writer.println(line))
+        ).foreach(line => {
+        if line.isEmpty && lastLine.isEmpty
+        then lastLine = line
+        else
+          writer.println(line)
+          lastLine = line
+      })
     }
     }
     writer.close()
     decoratedFile.getPath
   }
-
 
   def getFileType(path: String): FileType
 
@@ -68,9 +74,12 @@ abstract class DocumentEnricher {
 
   protected def extractEnrichedText[A](line: String, references: Set[A], searchCriteria: (A, String) => Boolean, projectEnriched: A => String): String = {
     val relevantRefs = references.filter(ref => searchCriteria(ref, line))
-    if (relevantRefs.isEmpty) return line
-    assert(relevantRefs.size == 1)
-    projectEnriched(relevantRefs.head)
+    if relevantRefs.isEmpty
+    then
+      line
+    else
+      assert(relevantRefs.size == 1)
+      projectEnriched(relevantRefs.head)
   }
 
   protected def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {

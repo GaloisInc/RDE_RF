@@ -1,5 +1,8 @@
 package Types
 
+import org.scalactic.Equality
+import org.scalactic.TypeCheckedTripleEquals.convertToCheckingEqualizer
+
 enum LandoReferenceType {
   case Component, SubSystem, System, Scenario, Requirement, Event
 }
@@ -19,7 +22,6 @@ enum RelationType {
 enum DocumentType {
   case Lando, Lobot, SysML, HDL, Cryptol, Saw
 }
-
 enum LandoLineType {
   case EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped
 }

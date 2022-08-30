@@ -1,6 +1,6 @@
 package Types
 
-case class DocRelation(
+final case class DocRelation(
                         documentName: String,
                         explicit: Boolean,
                         relationReference: RelationReference,

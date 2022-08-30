@@ -41,10 +41,10 @@ class SysMLDocumentInfo(
   override def getRelations: Set[DocRelation] = Set.empty
 
   override def getFileType: FileType = {
-    if (fileUtil.isFileType(filePath, "action")) return FileType.EventFile
-    if (fileUtil.isFileType(filePath, "requirement")) return FileType.RequirementFile
-    if (fileUtil.isFileType(filePath, "use case")) return FileType.ScenarioFile
-    if (fileUtil.isFileType(filePath, "view")) return FileType.ViewFile
-    FileType.ComponentFile
+    if (fileUtil.isFileType(filePath, "action")) FileType.EventFile
+    else if (fileUtil.isFileType(filePath, "requirement")) FileType.RequirementFile
+    else if (fileUtil.isFileType(filePath, "use case")) FileType.ScenarioFile
+    else if (fileUtil.isFileType(filePath, "view")) FileType.ViewFile
+    else FileType.ComponentFile
   }
 }

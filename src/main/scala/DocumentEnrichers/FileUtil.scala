@@ -3,7 +3,8 @@ package DocumentEnrichers
 import Types.{DocumentInfo, DocumentType}
 import Utils.Control
 
-import java.nio.file.{Files, Paths}
+import java.io.File
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 class FileUtil {
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
@@ -34,7 +35,7 @@ class FileUtil {
 
   def getDirectory(path: String): String = {
     require(path.nonEmpty)
-    require(Files.exists(Paths.get(path)))
+    //require(Files.exists(Paths.get(path)))
     val directory = path.split('/').dropRight(1).mkString("/")
     directory
   } ensuring ((directory: String) => path.startsWith(directory) && path.length > directory.length)
@@ -53,5 +54,36 @@ class FileUtil {
     Control.using(io.Source.fromFile(path)) { source =>
       source.getLines().exists(_.startsWith(filetype))
     }
+  }
+
+  def getListOfFiles(dir: String): List[String] = {
+    val d = new File(dir)
+    if (d.exists && d.isDirectory) {
+      val filesToDelete = d.listFiles.filter(file => file.getName.contains("decorated"))
+      filesToDelete.foreach(file => file.delete())
+      d.listFiles.filter(_.isFile).map(_.toString).toList
+    } else {
+      List[String]()
+    }
+  }
+
+  def moveRenameFile(source: String, destinationDirectory: String): Unit = {
+    require(source.nonEmpty)
+    require(Files.exists(Paths.get(source)))
+    val fileName = source.split("/").takeRight(1).head
+
+    val directory = new File(destinationDirectory)
+    if (!directory.exists) {
+      directory.mkdir
+      // If you require it to make the entire directory path including parents,
+      // use directory.mkdirs(); here instead.
+    }
+
+    val path = Files.move(
+      Paths.get(source),
+      Paths.get(Path.of(destinationDirectory, fileName).toString),
+      StandardCopyOption.REPLACE_EXISTING
+    )
+    // could return `path`
   }
 }

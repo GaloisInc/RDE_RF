@@ -1,13 +1,13 @@
 package Referencer
 
-import DocumentEnrichers.LatexFormatter
+import Formatter.InLineFormatter
 import Types.*
 import Types.DocumentInfos.DocumentInfo
 
 import java.util.Locale
 
 abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
-  protected val latexFormatter = new LatexFormatter()
+  protected val latexFormatter = new InLineFormatter()
 
   def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo
 

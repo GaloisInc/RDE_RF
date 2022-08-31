@@ -1,5 +1,6 @@
 package DocumentEnrichers
 
+import Formatter.InLineFormatter
 import Types.*
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType.Saw
@@ -9,10 +10,11 @@ import java.io.{File, PrintWriter}
 import java.nio.file.{Files, Paths}
 import java.util.Locale
 import scala.collection.mutable
+import scala.util.matching.Regex
 
-abstract class DocumentEnricher(skipTodos: Boolean = false) {
+abstract class DocumentEnricher(val skipTodos: Boolean = false,
+                                val latexFormatter: Formatter.Formatter = new InLineFormatter) {
   val fileUtil = new FileUtil()
-  val latexFormatter = new LatexFormatter()
 
   def keyWordsToRemove: Array[String]
 
@@ -32,7 +34,8 @@ abstract class DocumentEnricher(skipTodos: Boolean = false) {
       l.replaceAll(keyWord, "")
     }).strip()
       .replaceAll(" +", " ")
-  } ensuring ((res: String) => res.length <= line.length && keyWordsToRemove.forall(unwantedKeyword => !res.contains(unwantedKeyword)))
+  } ensuring ((res: String) => res.length <= line.length
+    && keyWordsToRemove.forall(unwantedKeyword => !res.contains(unwantedKeyword)))
 
 
   def enrichFile(documentInfo: DocumentInfo): String = {
@@ -51,10 +54,12 @@ abstract class DocumentEnricher(skipTodos: Boolean = false) {
             formatLine(line, documentInfo)
         }
         ).foreach(line => {
+        // To Remove Multiple empty lines
         if line.isEmpty && lastLine.isEmpty
         then lastLine = line
         else
-          writer.println(line)
+          val highLighted = highlightLinks(line)
+          writer.println(highLighted)
           lastLine = line
       })
     }
@@ -106,6 +111,11 @@ abstract class DocumentEnricher(skipTodos: Boolean = false) {
           case None => ""
   }
 
+  def referenceText(name: String, typeString: String): String = {
+    val sanitizedName = latexFormatter.sanitizeLine(name)
+    s"${typeString}_$sanitizedName"
+  }
+
   protected def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {
     if (referenceName.acronym.isDefined) {
       name.equals(referenceName.acronym.get)
@@ -125,6 +135,11 @@ abstract class DocumentEnricher(skipTodos: Boolean = false) {
   }
 
   protected def getReferenceType(line: String): Option[ReferenceType] = {
+    def matchKeyword(line: String, keyWord: String): Boolean = {
+      require(keyWord.nonEmpty)
+      line.startsWith(keyWord + " ")
+    }
+
     val lowerCaseLine = removeKeyWords(line).toLowerCase(Locale.US).strip()
     if matchKeyword(lowerCaseLine, keyWordsToReference.System) then
       Some(ReferenceType.System)
@@ -154,10 +169,17 @@ abstract class DocumentEnricher(skipTodos: Boolean = false) {
       None
   }
 
-  private def matchKeyword(line: String, keyWord: String): Boolean = {
-    require(keyWord.nonEmpty)
-    line.startsWith(keyWord + " ")
-  }
+  def highlightLinks(str: String): String = {
+    val urlRegex = Regex("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")
+    val urls = urlRegex findAllIn str
+    if urls.isEmpty then str
+    else urls.foldLeft(str)((line, url) => {
+      val formattedUrl = latexFormatter.createLink(url)
+      line.replaceAll(url, formattedUrl)
+    })
+  } ensuring ((highlightedString: String) => highlightedString.length >= str.length,
+    s"Highlighted link is shorter. " +
+    s"Original Link: $str")
 
 }
 

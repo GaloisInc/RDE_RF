@@ -1,3 +1,4 @@
+import Analyzers.DocumentAnalyzer
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -5,7 +6,6 @@ import org.scalatest.matchers.*
 
 import scala.collection.mutable
 import scala.io.Source
-import DocumentEnrichers.DocumentAnalyzer
 
 import java.nio.file.Path
 

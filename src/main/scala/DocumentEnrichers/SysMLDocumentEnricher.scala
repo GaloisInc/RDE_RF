@@ -107,11 +107,6 @@ class SysMLDocumentEnricher extends DocumentEnricher {
   } ensuring ((refs: Set[DocReference]) => refs.forall(_.referenceType == referenceType))
 
 
-  def referenceText(name: String, typeString: String): String = {
-    val sanitizedName = latexFormatter.sanitizeLine(name)
-    s"${typeString}_$sanitizedName"
-  }
-
   def extractTypeDependency(str: String, referenceType: ReferenceType): NameAcronym = {
     val cleanLine = removeAllKeyWordsFromName(str, referenceType)
     if cleanLine.contains(":>")

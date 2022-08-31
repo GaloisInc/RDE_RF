@@ -1,6 +1,6 @@
 package Referencer
 
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.{DocumentType, ReferenceType}
 
 class LandoReferencer extends Referencer {
@@ -8,7 +8,7 @@ class LandoReferencer extends Referencer {
     require(specializedDocuments.forall(_.documentType == DocumentType.SysML))
     require(documentToExtend.documentType == DocumentType.Lando)
     addSpecializationsToDocument(documentToExtend, specializedDocuments)
-  }
+  } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
   def addAbstractionsToDocument(specializedDocument: DocumentInfo, abstractDocument: Array[DocumentInfo]): DocumentInfo = {
     specializedDocument
@@ -31,14 +31,7 @@ class LandoReferencer extends Referencer {
       updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
       updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
     )
-  } ensuring ((resDoc: LandoDocumentInfo) => resDoc.documentName == documentInfo.documentName
-    && resDoc.filePath == documentInfo.filePath
-    && resDoc.getRelations.size == documentInfo.getRelations.size
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
-    )
+  } ensuring ((resDoc: LandoDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 }
 
 

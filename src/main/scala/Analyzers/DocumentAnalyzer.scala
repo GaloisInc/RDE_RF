@@ -1,9 +1,10 @@
-package DocumentEnrichers
+package Analyzers
 
-import Types.{DocReference, ReferenceType}
-import Referencer.{CryptolReferencer, LandoReferencer, SysMLReferencer}
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
-import Utils.FileUtil
+import Types.{DocReference, ReferenceType}
+import DocumentEnrichers.*
+import Referencer.*
+import Utils.*
 
 import java.nio.file.Path
 

@@ -1,6 +1,6 @@
 package Referencer
 
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.{DocumentType, ReferenceType}
 
 class SysMLReferencer extends Referencer {
@@ -11,7 +11,8 @@ class SysMLReferencer extends Referencer {
 
     val documentWithSpecializations = this.addSpecializationsToDocument(documentToExtend, specializedDocuments)
     this.addAbstractionsToDocument(documentWithSpecializations, abstractDocuments)
-  }
+  } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
+
 
   override def addAbstractionsToDocument(documentInfo: DocumentInfo, landoDocuments: Array[DocumentInfo]): DocumentInfo = {
     require(landoDocuments.forall(_.documentType == DocumentType.Lando))
@@ -33,14 +34,7 @@ class SysMLReferencer extends Referencer {
       updatedReferences.filter(_.referenceType == ReferenceType.View),
       updatedReferences.filter(_.referenceType == ReferenceType.Component)
     )
-  } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
-    && resDoc.filePath == documentInfo.filePath
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Component) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Component)
-    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
-    )
+  } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 
   override def addSpecializationsToDocument(documentInfo: DocumentInfo, cryptolDocuments: Array[DocumentInfo]): DocumentInfo = {
     require(cryptolDocuments.forall(_.documentType == DocumentType.Cryptol))
@@ -62,11 +56,5 @@ class SysMLReferencer extends Referencer {
       updatedReferences.filter(_.referenceType == ReferenceType.View),
       updatedReferences.filter(_.referenceType == ReferenceType.Component)
     )
-  } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
-    && resDoc.filePath == documentInfo.filePath
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
-    )
+  } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 }

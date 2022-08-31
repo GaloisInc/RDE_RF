@@ -32,15 +32,11 @@ enum RelationType {
 }
 
 enum DocumentType {
-  case Lando, Lobot, SysML, HDL, Cryptol, Saw, SV
+  case Lando, Lobot, SysML, Cryptol, Saw, SV, BSV
 }
 
 enum LandoLineType {
   case EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped
-}
-
-enum SysMLLineType {
-  case EmptyLine, Comment, Requirement, UseCase, Action, Package, Part
 }
 
 enum FileType {

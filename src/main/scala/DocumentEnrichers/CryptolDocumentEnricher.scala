@@ -63,11 +63,6 @@ class CryptolDocumentEnricher extends DocumentEnricher {
     extract(filePath, (line: String, _: String) => filterReferenceTypes(line, referenceType), transformReference)
   } ensuring ((references: Set[DocReference]) => references.forall(ref => ref.referenceType == referenceType && ref.documentType == DocumentType.Cryptol))
 
-  def referenceText(name: String, typeString: String): String = {
-    val sanitizedName = latexFormatter.sanitizeLine(name)
-    s"${typeString}_$sanitizedName"
-  }
-
   def extractTypeDependency(str: String, referenceType: ReferenceType): String = {
     val cleanLine = removeCryptolMetaData(str)
     val name = referenceType match

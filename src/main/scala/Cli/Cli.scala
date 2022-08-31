@@ -1,8 +1,8 @@
 package Cli
 
+import Analyzers.DocumentAnalyzer
 import scala.io.StdIn
 import scala.util.matching.Regex
-import DocumentEnrichers.DocumentAnalyzer
 import Utils.FileUtil
 
 class Cli {

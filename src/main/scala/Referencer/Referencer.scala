@@ -2,10 +2,11 @@ package Referencer
 
 import DocumentEnrichers.LatexFormatter
 import Types.*
+import Types.DocumentInfos.DocumentInfo
 
 import java.util.Locale
 
-abstract class Referencer() {
+abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
   protected val latexFormatter = new LatexFormatter()
 
   def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo
@@ -44,13 +45,14 @@ abstract class Referencer() {
       && ref.referenceType == reference.referenceType
       && ref.specializes == reference.specializes)
 
-  private def isSpecialization(referenceName: String, ref: DocReference) = {
+  def isSpecialization(referenceName: String, ref: DocReference): Boolean = {
     val referenceNameToMatch = ref.referenceName.name.toLowerCase(Locale.US)
     val referenceNameAcronym = ref.referenceName.acronym.getOrElse("XXXXXXXXXXX").toLowerCase()
     val referenceNameLower = referenceName.toLowerCase()
     referenceNameToMatch.equals(referenceNameLower)
       || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equals(referenceNameLower)
       || referenceNameAcronym.equals(referenceNameLower)
+      || Hamming.computeRelHamming(referenceName, referenceNameToMatch) <= hammingDistanceMeasure
   }
 
   protected def enrichAbstractionWithSpecialization(reference: DocReference, specializations: Set[DocReference]): DocReference = {
@@ -70,5 +72,5 @@ abstract class Referencer() {
       specializes = Some(abstractions)
     )
   } ensuring ((ref: DocReference) => ref.enrichedLine.get.contains(reference.enrichedLine.get) && ref.specializes.isDefined)
-}
 
+}

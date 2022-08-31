@@ -1,6 +1,7 @@
-package Types
+package Types.DocumentInfos
 
-import DocumentEnrichers.FileUtil
+import Types.*
+import Utils.FileUtil
 
 class LandoDocumentInfo(
                          override val documentName: String,
@@ -16,7 +17,9 @@ class LandoDocumentInfo(
   private val fileUtil = new FileUtil()
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType) && ref.documentName == documentName && ref.documentType == DocumentType.Lando))
+  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType)
+    && ref.documentName == documentName
+    && ref.documentType == DocumentType.Lando))
   require(events.forall(_.referenceType == ReferenceType.Event))
   require(scenarios.forall(_.referenceType == ReferenceType.Scenario))
   require(requirements.forall(_.referenceType == ReferenceType.Requirement))
@@ -35,6 +38,9 @@ class LandoDocumentInfo(
     FileType.ComponentFile
   }
 }
+
+
+
 
 
 

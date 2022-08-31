@@ -1,6 +1,7 @@
-package Types
+package Types.DocumentInfos
 
-import DocumentEnrichers.FileUtil
+import Types.*
+import Utils.FileUtil
 
 class CryptolDocumentInfo(
                            override val documentName: String,
@@ -18,16 +19,16 @@ class CryptolDocumentInfo(
   //      path,
   //      allRefs.filter(_.referenceType == ReferenceType.Import),
   //      allRefs.filter(_.referenceType == ReferenceType.Type),
-  //      allRefs.filter(_.referenceType == ReferenceType.Action),
+  //      allRefs.filter(_.referenceType == ReferenceType.Event),
   //      allRefs.filter(_.referenceType == ReferenceType.Requirement)
   //    )
 
 
   private val fileUtil = new FileUtil()
-  private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Requirement, ReferenceType.Action, ReferenceType.Import, ReferenceType.Type)
+  private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
 
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType) && ref.documentType == DocumentType.Cryptol && ref.documentName == documentName))
-  require(functions.forall(ref => ref.referenceType == ReferenceType.Action && ref.documentType == DocumentType.Cryptol))
+  require(functions.forall(ref => ref.referenceType == ReferenceType.Event && ref.documentType == DocumentType.Cryptol))
   require(imports.forall(ref => ref.referenceType == ReferenceType.Import && ref.documentType == DocumentType.Cryptol))
   require(types.forall(ref => ref.referenceType == ReferenceType.Type && ref.documentType == DocumentType.Cryptol))
   require(properties.forall(ref => ref.referenceType == ReferenceType.Requirement && ref.documentType == DocumentType.Cryptol))

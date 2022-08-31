@@ -6,9 +6,10 @@ import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo}
 import java.util.Locale
 import scala.util.matching.Regex
 
-class CryptolDocumentEnricher extends DocumentEnricher {
+class CDocumentEnricher extends DocumentEnricher {
   // Reads a Document to create an object of the necessary information to enrich the document.
-  val keyWordsToRemove: Array[String] = Array("private")
+  val keyWordsToRemove: Array[String] = Array("private", "public", "static")
+
 
   //Cryptol
   val keyWordsToReference: ReferenceKeyWords = ReferenceKeyWords(

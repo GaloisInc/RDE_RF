@@ -1,6 +1,7 @@
-package Types
+package Types.DocumentInfos
 
-import DocumentEnrichers.FileUtil
+import Types.*
+import Utils.FileUtil
 
 class SysMLDocumentInfo(
                          override val documentName: String,
@@ -18,17 +19,17 @@ class SysMLDocumentInfo(
                        ) extends DocumentInfo {
   val fileUtil = new FileUtil()
 
-  private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Action, ReferenceType.Package, ReferenceType.UseCase, ReferenceType.Part, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Item)
+  private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component)
 
   require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.referenceType) && ref.documentType == DocumentType.SysML && ref.documentName == documentName))
-  require(parts.forall(_.referenceType == ReferenceType.Part))
+  require(parts.forall(_.referenceType == ReferenceType.SubSystem))
   require(connections.forall(_.referenceType == ReferenceType.Connection))
-  require(packages.forall(_.referenceType == ReferenceType.Package))
-  require(actions.forall(_.referenceType == ReferenceType.Action))
+  require(packages.forall(_.referenceType == ReferenceType.System))
+  require(actions.forall(_.referenceType == ReferenceType.Event))
   require(views.forall(_.referenceType == ReferenceType.View))
   require(imports.forall(_.referenceType == ReferenceType.Import))
-  require(usecases.forall(_.referenceType == ReferenceType.UseCase))
-  require(items.forall(_.referenceType == ReferenceType.Item))
+  require(usecases.forall(_.referenceType == ReferenceType.Scenario))
+  require(items.forall(_.referenceType == ReferenceType.Component))
 
   //All referenceNames must be unique
 

@@ -1,5 +1,5 @@
-import DocumentEnrichers.CryptolDocumentEnricher
-import Types.{ReferenceType, DocumentType}
+import DocumentEnrichers.SVDocumentEnricher
+import Types.{DocumentType, ReferenceType}
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -9,28 +9,24 @@ import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
-class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
+class SVAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val fileUtil = FileUtil()
-  private val documentAnalyser = CryptolDocumentEnricher()
+  private val documentAnalyser = SVDocumentEnricher()
 
-  "CryptolDocumentEnricher" should "be able to extract types from AcutationUnit" in {
-    checkExtractReferences("ActuationUnit", numberOfTypes = 5, numberOfRequirements = 5, numberOfEvents = 9)
+  "SVDocumentEnricher" should "be able to extract modules from AcutationUnit" in {
+    checkExtractReferences("actuation_unit_impl", numberOfSystem = 7)
   }
 
-  "CryptolDocumentEnricher" should "be able to extract types from Actuator" in {
-    checkExtractReferences("Actuator", numberOfTypes = 3, numberOfEvents = 3)
+  "SVDocumentEnricher" should "be able to extract modules from Actuator Impl" in {
+    checkExtractReferences("actuator_impl", numberOfSystem = 1)
   }
 
-  "CryptolDocumentEnricher" should "be able to extract types from InstrumentationUnit" in {
-    checkExtractReferences("InstrumentationUnit", numberOfTypes = 10, numberOfRequirements = 9, numberOfEvents = 9)
+  "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Generated" in {
+    checkExtractReferences("instrumentation_impl", numberOfSystem = 3)
   }
 
-  "CryptolDocumentEnricher" should "be able to extract types from RTS" in {
-    checkExtractReferences("RTS", numberOfTypes = 10, numberOfRequirements = 6, numberOfEvents = 7)
-  }
-
-  "CryptolDocumentEnricher" should "be able to extract types from Utils" in {
-    checkExtractReferences("Utils", numberOfEvents = 1)
+  "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Handwritten" in {
+    checkExtractReferences("instrumentation_impl_handwritten", numberOfSystem = 2)
   }
 
 
@@ -45,8 +41,8 @@ class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
                                      numberOfViews: Int = 0,
                                      numberOfTypes: Int = 0
                                     ) = {
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(cryptolDocuments).toArray
+    val systemVerilogDocuments = getClass.getResource("SystemVerilog").getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(systemVerilogDocuments).toArray
 
     val documentOfInterest = filesToAnalyze.filter(_.contains(fileName))
     assert(documentOfInterest.length == 1)
@@ -54,7 +50,7 @@ class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
 
     val analyzedDocument = documentAnalyser.extractDocumentInfo(filePath)
     assert(analyzedDocument.documentName == fileName)
-    assert(analyzedDocument.documentType == DocumentType.Cryptol)
+    assert(analyzedDocument.documentType == DocumentType.SV)
 
     val extractedReferences = analyzedDocument.getAllReferences
     assert(extractedReferences.count(_.referenceType == ReferenceType.System) == numberOfSystem)
@@ -66,8 +62,6 @@ class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
     assert(extractedReferences.count(_.referenceType == ReferenceType.Event) == numberOfEvents)
     assert(extractedReferences.count(_.referenceType == ReferenceType.Attribute) == numberOfAttributes)
     assert(extractedReferences.count(_.referenceType == ReferenceType.Type) == numberOfTypes)
-    assert(extractedReferences.count(_.referenceType == ReferenceType.Scenario) == numberOfScenarios)
-
 
   }
 }

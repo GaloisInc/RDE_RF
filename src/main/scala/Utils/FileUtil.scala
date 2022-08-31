@@ -1,6 +1,7 @@
-package DocumentEnrichers
+package Utils
 
-import Types.{DocumentInfo, DocumentType}
+import Types.DocumentInfos.DocumentInfo
+import Types.DocumentType
 import Utils.Control
 
 import java.io.File
@@ -67,7 +68,7 @@ class FileUtil {
     }
   }
 
-  def moveRenameFile(source: String, destinationDirectory: String): Unit = {
+  def moveRenameFile(source: String, destinationDirectory: String): String = {
     require(source.nonEmpty)
     require(Files.exists(Paths.get(source)))
     val fileName = source.split("/").takeRight(1).head
@@ -84,6 +85,6 @@ class FileUtil {
       Paths.get(Path.of(destinationDirectory, fileName).toString),
       StandardCopyOption.REPLACE_EXISTING
     )
-    // could return `path`
+    path.toString
   }
 }

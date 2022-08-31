@@ -1,6 +1,7 @@
 package Referencer
 
 import Types.*
+import Types.DocumentInfos.{DocumentInfo, CryptolDocumentInfo}
 
 class CryptolReferencer extends Referencer {
   override def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
@@ -21,7 +22,7 @@ class CryptolReferencer extends Referencer {
       documentInfo.filePath,
       updatedReferences.filter(_.referenceType == ReferenceType.Import),
       updatedReferences.filter(_.referenceType == ReferenceType.Type),
-      updatedReferences.filter(_.referenceType == ReferenceType.Action),
+      updatedReferences.filter(_.referenceType == ReferenceType.Event),
       updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
     )
   } ensuring ((resDoc: DocumentInfo) => resDoc.documentName == documentInfo.documentName

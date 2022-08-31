@@ -1,6 +1,7 @@
 package Referencer
 
-import Types.{CryptolDocumentInfo, DocumentInfo, DocumentType, LandoDocumentInfo, ReferenceType, SysMLDocumentInfo}
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.{DocumentType, ReferenceType}
 
 class LandoReferencer extends Referencer {
   def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
@@ -36,7 +37,7 @@ class LandoReferencer extends Referencer {
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
+    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
     )
 }
 

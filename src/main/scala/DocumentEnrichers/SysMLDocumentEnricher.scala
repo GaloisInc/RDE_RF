@@ -1,177 +1,183 @@
 package DocumentEnrichers
 
-import Types.{DocReference, DocumentInfo, DocumentType, FileType, ReferenceName, ReferenceType, SysMLDocumentInfo}
+import Types.DocumentInfos.{DocumentInfo, SysMLDocumentInfo}
+import Types.{DocReference, DocumentType, FileType, ReferenceKeyWords, ReferenceName, ReferenceType}
 
 import java.util.Locale
 import scala.util.matching.Regex
 
 class SysMLDocumentEnricher extends DocumentEnricher {
-  // Reads a Document to create an object of the necessary information to enrich the document.
+  val keyWordsToRemove: Array[String] = Array("private", "abstract", "id", "def", ";", "\\{")
+
+  //SysML
+  val keyWordsToReference: ReferenceKeyWords = ReferenceKeyWords(
+    System = "package",
+    // Lando SubSystem and SysML Part
+    SubSystem = "part",
+    // Lando SubSystem and SysML Item
+    Component = "item",
+    // SysML Use case and Lando Scenario
+    Scenario = "use case",
+    // SysML and Lando Requirement and Cryptol Properties
+    Requirement = "requirement",
+    // Lando Event, SysML Action and Cryptol Functions
+    Event = "action",
+    Connection = "connection",
+    Import = "import",
+    View = "view",
+    ViewPoint = "viewpoint",
+    Attribute = "attribute",
+  )
+
   def extractDocumentInfo(filePath: String): SysMLDocumentInfo = {
     require(filePath.nonEmpty)
     require(fileUtil.getFileType(filePath) == "sysml")
 
     val fileName = fileUtil.getFileName(filePath)
-    val parts: Set[DocReference] = extractParts(filePath)
-    val packages: Set[DocReference] = extractPackages(filePath)
-    val connections: Set[DocReference] = extractConnection(filePath)
-    val usecases: Set[DocReference] = extractUseCases(filePath)
-    val requirements: Set[DocReference] = extractRequirements(filePath)
-    val actions: Set[DocReference] = extractActions(filePath)
-    val imports: Set[DocReference] = Set.empty[DocReference]
-    val views: Set[DocReference] = extractViews(filePath)
-    val items: Set[DocReference] = extractItems(filePath)
+    val packages: Set[DocReference] = extractReferences(filePath, ReferenceType.System)
+    val parts: Set[DocReference] = extractReferences(filePath, ReferenceType.SubSystem)
+    val items: Set[DocReference] = extractReferences(filePath, ReferenceType.Component)
 
-    SysMLDocumentInfo(fileName, filePath, packages, parts, connections, usecases, requirements, actions, imports, views, items)
+    val connections: Set[DocReference] = extractReferences(filePath, ReferenceType.Connection)
+    val usecases: Set[DocReference] = extractReferences(filePath, ReferenceType.Scenario)
+    val requirements: Set[DocReference] = extractReferences(filePath, ReferenceType.Requirement)
+    val actions: Set[DocReference] = extractReferences(filePath, ReferenceType.Event)
+    val imports: Set[DocReference] = Set.empty[DocReference]
+    val views: Set[DocReference] = extractReferences(filePath, ReferenceType.View)
+    val viewPoints: Set[DocReference] = extractReferences(filePath, ReferenceType.ViewPoint)
+    val attributes: Set[DocReference] = extractReferences(filePath, ReferenceType.Attribute)
+    //val ports: Set[DocReference] = extractAttributes(filePath)
+
+    SysMLDocumentInfo(
+      fileName,
+      filePath,
+      packages,
+      parts,
+      connections,
+      usecases,
+      requirements,
+      actions,
+      imports,
+      views,
+      items,
+      //attributes
+    )
   }
 
 
   def formatLine(line: String, documentInfo: DocumentInfo): String = {
-    def searchCriteria = (ref: DocReference, srcLine: String) => ref.originalLine == srcLine
-
-    def extractor = (ref: DocReference) => ref.enrichedLine.get
-
     val references = documentInfo.getAllReferences
 
-    sysmlType(line) match
+    getReferenceType(line) match
       case Some(value) => value match
-        case ReferenceType.Action => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Action), searchCriteria, extractor)
-        case ReferenceType.Package => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Package), searchCriteria, extractor)
-        case ReferenceType.UseCase => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.UseCase), searchCriteria, extractor)
-        case ReferenceType.Part => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Part), searchCriteria, extractor)
-        case ReferenceType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement), searchCriteria, extractor)
-        case ReferenceType.Connection => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Connection), searchCriteria, extractor)
-        case ReferenceType.Import => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Import), searchCriteria, extractor)
-        case ReferenceType.View => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.View), searchCriteria, extractor)
+        case ReferenceType.Event => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Event))
+        case ReferenceType.System => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.System))
+        case ReferenceType.SubSystem => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.SubSystem))
+        case ReferenceType.Component => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Component))
+        case ReferenceType.Scenario => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Scenario))
+        case ReferenceType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement))
+        case ReferenceType.Connection => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Connection))
+        case ReferenceType.Import => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Import))
+        case ReferenceType.View => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.View))
         case ReferenceType.ViewPoint => line
-        case ReferenceType.Item => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Item), searchCriteria, extractor)
         case _ => line
       case None => line
   }
 
   def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
-    val strippedLine = removeSysMLMetadata(line)
-    val sysMlType = sysmlType(strippedLine).get
+    val cleanedString = removeKeyWords(line)
+    val referenceType = getReferenceType(cleanedString).get
     //todo add type
-    val name = extractTypeDependency(line, sysMlType)
-    val reference = referenceText(name, s"sysml_${fileName}_${sysMlType.toString}")
-    val referenceInfo = ReferenceName(name, reference)
+    val nameAcronym = extractTypeDependency(line, referenceType)
+    val reference = referenceText(nameAcronym.name, s"sysml_${fileName}_${referenceType.toString}")
+    val referenceInfo = ReferenceName(nameAcronym.name, reference, nameAcronym.acronym)
 
     DocReference(
       fileName,
       referenceInfo,
-      sysMlType,
+      referenceType,
       DocumentType.SysML,
       line,
       Some(latexFormatter.enrichLineWithLabel(line, reference))
     )
   }
 
-  private def extractParts(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Part), transformReference)
+  private def extractReferences(filePath: String, referenceType: ReferenceType): Set[DocReference] = {
+    extract(filePath, (line: String, _: String) => filterReferenceTypes(line, referenceType), transformReference)
+  } ensuring ((refs: Set[DocReference]) => refs.forall(_.referenceType == referenceType))
 
-  private def extractPackages(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Package), transformReference)
-
-  private def extractItems(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Item), transformReference)
-
-  private def extractViewPoints(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.ViewPoint), transformReference)
-
-  private def extractViews(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.View), transformReference)
-
-  private def extractRequirements(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Requirement), transformReference)
-
-  private def extractUseCases(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.UseCase), transformReference)
-
-  private def extractConnection(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Connection), transformReference)
-
-  private def extractActions(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Action), transformReference)
-
-  private def extractImports(filePath: String): Set[DocReference] =
-    extract(filePath, (l: String, _: String) => filterReferenceTypes(l, ReferenceType.Import), transformReference)
 
   def referenceText(name: String, typeString: String): String = {
     val sanitizedName = latexFormatter.sanitizeLine(name)
     s"${typeString}_$sanitizedName"
   }
 
-  def extractTypeDependency(str: String, sysMLType: ReferenceType): String = {
-    val strippedLine = str.replace(sysMLType.toString.toLowerCase(Locale.US), "").strip()
-    val cleanLine = removeSysMLMetadata(strippedLine)
+  def extractTypeDependency(str: String, referenceType: ReferenceType): NameAcronym = {
+    val cleanLine = removeAllKeyWordsFromName(str, referenceType)
     if cleanLine.contains(":>")
     then
       val relationTo = cleanLine.split(":>").last
       val name = cleanLine.split(":>").head
-      extractName(relationTo, sysMLType)
-      extractName(name, sysMLType)
+      //extractNameAcronym(relationTo, referenceType)
+      extractNameAcronym(name, referenceType)
     else if cleanLine.contains(":")
     then
       val typeOf = cleanLine.split(":").last
       val name = cleanLine.split(":").head
-      extractName(typeOf, sysMLType)
-      extractName(name, sysMLType)
+      //extractNameAcronym(typeOf, referenceType)
+      extractNameAcronym(name, referenceType)
     else
-      extractName(cleanLine, sysMLType)
+      extractNameAcronym(cleanLine, referenceType)
   }
 
-  def extractName(str: String, sysMLType: ReferenceType): String = {
-    val strippedLine = str.replace(sysMLType.toString.toLowerCase(Locale.US), "").strip()
-    val acronymRegex = new Regex("'.*'")
-    val referenceName = acronymRegex findFirstIn strippedLine
+  def extractNameAcronym(str: String, referenceType: ReferenceType): NameAcronym = {
+    val strippedLine = removeAllKeyWordsFromName(str, referenceType)
+    val nameRegex = new Regex("'.*'")
+    val referenceName = nameRegex findFirstIn strippedLine
     if referenceName.isDefined then
-      referenceName.get.replaceAll("'", "")
+      val highlightedName = referenceName.get
+      val name = highlightedName.replaceAll("'", "")
+      val acronym = if strippedLine.length > referenceName.get.length then Some(strippedLine.replace(highlightedName, "").strip()) else None
+      NameAcronym(name, acronym)
     else
-      strippedLine
+      NameAcronym(strippedLine, None)
   }
 
-  // So far only support for lando types
-  private def sysmlType(line: String): Option[ReferenceType] = {
-    val lowerCaseLine = removeSysMLMetadata(line).toLowerCase(Locale.US).strip()
-    if lowerCaseLine.startsWith("action") then
-      Some(ReferenceType.Action)
-    else if lowerCaseLine.startsWith("package") then
-      Some(ReferenceType.Package)
-    else if lowerCaseLine.startsWith("use case") then
-      Some(ReferenceType.UseCase)
-    else if lowerCaseLine.startsWith("requirement") then
-      Some(ReferenceType.Requirement)
-    else if lowerCaseLine.startsWith("part") then
-      Some(ReferenceType.Part)
-    else if lowerCaseLine.startsWith("connection") then
-      Some(ReferenceType.Connection)
-    else if lowerCaseLine.startsWith("import") then
-      Some(ReferenceType.Import)
-    else if lowerCaseLine.startsWith("view") then
-      Some(ReferenceType.View)
-    else if lowerCaseLine.startsWith("item") then
-      Some(ReferenceType.Item)
-    else
-      None
-  }
+  final case class NameAcronym(
+                                name: String,
+                                acronym: Option[String]
+                              )
 
-  private def filterReferenceTypes(line: String, sysMLType: ReferenceType): Boolean = {
-    val strippedLine = line.strip()
-    strippedLine.nonEmpty && !strippedLine.startsWith("//") && !strippedLine.startsWith("/*") && sysmlType(strippedLine).nonEmpty && sysmlType(strippedLine).get == sysMLType
-  }
+  def removeAllKeyWordsFromName(name: String, referenceType: ReferenceType): String = {
+    val nameToRemove = referenceType match
+      case ReferenceType.Component => "item"
+      case ReferenceType.SubSystem => "part"
+      case ReferenceType.System => "package"
+      case ReferenceType.Scenario => "use case"
+      case ReferenceType.Requirement => "requirement"
+      case ReferenceType.Event => "action"
+      case ReferenceType.Connection => "connection"
+      case ReferenceType.Import => "impprt"
+      case ReferenceType.View => "view"
+      case ReferenceType.ViewPoint => "viewpoint"
+      case ReferenceType.Type => ""
+      case ReferenceType.Attribute => "attribute"
 
-  private def removeSysMLMetadata(line: String): String = {
-    line.replaceAll("abstract", "")
-      .replaceAll("private", "")
-      .replaceAll("id", "")
-      .replaceAll("def", "")
-      .replaceAll(";", "")
-      .replaceAll("\\{", "")
-      .replaceAll("\\}", "")
-
+    val cleanedString = name.toLowerCase(Locale.US)
+      .replaceFirst(nameToRemove, "")
       .strip()
-  } ensuring ((res: String) => res.length <= line.length)
+
+    removeKeyWords(cleanedString)
+  }
+
+  private def filterReferenceTypes(line: String, referenceType: ReferenceType): Boolean = {
+    val strippedLine = line.strip()
+    strippedLine.nonEmpty
+      && !strippedLine.startsWith("//")
+      && !strippedLine.startsWith("/*")
+      && getReferenceType(strippedLine).nonEmpty
+      && getReferenceType(strippedLine).get == referenceType
+  }
 
   def getFileType(path: String): FileType = {
     if (fileUtil.isFileType(path, "action")) FileType.EventFile

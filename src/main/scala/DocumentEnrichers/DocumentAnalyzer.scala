@@ -1,6 +1,11 @@
-import DocumentEnrichers.{FileUtil, LandoDocumentEnricher, SysMLDocumentEnricher, CryptolDocumentEnricher}
-import Referencer.{LandoReferencer, SysMLReferencer, CryptolReferencer}
-import Types.{DocReference, DocumentInfo, ReferenceType, DocumentType, LandoDocumentInfo}
+package DocumentEnrichers
+
+import Types.{DocReference, ReferenceType}
+import Referencer.{CryptolReferencer, LandoReferencer, SysMLReferencer}
+import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
+import Utils.FileUtil
+
+import java.nio.file.Path
 
 object DocumentAnalyzer {
   //Analyzers
@@ -13,6 +18,29 @@ object DocumentAnalyzer {
   private val cryptolReferencer = CryptolReferencer()
 
   private val fileUtil = FileUtil()
+
+  def enrichAndSortFiles(filesToAnalyze: Array[String]): Array[String] = {
+    val enrichedFiles = enrichFiles(filesToAnalyze)
+    val decoratedLandoFiles = enrichedFiles.filter(_.endsWith("lando"))
+    val decoratedSysMLFiles = enrichedFiles.filter(_.endsWith("sysml"))
+    val decoratedCryptolFiles = enrichedFiles.filter(_.endsWith("cry"))
+
+    val newLandoFiles = decoratedLandoFiles.map(filePath => {
+      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedLando").toString
+      fileUtil.moveRenameFile(filePath, destinationPath)
+    })
+    val newSysMLFiles = decoratedSysMLFiles.map(filePath => {
+      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedSysML").toString
+      fileUtil.moveRenameFile(filePath, destinationPath)
+    })
+
+    val newCryptolFiles = decoratedCryptolFiles.map(filePath => {
+      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedCryptol").toString
+      fileUtil.moveRenameFile(filePath, destinationPath)
+    })
+
+    newLandoFiles ++ newSysMLFiles ++ newCryptolFiles
+  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
   def enrichFiles(filesToAnalyze: Array[String]): Array[String] = {
     require(filesToAnalyze.nonEmpty)

@@ -1,6 +1,7 @@
 package Referencer
 
-import Types.{CryptolDocumentInfo, LandoDocumentInfo, DocumentType, ReferenceType, SysMLDocumentInfo, DocumentInfo}
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.{DocumentType, ReferenceType}
 
 class SysMLReferencer extends Referencer {
   override def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
@@ -22,24 +23,23 @@ class SysMLReferencer extends Referencer {
     SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(_.referenceType == ReferenceType.Package),
-      updatedReferences.filter(_.referenceType == ReferenceType.Part),
+      updatedReferences.filter(_.referenceType == ReferenceType.System),
+      updatedReferences.filter(_.referenceType == ReferenceType.SubSystem),
       updatedReferences.filter(_.referenceType == ReferenceType.Connection),
-      updatedReferences.filter(_.referenceType == ReferenceType.UseCase),
+      updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
       updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
-      updatedReferences.filter(_.referenceType == ReferenceType.Action),
+      updatedReferences.filter(_.referenceType == ReferenceType.Event),
       updatedReferences.filter(_.referenceType == ReferenceType.Import),
       updatedReferences.filter(_.referenceType == ReferenceType.View),
-      updatedReferences.filter(_.referenceType == ReferenceType.Item)
+      updatedReferences.filter(_.referenceType == ReferenceType.Component)
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
     && resDoc.filePath == documentInfo.filePath
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.UseCase) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.UseCase)
-    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Item) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Item)
-    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
+    && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Component) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Component)
+    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
     )
 
   override def addSpecializationsToDocument(documentInfo: DocumentInfo, cryptolDocuments: Array[DocumentInfo]): DocumentInfo = {
@@ -52,21 +52,21 @@ class SysMLReferencer extends Referencer {
     SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(_.referenceType == ReferenceType.Package),
-      updatedReferences.filter(_.referenceType == ReferenceType.Part),
+      updatedReferences.filter(_.referenceType == ReferenceType.System),
+      updatedReferences.filter(_.referenceType == ReferenceType.SubSystem),
       updatedReferences.filter(_.referenceType == ReferenceType.Connection),
-      updatedReferences.filter(_.referenceType == ReferenceType.UseCase),
+      updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
       updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
-      updatedReferences.filter(_.referenceType == ReferenceType.Action),
+      updatedReferences.filter(_.referenceType == ReferenceType.Event),
       updatedReferences.filter(_.referenceType == ReferenceType.Import),
       updatedReferences.filter(_.referenceType == ReferenceType.View),
-      updatedReferences.filter(_.referenceType == ReferenceType.Item)
+      updatedReferences.filter(_.referenceType == ReferenceType.Component)
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => resDoc.documentName == documentInfo.documentName
     && resDoc.filePath == documentInfo.filePath
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Requirement) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Requirement)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Event) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Event)
     && resDoc.getAllReferences.count(_.referenceType == ReferenceType.Scenario) == documentInfo.getAllReferences.count(_.referenceType == ReferenceType.Scenario)
-    && resDoc.getAllReferences.sizeIs == documentInfo.getAllReferences.sizeIs
+    && resDoc.getAllReferences.size == documentInfo.getAllReferences.size
     )
 }

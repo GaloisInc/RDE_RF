@@ -1,4 +1,4 @@
-import DocumentEnrichers.SysMLDocumentEnricher
+import DocumentEnrichers.LandoDocumentEnricher
 import Types.{ReferenceType, DocumentType}
 import Utils.{Control, FileUtil}
 import org.scalatest.*
@@ -9,34 +9,28 @@ import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
-class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
+class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val fileUtil = FileUtil()
-  private val documentEnricher = SysMLDocumentEnricher()
+  private val landoDocumentEnricher = LandoDocumentEnricher()
 
-  "SysMLReader" should "to extract parts and items" in {
-    checkExtractReferences("RTS_Glossary", 1, 80, 66, 0, 0, 0, 0, 0)
+  "LandoDocumentEnricher" should "be able to extract glossary" in {
+    checkExtractReferences("glossary", 0,1,104, 0, 0,0,0,0)
   }
 
-  "SysMLReader" should "to extract requirements" in {
-    checkExtractReferences("RTS_Requirements", 4, 0, 0, 17, 0, 0, 0, 0)
+  "LandoDocumentEnricher" should "be able to extract system" in {
+    checkExtractReferences("RTS", 1,6,0, 0, 0,0,0,0)
   }
 
-  "SysMLReader" should "to extract packages" in {
-    checkExtractReferences("HARDENS", 7, 0, 0, 0, 0, 0, 0, 0)
+  "LandoDocumentEnricher" should "be able to extract events" in {
+    checkExtractReferences("events", 0,0,0, 0, 0,16,0,0)
   }
 
-  "SysMLReader" should "to extract Scenarios" in {
-    checkExtractReferences("RTS_Scenarios", 4, 0, 1, 0, 39, 0, 0, 0)
+  "LandoDocumentEnricher" should "be able to extract requirements" in {
+    checkExtractReferences("project_requirements", 0,0,0, 16, 0,0,0,0)
   }
 
-
-  "SysMLReader" should "to extract Views" in {
-    checkExtractReferences("RTS_Viewpoints", 1, 0, 0, 0, 0, 8, 0, 0)
-  }
-
-
-  "SysMLReader" should "to extract Actions" in {
-    checkExtractReferences("RTS_Actions", 4, 0, 0, 0, 0, 0, 20, 0)
+  "LandoDocumentEnricher" should "be able to extract scenarios" in {
+    checkExtractReferences("test_scenarios", 0,0,0, 0, 40,0,0,0)
   }
 
   private def checkExtractReferences(fileName: String,
@@ -45,20 +39,20 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
                                      numberOfComponent: Int,
                                      numberOfRequirements: Int,
                                      numberOfScenarios: Int,
-                                     numberOfViews: Int,
                                      numberOfEvents: Int,
-                                     numberOfAttributes: Int
+                                     numberOfAttributes: Int = 0,
+                                     numberOfViews: Int = 0,
                                     ) = {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(sysmlDocuments).toArray
+    val landoDocuments = getClass.getResource("Lando").getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(landoDocuments).toArray
 
     val documentOfInterest = filesToAnalyze.filter(_.contains(fileName))
     assert(documentOfInterest.length == 1)
     val filePath = documentOfInterest.head
 
-    val analyzedDocument = documentEnricher.extractDocumentInfo(filePath)
+    val analyzedDocument = landoDocumentEnricher.extractDocumentInfo(filePath)
     assert(analyzedDocument.documentName == fileName)
-    assert(analyzedDocument.documentType == DocumentType.SysML)
+    assert(analyzedDocument.documentType == DocumentType.Lando)
 
     val extractedReferences = analyzedDocument.getAllReferences
     assert(extractedReferences.count(_.referenceType == ReferenceType.System) == numberOfSystem)

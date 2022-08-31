@@ -2,11 +2,15 @@ package Cli
 
 import scala.io.StdIn
 import scala.util.matching.Regex
+import DocumentEnrichers.DocumentAnalyzer
+import Utils.FileUtil
 
 class Cli {
 
   // Makes sure our user CLI inputs are valid
-  val commandArgPattern: Regex = "(\\w+)\\s*(.*)".r
+  private val commandArgPattern: Regex = "(\\w+)\\s*(.*)".r
+
+  private val fileUtil = FileUtil()
 
   // Introduction to and explanation of the application
   def intro(): Unit = println(
@@ -60,13 +64,28 @@ class Cli {
     println("Enjoy your Documentation!")
   }
 
-  def enrichFilesInFolder(folder: String): Unit = {
+  def enrichFilesInFolder(): Unit = {
     println("------------------------------------------------")
 
+    println("Enter source folder:")
+    val folder = StdIn.readLine()
+
+    val filesToAnalyze = fileUtil.getListOfFiles(folder).toArray
+
+    val enrichedFiles = DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze)
+
+    println("The documents are now enriched with Latex references.")
   }
 
-  def enrichFilesInFolderAndMoveTo(dstFolder: String): Unit = {
+  def enrichFilesInFolderAndMoveTo(): Unit = {
     println("------------------------------------------------")
+
+    println("Enter source folder:")
+    val sourceFolder = StdIn.readLine()
+
+    println("Enter destination folder:")
+    val destinationFolder = StdIn.readLine()
+
   }
 
 }

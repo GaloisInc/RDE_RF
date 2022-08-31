@@ -12,7 +12,19 @@ enum SysMLType {
 }
 
 enum ReferenceType {
-  case Component, SubSystem, System, Scenario, Requirement, Event, Action, Package, UseCase, Part, Connection, Import, View, ViewPoint, Item, Type
+  case
+  Component,
+  SubSystem,
+  System,
+  Scenario,
+  Requirement,
+  Event,
+  Connection,
+  Import,
+  View,
+  ViewPoint,
+  Type,
+  Attribute
 }
 
 enum RelationType {
@@ -20,8 +32,9 @@ enum RelationType {
 }
 
 enum DocumentType {
-  case Lando, Lobot, SysML, HDL, Cryptol, Saw
+  case Lando, Lobot, SysML, HDL, Cryptol, Saw, SV
 }
+
 enum LandoLineType {
   case EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped
 }

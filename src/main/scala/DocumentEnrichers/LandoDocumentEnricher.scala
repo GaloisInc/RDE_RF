@@ -1,21 +1,40 @@
 package DocumentEnrichers
 
+import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.FileType.{ComponentFile, EventFile, RequirementFile, ScenarioFile, ViewFile}
-import Types.{DocReference, DocRelation, DocumentInfo, DocumentType, FileType, LandoDocumentInfo, LandoLineType, ReferenceName, ReferenceType, RelationReference, RelationType}
+import Types.{DocReference, DocRelation, DocumentType, FileType, LandoLineType, ReferenceKeyWords, ReferenceName, ReferenceType, RelationReference, RelationType}
 
 import java.util.Locale
 import scala.util.matching.Regex
 
-
 class LandoDocumentEnricher extends DocumentEnricher {
+
+  val keyWordsToRemove: Array[String] = Array("private", "requirements", "events", "scenarios")
+
+  //Lando
+  val keyWordsToReference: ReferenceKeyWords = ReferenceKeyWords(
+    System = "system",
+    // Lando SubSystem and SysML Part
+    SubSystem = "subsystem",
+    // Lando Component and SysML Item
+    Component = "component",
+    // SysML Use case and Lando Scenario
+    //Scenario = "",
+    // SysML and Lando Requirement and Cryptol Properties
+    //Requirement = "",
+    // Lando Event, SysML Action and Cryptol Functions
+    //Event = "",
+    Import = "import",
+  )
+
   def extractDocumentInfo(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty)
     require(fileUtil.getFileType(filePath) == "lando")
-    val references: Set[DocReference] = extractReferences(filePath)
+    val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
     val relations: Set[DocRelation] = extractRelations(filePath)
-    val requirements: Set[DocReference] = extractRequirements(filePath)
-    val scenarios: Set[DocReference] = extractScenarios(filePath)
-    val events: Set[DocReference] = extractEvents(filePath)
+    val requirements: Set[DocReference] = extractReferences(filePath, FileType.RequirementFile)
+    val scenarios: Set[DocReference] = extractReferences(filePath, FileType.ScenarioFile)
+    val events: Set[DocReference] = extractReferences(filePath, FileType.EventFile)
 
     val fileName = fileUtil.getFileName(filePath)
     val enrichedRelations = enrichRelations(relations, references, fileName)
@@ -31,11 +50,11 @@ class LandoDocumentEnricher extends DocumentEnricher {
     getLineType(line, documentInfo.filePath) match
       case LandoLineType.EmptyLine => line
       case LandoLineType.Comment => line
-      case LandoLineType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement), (ref: DocReference, l: String) => ref.originalLine.equals(l), (ref: DocReference) => ref.enrichedLine.get)
-      case LandoLineType.Event => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Event), (ref: DocReference, l: String) => ref.originalLine.equals(l), (ref: DocReference) => ref.enrichedLine.get)
-      case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Scenario), (ref: DocReference, l: String) => ref.originalLine.equals(l), (ref: DocReference) => ref.enrichedLine.get)
-      case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.referenceType)), (ref: DocReference, l: String) => ref.originalLine.equals(l), (ref: DocReference) => ref.enrichedLine.get)
-      case LandoLineType.Relation => extractEnrichedText(line, documentInfo.getRelations, (ref: DocRelation, l: String) => ref.originalLine.equals(l), (ref: DocRelation) => ref.enrichedLine.get)
+      case LandoLineType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement))
+      case LandoLineType.Event => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Event))
+      case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Scenario))
+      case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.referenceType)))
+      case LandoLineType.Relation => extractEnrichedText(line, documentInfo.getRelations)
       case LandoLineType.LineToBeSkipped => ""
   }
 
@@ -62,7 +81,7 @@ class LandoDocumentEnricher extends DocumentEnricher {
   }
 
   private def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
-    val referenceOption = getReferenceType(line, fileType)
+    val referenceOption = getReferenceTypeBasedOnFileType(line, fileType)
     val referenceType = referenceOption.get
     val referenceName = extractReferenceName(line, referenceType, fileName)
     DocReference(
@@ -70,23 +89,10 @@ class LandoDocumentEnricher extends DocumentEnricher {
     )
   }
 
-  private def extractReferences(filePath: String): Set[DocReference] = {
-    extract(filePath, isReference, transformReference)
-  }
-
-  private def extractEvents(filePath: String): Set[DocReference] = {
-    if (getFileType(filePath) != FileType.EventFile) Set.empty
-    else extract(filePath, isEvent, transformReference)
-  }
-
-  private def extractRequirements(filePath: String): Set[DocReference] = {
-    if (getFileType(filePath) != FileType.RequirementFile) Set.empty
-    else extract(filePath, isRequirement, transformReference)
-  }
-
-  private def extractScenarios(filePath: String): Set[DocReference] = {
-    if (getFileType(filePath) != FileType.ScenarioFile) Set.empty
-    else extract(filePath, isScenario, transformReference)
+  private def extractReferences(filePath: String, fileType: FileType): Set[DocReference] = {
+    if (getFileType(filePath) != fileType) return Set.empty
+    val fileChecker = (l: String, p: String) => isOfType(fileType, l, p)
+    extract(filePath, fileChecker, transformReference)
   }
 
   private def addRelation(relation: DocRelation, srcRefs: Set[DocReference], trgRefs: Set[DocReference], currentDoc: String): String = {
@@ -104,20 +110,11 @@ class LandoDocumentEnricher extends DocumentEnricher {
     (line.nonEmpty && !line.startsWith("//")) && getRelationType(line).nonEmpty
   }
 
-  private def isReference(line: String, prev: String = ""): Boolean = {
-    (line.nonEmpty && !line.startsWith("//")) && getReferenceType(line, FileType.ComponentFile).nonEmpty
-  }
-
-  private def isRequirement(line: String, previousLine: String): Boolean = {
-    (line.nonEmpty && !line.startsWith("//")) && (previousLine.isEmpty || previousLine.startsWith("//")) && getReferenceType(line, FileType.RequirementFile).nonEmpty
-  }
-
-  private def isEvent(line: String, previousLine: String): Boolean = {
-    (line.nonEmpty && !line.startsWith("//")) && (previousLine.isEmpty || previousLine.startsWith("//")) && getReferenceType(line, FileType.EventFile).nonEmpty
-  }
-
-  private def isScenario(line: String, previousLine: String): Boolean = {
-    line.nonEmpty && !line.startsWith("//") && (previousLine.isEmpty || previousLine.startsWith("//")) && getReferenceType(line, FileType.ScenarioFile).nonEmpty
+  private def isOfType(fileType: FileType, line: String, previousLine: String): Boolean = {
+    line.nonEmpty && !line.startsWith("//")
+      && (fileType == FileType.ComponentFile
+      || (fileType != FileType.ComponentFile && (previousLine.isEmpty || previousLine.startsWith("//"))))
+      && getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
   }
 
   private def extractReferenceName(line: String, referenceType: ReferenceType, documentName: String): ReferenceName = {
@@ -159,24 +156,15 @@ class LandoDocumentEnricher extends DocumentEnricher {
   }
 
 
-  private def getReferenceType(line: String, fileType: FileType): Option[ReferenceType] = {
+  private def getReferenceTypeBasedOnFileType(line: String, fileType: FileType): Option[ReferenceType] = {
     fileType match
-      case FileType.RequirementFile => Some(ReferenceType.Requirement)
-      case FileType.ScenarioFile => Some(ReferenceType.Scenario)
-      case FileType.EventFile => Some(ReferenceType.Event)
-      case FileType.ViewFile => None
-      case FileType.ComponentFile =>
-        val lowerCaseLine = line.toLowerCase(Locale.US).strip()
-        if lowerCaseLine.startsWith("component") then
-          Some(ReferenceType.Component)
-        else if lowerCaseLine.startsWith("subsystem") then
-          Some(ReferenceType.SubSystem)
-        else if lowerCaseLine.startsWith("system") then
-          Some(ReferenceType.System)
-        else
-          None
+      case FileType.RequirementFile => if !line.startsWith("requirements") then Some(ReferenceType.Requirement) else None
+      case FileType.ScenarioFile => if !line.startsWith("scenarios") then Some(ReferenceType.Scenario) else None
+      case FileType.EventFile => if !line.startsWith("events") then  Some(ReferenceType.Event) else None
+      case _ => getReferenceType(line)
   }
 
+  // Enhance this
   private def getRelationType(line: String): Option[RelationType] = {
     val lowerCaseLine = line.toLowerCase(Locale.US)
     if lowerCaseLine.startsWith("relation") then
@@ -213,6 +201,8 @@ class LandoDocumentEnricher extends DocumentEnricher {
     if (fileUtil.isFileType(path, "scenarios")) return FileType.ScenarioFile
     FileType.ComponentFile
   }
+
+
 }
 
 

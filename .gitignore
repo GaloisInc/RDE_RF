@@ -210,3 +210,23 @@ $RECYCLE.BIN/
 
 
 .idea/libraries/*
+.idea/libraries/sbt__org_scala_lang_modules_scala_xml_3_2_1_0_jar.xml
+.idea/libraries/sbt__org_scala_lang_scala3_library_3_3_1_3_jar.xml
+.idea/libraries/sbt__org_scala_lang_scala_library_2_13_8_jar.xml
+.idea/libraries/sbt__org_scalactic_scalactic_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_compatible_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_core_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_diagrams_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_featurespec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_flatspec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_freespec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_funspec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_funsuite_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_matchers_core_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_mustmatchers_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_propspec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_refspec_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_shouldmatchers_3_3_2_13_jar.xml
+.idea/libraries/sbt__org_scalatest_scalatest_wordspec_3_3_2_13_jar.xml
+.idea/codeStyles/codeStyleConfig.xml

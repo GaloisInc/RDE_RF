@@ -21,19 +21,19 @@ class SysMLDocumentInfo(
 
   private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component)
 
-  require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.referenceType) && ref.documentType == DocumentType.SysML && ref.documentName == documentName))
-  require(parts.forall(_.referenceType == ReferenceType.SubSystem))
-  require(connections.forall(_.referenceType == ReferenceType.Connection))
-  require(packages.forall(_.referenceType == ReferenceType.System))
-  require(actions.forall(_.referenceType == ReferenceType.Event))
-  require(views.forall(_.referenceType == ReferenceType.View))
-  require(imports.forall(_.referenceType == ReferenceType.Import))
-  require(usecases.forall(_.referenceType == ReferenceType.Scenario))
-  require(items.forall(_.referenceType == ReferenceType.Component))
+  require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.SysML && ref.getDocumentName == documentName))
+  require(parts.forall(_.getReferenceType == ReferenceType.SubSystem))
+  require(connections.forall(_.getReferenceType == ReferenceType.Connection))
+  require(packages.forall(_.getReferenceType == ReferenceType.System))
+  require(actions.forall(_.getReferenceType == ReferenceType.Event))
+  require(views.forall(_.getReferenceType == ReferenceType.View))
+  require(imports.forall(_.getReferenceType == ReferenceType.Import))
+  require(usecases.forall(_.getReferenceType == ReferenceType.Scenario))
+  require(items.forall(_.getReferenceType == ReferenceType.Component))
 
   //All referenceNames must be unique
 
-  require(requirements.forall(_.referenceType == ReferenceType.Requirement))
+  require(requirements.forall(_.getReferenceType == ReferenceType.Requirement))
 
   override lazy val getAllReferences: Set[DocReference] = {
     packages ++ parts ++ connections ++ usecases ++ requirements ++ actions ++ imports ++ views ++ items

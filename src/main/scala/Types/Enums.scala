@@ -3,14 +3,6 @@ package Types
 import org.scalactic.Equality
 import org.scalactic.TypeCheckedTripleEquals.convertToCheckingEqualizer
 
-enum LandoReferenceType {
-  case Component, SubSystem, System, Scenario, Requirement, Event
-}
-
-enum SysMLType {
-  case Action, Package, UseCase, Part, Requirement, Connection, Import, View, ViewPoint
-}
-
 enum ReferenceType {
   case
   Component,

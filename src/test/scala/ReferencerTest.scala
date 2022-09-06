@@ -2,6 +2,7 @@ import Referencer.SysMLReferencer
 import Types.{DocReference, DocumentType, ReferenceName, ReferenceType}
 import DocumentEnrichers.{LandoDocumentEnricher, SysMLDocumentEnricher}
 import Utils.{Control, FileUtil}
+import Formatter.InlineFormatter
 import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
@@ -12,8 +13,9 @@ import scala.io.Source
 
 class ReferencerTest extends AnyFlatSpec with should.Matchers {
   private val fileUtil = FileUtil()
-  private val landoDocumentEnricher = LandoDocumentEnricher()
-  private val sysMLDocumentEnricher = SysMLDocumentEnricher()
+  private val formatterType = InlineFormatter()
+  private val landoDocumentEnricher = LandoDocumentEnricher(formatterType)
+  private val sysMLDocumentEnricher = SysMLDocumentEnricher(formatterType)
 
   private val sysMLReferencer = SysMLReferencer()
 
@@ -21,7 +23,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val searchReferenceName = "Coq"
     val referenceBeingDiscovered =
       DocReference("DocumentName",
-        ReferenceName("Coq", "RandomReference"),
+        ReferenceName("Coq"),
         ReferenceType.Component,
         DocumentType.Lando,
         "component Coq"
@@ -40,9 +42,9 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val analysedLandoDocument = landoDocumentEnricher.extractDocumentInfo(landoFilesToAnalyse.head)
     val analysedSysMLDocument = sysMLDocumentEnricher.extractDocumentInfo(sysMLFilesToAnalyse.head)
 
-    val coqReferenceName = analysedSysMLDocument.getAllReferences.filter(_.referenceName.name.equalsIgnoreCase("coq")).head
+    val coqReferenceName = analysedSysMLDocument.getAllReferences.filter(_.getName.equalsIgnoreCase("coq")).head
 
-    assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(coqReferenceName.referenceName.name, ref)))
+    assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(coqReferenceName.getName, ref)))
   }
 
   "Referencer" should "be able to match all SysML References" in {
@@ -57,7 +59,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
 
     analysedSysMLDocument.getAllReferences.forall(
       sysMLRef => {
-        assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(sysMLRef.referenceName.name, ref)))
+        assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(sysMLRef.getReference.name, ref)))
         true
       }
     )

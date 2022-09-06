@@ -1,5 +1,6 @@
 package DocumentEnrichers
 
+import Formatter.{LatexFormatter, LatexSanitizer}
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.FileType.{ComponentFile, EventFile, RequirementFile, ScenarioFile, ViewFile}
 import Types.{DocReference, DocRelation, DocumentType, FileType, LandoLineType, ReferenceKeyWords, ReferenceName, ReferenceType, RelationReference, RelationType}
@@ -7,7 +8,8 @@ import Types.{DocReference, DocRelation, DocumentType, FileType, LandoLineType, 
 import java.util.Locale
 import scala.util.matching.Regex
 
-class LandoDocumentEnricher extends DocumentEnricher {
+class LandoDocumentEnricher(override val formatterType: LatexFormatter,
+                            override val skipTodos: Boolean = true) extends DocumentEnricher {
 
   val keyWordsToRemove: Array[String] = Array("private", "requirements", "events", "scenarios")
 
@@ -28,8 +30,8 @@ class LandoDocumentEnricher extends DocumentEnricher {
   )
 
   def extractDocumentInfo(filePath: String): LandoDocumentInfo = {
-    require(filePath.nonEmpty)
-    require(fileUtil.getFileType(filePath) == "lando")
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(fileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
     val relations: Set[DocRelation] = extractRelations(filePath)
     val requirements: Set[DocReference] = extractReferences(filePath, FileType.RequirementFile)
@@ -50,21 +52,34 @@ class LandoDocumentEnricher extends DocumentEnricher {
     getLineType(line, documentInfo.filePath) match
       case LandoLineType.EmptyLine => line
       case LandoLineType.Comment => line
-      case LandoLineType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement))
-      case LandoLineType.Event => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Event))
-      case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Scenario))
-      case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.referenceType)))
+      case LandoLineType.Requirement => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Requirement))
+      case LandoLineType.Event => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
+      case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
+      case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.getReferenceType)))
       case LandoLineType.Relation => extractEnrichedText(line, documentInfo.getRelations)
       case LandoLineType.LineToBeSkipped => ""
   }
 
   private def enrichRelation(relation: DocRelation, references: Set[DocReference], docName: String): DocRelation = {
-    val srcRefs = references.filter(ref => referenceNameMatches(relation.relationReference.sourceName, ref.referenceName))
-    val trgRefs = references.filter(ref => referenceNameMatches(relation.relationReference.targetName, ref.referenceName))
-    val enrichedLine = latexFormatter.enrichLineWithLabel(addRelation(relation, srcRefs, trgRefs, docName), relation.relationReference.relationName)
+    require(references.nonEmpty, "references must not be empty")
+    val sourceReference = references.filter(ref => referenceNameMatches(relation.getSourceName, ref.getReference))
+    val targetReference = references.filter(ref => referenceNameMatches(relation.getTargetName, ref.getReference))
 
-    relation.copy(enrichedLine = Some(enrichedLine))
+    assert(sourceReference.size == 1, s"Relation source reference not found: ${relation.getSourceName} in $docName")
+    assert(targetReference.size == 1, s"Relation target reference not found: ${relation.getTargetName} in $docName")
+
+    //val enrichedLine = latexFormatter.enrichLineWithLabel(addRelation(relation, srcRefs, trgRefs, docName), relation.relationReference.relationName)
+
+    DocRelation(
+      relation.getDocumentName,
+      relation.getRelationReference,
+      relation.getRelationType,
+      relation.getOriginalLine,
+      Some(sourceReference.head),
+      Some(targetReference.head),
+    )
   }
+
 
   private def getLineType(line: String, documentPath: String): LandoLineType = {
     val lowerLine = line.toLowerCase(Locale.US).strip()
@@ -82,10 +97,10 @@ class LandoDocumentEnricher extends DocumentEnricher {
 
   private def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
     val referenceOption = getReferenceTypeBasedOnFileType(line, fileType)
-    val referenceType = referenceOption.get
-    val referenceName = extractReferenceName(line, referenceType, fileName)
+    val getReferenceType = referenceOption.get
+    val referenceName = extractReferenceName(line, getReferenceType, fileName)
     DocReference(
-      fileName, referenceName, referenceType, DocumentType.Lando, line, Some(latexFormatter.enrichLineWithLabel(line, referenceName.reference))
+      fileName, referenceName, getReferenceType, DocumentType.Lando, line
     )
   }
 
@@ -95,14 +110,8 @@ class LandoDocumentEnricher extends DocumentEnricher {
     extract(filePath, fileChecker, transformReference)
   }
 
-  private def addRelation(relation: DocRelation, srcRefs: Set[DocReference], trgRefs: Set[DocReference], currentDoc: String): String = {
-    "relation " + addHrefLink(srcRefs, relation.relationReference.sourceName, currentDoc) + " "
-      + relation.relationType.toString + " " + addHrefLink(trgRefs, relation.relationReference.targetName, currentDoc)
-  }
-
   private def enrichRelations(relations: Set[DocRelation], references: Set[DocReference], docName: String): Set[DocRelation] = {
     val enrichedRels = relations.map(rel => enrichRelation(rel, references, docName))
-    assert(enrichedRels.forall(rel => rel.enrichedLine.isDefined))
     enrichedRels
   }
 
@@ -117,22 +126,20 @@ class LandoDocumentEnricher extends DocumentEnricher {
       && getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
   }
 
-  private def extractReferenceName(line: String, referenceType: ReferenceType, documentName: String): ReferenceName = {
-    val strippedLine = line.replace(referenceType.toString.toLowerCase(Locale.US), "").strip()
+  private def extractReferenceName(line: String, getReferenceType: ReferenceType, documentName: String): ReferenceName = {
+    val strippedLine = line.replace(getReferenceType.toString.toLowerCase(Locale.US), "").strip()
 
     val acronym = extractAcronym(strippedLine)
-    val name = extractReferenceText(strippedLine, acronym, referenceType)
-
-    val referenceName = s"${documentName}_${referenceType.toString}_${latexFormatter.sanitizeLine(name)}"
-    ReferenceName(name, referenceName, acronym)
+    val name = extractReferenceText(strippedLine, acronym, getReferenceType)
+    ReferenceName(name, acronym)
   }
 
-  private def extractReferenceText(strippedLine: String, acronym: Option[String], referenceType: ReferenceType) = {
+  private def extractReferenceText(strippedLine: String, acronym: Option[String], getReferenceType: ReferenceType) = {
     val line = strippedLine.split(" ")
       .dropRight(if acronym.nonEmpty then 1 else 0)
       .mkString(" ").strip()
 
-    if referenceType == ReferenceType.Scenario && line.exists(_.isDigit) then
+    if getReferenceType == ReferenceType.Scenario && line.exists(_.isDigit) then
       line.dropWhile(!_.isDigit)
     else line
   }
@@ -151,8 +158,7 @@ class LandoDocumentEnricher extends DocumentEnricher {
     val sourceTargetStrings = strippedString.split(relationType.toString)
     val source = sourceTargetStrings.head.strip()
     val target = sourceTargetStrings.last.strip()
-    val relationName = relationType.toString + "_" + latexFormatter.sanitizeLine(source) + "_" + latexFormatter.sanitizeLine(target)
-    RelationReference(source, target, relationName)
+    RelationReference(source, target)
   }
 
 
@@ -160,7 +166,7 @@ class LandoDocumentEnricher extends DocumentEnricher {
     fileType match
       case FileType.RequirementFile => if !line.startsWith("requirements") then Some(ReferenceType.Requirement) else None
       case FileType.ScenarioFile => if !line.startsWith("scenarios") then Some(ReferenceType.Scenario) else None
-      case FileType.EventFile => if !line.startsWith("events") then  Some(ReferenceType.Event) else None
+      case FileType.EventFile => if !line.startsWith("events") then Some(ReferenceType.Event) else None
       case _ => getReferenceType(line)
   }
 
@@ -184,12 +190,14 @@ class LandoDocumentEnricher extends DocumentEnricher {
     def transformRelation(line: String, fileName: String, fileType: FileType): DocRelation = {
       val relationType = getRelationType(line).get
       val relationReference = extractRelationName(line, relationType)
-      DocRelation(fileName,
-        true,
+      DocRelation(
+        fileName,
         relationReference,
         relationType,
         line,
-        None)
+        None,
+        None,
+      )
     }
 
     extract(filePath, isRelation, transformRelation)

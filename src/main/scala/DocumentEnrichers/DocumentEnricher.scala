@@ -1,6 +1,6 @@
 package DocumentEnrichers
 
-import Formatter.InLineFormatter
+import Formatter.{InlineFormatter, LatexFormatter, ReferenceFormatter}
 import Types.*
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType.Saw
@@ -12,9 +12,10 @@ import java.util.Locale
 import scala.collection.mutable
 import scala.util.matching.Regex
 
-abstract class DocumentEnricher(val skipTodos: Boolean = false,
-                                val latexFormatter: Formatter.Formatter = new InLineFormatter) {
+abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFormatter(),
+                                val skipTodos: Boolean = false) {
   val fileUtil = new FileUtil()
+  val latexFormatter = new ReferenceFormatter(formatterType)
 
   def keyWordsToRemove: Array[String]
 
@@ -34,8 +35,8 @@ abstract class DocumentEnricher(val skipTodos: Boolean = false,
       l.replaceAll(keyWord, "")
     }).strip()
       .replaceAll(" +", " ")
-  } ensuring ((res: String) => res.length <= line.length
-    && keyWordsToRemove.forall(unwantedKeyword => !res.contains(unwantedKeyword)))
+  } ensuring((res: String) => res.length <= line.length
+    && keyWordsToRemove.forall(unwantedKeyword => !res.contains(unwantedKeyword)), "The result should not contain any of the keywords")
 
 
   def enrichFile(documentInfo: DocumentInfo): String = {
@@ -97,23 +98,17 @@ abstract class DocumentEnricher(val skipTodos: Boolean = false,
     }
   }
 
+
   protected def extractEnrichedText[A <: EnrichableString](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)
     if relevantRefs.isEmpty
     then
       line
     else
-      assert(relevantRefs.size == 1)
+      assert(relevantRefs.size == 1, "There should be only one reference per line")
       relevantRefs.headOption match
         case None => ""
-        case Some(value) => value.enrichedLine match
-          case Some(enrichedLine) => enrichedLine
-          case None => ""
-  }
-
-  def referenceText(name: String, typeString: String): String = {
-    val sanitizedName = latexFormatter.sanitizeLine(name)
-    s"${typeString}_$sanitizedName"
+        case Some(value) => value.enrichedLine(latexFormatter)
   }
 
   protected def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {
@@ -121,16 +116,6 @@ abstract class DocumentEnricher(val skipTodos: Boolean = false,
       name.equals(referenceName.acronym.get)
     } else {
       name.equals(referenceName.name)
-    }
-  }
-
-  protected def addHrefLink(refs: Set[DocReference], name: String, currentDocument: String): String = {
-    if (refs.nonEmpty) {
-      val ref = refs.head
-      latexFormatter.addReference(ref, currentDocument)
-    } else {
-      //No reference to add
-      name
     }
   }
 
@@ -174,12 +159,12 @@ abstract class DocumentEnricher(val skipTodos: Boolean = false,
     val urls = urlRegex findAllIn str
     if urls.isEmpty then str
     else urls.foldLeft(str)((line, url) => {
-      val formattedUrl = latexFormatter.createLink(url)
-      line.replaceAll(url, formattedUrl)
+      val formattedUrl = latexFormatter.createWebLink(url)
+      line.replace(url, formattedUrl)
     })
-  } ensuring ((highlightedString: String) => highlightedString.length >= str.length,
+  } ensuring((highlightedString: String) => highlightedString.length >= str.length,
     s"Highlighted link is shorter. " +
-    s"Original Link: $str")
+      s"Original Link: $str")
 
 }
 

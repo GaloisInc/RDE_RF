@@ -1,13 +1,13 @@
 package Types
 
+import Formatter.ReferenceFormatter
+
 abstract class EnrichableString {
   def documentName: String
 
   def originalLine: String
+  def enrichedLine(formatter: ReferenceFormatter): String
 
-  def enrichedLine: Option[String]
-
-  require(documentName.nonEmpty)
-  require(originalLine.nonEmpty)
-  //require(enrichedLine.isEmpty || (enrichedLine.isDefined && enrichedLine.get.contains(originalLine)))
+  require(documentName.nonEmpty, "documentName must not be empty")
+  require(originalLine.nonEmpty, "originalLine must not be empty")
 }

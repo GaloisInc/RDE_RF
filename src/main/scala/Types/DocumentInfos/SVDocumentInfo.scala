@@ -11,9 +11,9 @@ class SVDocumentInfo(
                     ) extends DocumentInfo {
 
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.System)
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType)
-    && ref.documentName == documentName
-    && ref.documentType == DocumentType.SV))
+  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
+    && ref.getDocumentName == documentName
+    && ref.getDocumentType == DocumentType.SV))
 
   override lazy val getAllReferences: Set[DocReference] = {
     modules

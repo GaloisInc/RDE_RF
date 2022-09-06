@@ -17,13 +17,13 @@ class LandoDocumentInfo(
   private val fileUtil = new FileUtil()
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType)
-    && ref.documentName == documentName
-    && ref.documentType == DocumentType.Lando))
-  require(events.forall(_.referenceType == ReferenceType.Event))
-  require(scenarios.forall(_.referenceType == ReferenceType.Scenario))
-  require(requirements.forall(_.referenceType == ReferenceType.Requirement))
-  //require(references.forall(_.referenceType ))
+  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
+    && ref.getDocumentName == documentName
+    && ref.getDocumentType == DocumentType.Lando))
+  require(events.forall(_.getReferenceType == ReferenceType.Event), "All events must be of type Event")
+  require(scenarios.forall(_.getReferenceType == ReferenceType.Scenario), "All scenarios must be of type Scenario")
+  require(requirements.forall(_.getReferenceType == ReferenceType.Requirement), "All requirements must be of type Requirement")
+  //require(references.forall(_.getReferenceType ))
 
   override lazy val getAllReferences: Set[DocReference] = {
     references ++ events ++ requirements ++ scenarios

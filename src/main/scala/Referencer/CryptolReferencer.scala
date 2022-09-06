@@ -20,10 +20,10 @@ class CryptolReferencer extends Referencer {
     CryptolDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(_.referenceType == ReferenceType.Import),
-      updatedReferences.filter(_.referenceType == ReferenceType.Type),
-      updatedReferences.filter(_.referenceType == ReferenceType.Event),
-      updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Type),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Requirement),
     )
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 

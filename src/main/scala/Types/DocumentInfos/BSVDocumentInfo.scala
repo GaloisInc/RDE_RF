@@ -12,12 +12,12 @@ class BSVDocumentInfo(
                     ) extends DocumentInfo {
 
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.System, ReferenceType.SubSystem)
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.referenceType)
-    && ref.documentName == documentName
-    && ref.documentType == DocumentType.BSV))
+  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
+    && ref.getDocumentName == documentName
+    && ref.getDocumentType == DocumentType.BSV))
 
-  require(packages.forall(_.referenceType == ReferenceType.System))
-  require(modules.forall(_.referenceType == ReferenceType.SubSystem))
+  require(packages.forall(_.getReferenceType == ReferenceType.System))
+  require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
 
   override lazy val getAllReferences: Set[DocReference] = {
     modules ++ packages

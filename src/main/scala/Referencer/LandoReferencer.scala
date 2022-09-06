@@ -18,18 +18,18 @@ class LandoReferencer extends Referencer {
     require(sysMLDocuments.forall(_.documentType == DocumentType.SysML))
     require(documentInfo.documentType == DocumentType.Lando)
 
-    val sysmlReferences = sysMLDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.specializes.nonEmpty))
+    val sysmlReferences = sysMLDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getSpecializes.nonEmpty))
     val updatedReferences = documentInfo.getAllReferences.map(landoRef => addSpecializations(landoRef, sysmlReferences.toSet))
 
     val componentSet = Set(ReferenceType.Component, ReferenceType.SubSystem, ReferenceType.System)
     LandoDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(ref => componentSet.contains(ref.referenceType)),
+      updatedReferences.filter(ref => componentSet.contains(ref.getReferenceType)),
       documentInfo.getRelations,
-      updatedReferences.filter(_.referenceType == ReferenceType.Event),
-      updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
-      updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Requirement),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Scenario),
     )
   } ensuring ((resDoc: LandoDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 }

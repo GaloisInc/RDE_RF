@@ -1,12 +1,14 @@
 package DocumentEnrichers
 
+import Formatter.LatexFormatter
 import Types.DocumentInfos.{DocumentInfo, SysMLDocumentInfo}
 import Types.{DocReference, DocumentType, FileType, ReferenceKeyWords, ReferenceName, ReferenceType}
 
 import java.util.Locale
 import scala.util.matching.Regex
 
-class SysMLDocumentEnricher extends DocumentEnricher {
+class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
+                            override val skipTodos: Boolean = true) extends DocumentEnricher {
   val keyWordsToRemove: Array[String] = Array("private", "abstract", "id", "def", ";", "\\{")
 
   //SysML
@@ -70,15 +72,15 @@ class SysMLDocumentEnricher extends DocumentEnricher {
 
     getReferenceType(line) match
       case Some(value) => value match
-        case ReferenceType.Event => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Event))
-        case ReferenceType.System => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.System))
-        case ReferenceType.SubSystem => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.SubSystem))
-        case ReferenceType.Component => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Component))
-        case ReferenceType.Scenario => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Scenario))
-        case ReferenceType.Requirement => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Requirement))
-        case ReferenceType.Connection => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Connection))
-        case ReferenceType.Import => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.Import))
-        case ReferenceType.View => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.View))
+        case ReferenceType.Event => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
+        case ReferenceType.System => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
+        case ReferenceType.SubSystem => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.SubSystem))
+        case ReferenceType.Component => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Component))
+        case ReferenceType.Scenario => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
+        case ReferenceType.Requirement => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Requirement))
+        case ReferenceType.Connection => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Connection))
+        case ReferenceType.Import => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Import))
+        case ReferenceType.View => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.View))
         case ReferenceType.ViewPoint => line
         case _ => line
       case None => line
@@ -89,44 +91,42 @@ class SysMLDocumentEnricher extends DocumentEnricher {
     val referenceType = getReferenceType(cleanedString).get
     //todo add type
     val nameAcronym = extractTypeDependency(line, referenceType)
-    val reference = referenceText(nameAcronym.name, s"sysml_${fileName}_${referenceType.toString}")
-    val referenceInfo = ReferenceName(nameAcronym.name, reference, nameAcronym.acronym)
+    val referenceInfo = ReferenceName(nameAcronym.name, nameAcronym.acronym)
 
     DocReference(
       fileName,
       referenceInfo,
       referenceType,
       DocumentType.SysML,
-      line,
-      Some(latexFormatter.enrichLineWithLabel(line, reference))
+      line
     )
   }
 
-  private def extractReferences(filePath: String, referenceType: ReferenceType): Set[DocReference] = {
-    extract(filePath, (line: String, _: String) => filterReferenceTypes(line, referenceType), transformReference)
-  } ensuring ((refs: Set[DocReference]) => refs.forall(_.referenceType == referenceType))
+  private def extractReferences(filePath: String, getReferenceType: ReferenceType): Set[DocReference] = {
+    extract(filePath, (line: String, _: String) => filterReferenceTypes(line, getReferenceType), transformReference)
+  } ensuring ((refs: Set[DocReference]) => refs.forall(_.getReferenceType == getReferenceType))
 
 
-  def extractTypeDependency(str: String, referenceType: ReferenceType): NameAcronym = {
-    val cleanLine = removeAllKeyWordsFromName(str, referenceType)
+  def extractTypeDependency(str: String, getReferenceType: ReferenceType): NameAcronym = {
+    val cleanLine = removeAllKeyWordsFromName(str, getReferenceType)
     if cleanLine.contains(":>")
     then
       val relationTo = cleanLine.split(":>").last
       val name = cleanLine.split(":>").head
-      //extractNameAcronym(relationTo, referenceType)
-      extractNameAcronym(name, referenceType)
+      //extractNameAcronym(relationTo, getReferenceType)
+      extractNameAcronym(name, getReferenceType)
     else if cleanLine.contains(":")
     then
       val typeOf = cleanLine.split(":").last
       val name = cleanLine.split(":").head
-      //extractNameAcronym(typeOf, referenceType)
-      extractNameAcronym(name, referenceType)
+      //extractNameAcronym(typeOf, getReferenceType)
+      extractNameAcronym(name, getReferenceType)
     else
-      extractNameAcronym(cleanLine, referenceType)
+      extractNameAcronym(cleanLine, getReferenceType)
   }
 
-  def extractNameAcronym(str: String, referenceType: ReferenceType): NameAcronym = {
-    val strippedLine = removeAllKeyWordsFromName(str, referenceType)
+  def extractNameAcronym(str: String, getReferenceType: ReferenceType): NameAcronym = {
+    val strippedLine = removeAllKeyWordsFromName(str, getReferenceType)
     val nameRegex = new Regex("'.*'")
     val referenceName = nameRegex findFirstIn strippedLine
     if referenceName.isDefined then
@@ -143,8 +143,8 @@ class SysMLDocumentEnricher extends DocumentEnricher {
                                 acronym: Option[String]
                               )
 
-  def removeAllKeyWordsFromName(name: String, referenceType: ReferenceType): String = {
-    val nameToRemove = referenceType match
+  def removeAllKeyWordsFromName(name: String, getReferenceType: ReferenceType): String = {
+    val nameToRemove = getReferenceType match
       case ReferenceType.Component => "item"
       case ReferenceType.SubSystem => "part"
       case ReferenceType.System => "package"

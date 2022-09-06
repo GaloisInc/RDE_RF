@@ -24,15 +24,15 @@ class SysMLReferencer extends Referencer {
     SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(_.referenceType == ReferenceType.System),
-      updatedReferences.filter(_.referenceType == ReferenceType.SubSystem),
-      updatedReferences.filter(_.referenceType == ReferenceType.Connection),
-      updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
-      updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
-      updatedReferences.filter(_.referenceType == ReferenceType.Event),
-      updatedReferences.filter(_.referenceType == ReferenceType.Import),
-      updatedReferences.filter(_.referenceType == ReferenceType.View),
-      updatedReferences.filter(_.referenceType == ReferenceType.Component)
+      updatedReferences.filter(_.getReferenceType == ReferenceType.System),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.SubSystem),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Connection),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Scenario),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Requirement),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.View),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Component)
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 
@@ -40,21 +40,21 @@ class SysMLReferencer extends Referencer {
     require(cryptolDocuments.forall(_.documentType == DocumentType.Cryptol))
     require(documentInfo.documentType == DocumentType.SysML)
 
-    val cryptolReferences = cryptolDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.specializes.nonEmpty))
+    val cryptolReferences = cryptolDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getSpecializes.nonEmpty))
     val updatedReferences = documentInfo.getAllReferences.map(sysmlRef => addSpecializations(sysmlRef, cryptolReferences.toSet))
 
     SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
-      updatedReferences.filter(_.referenceType == ReferenceType.System),
-      updatedReferences.filter(_.referenceType == ReferenceType.SubSystem),
-      updatedReferences.filter(_.referenceType == ReferenceType.Connection),
-      updatedReferences.filter(_.referenceType == ReferenceType.Scenario),
-      updatedReferences.filter(_.referenceType == ReferenceType.Requirement),
-      updatedReferences.filter(_.referenceType == ReferenceType.Event),
-      updatedReferences.filter(_.referenceType == ReferenceType.Import),
-      updatedReferences.filter(_.referenceType == ReferenceType.View),
-      updatedReferences.filter(_.referenceType == ReferenceType.Component)
+      updatedReferences.filter(_.getReferenceType == ReferenceType.System),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.SubSystem),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Connection),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Scenario),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Requirement),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.View),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Component)
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 }

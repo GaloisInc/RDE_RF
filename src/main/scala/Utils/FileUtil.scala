@@ -10,16 +10,15 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 class FileUtil {
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet))
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lando))
 
   def getSysMLDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.SysML)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet))
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SysML))
 
   def getCryptolDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Cryptol)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet))
-
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Cryptol))
 
   def getFileName(path: String): String = {
     require(path.nonEmpty)
@@ -60,9 +59,9 @@ class FileUtil {
   def getListOfFiles(dir: String): List[String] = {
     val d = new File(dir)
     if (d.exists && d.isDirectory) {
-      val filesToDelete = d.listFiles.filter(file => file.getName.contains("decorated"))
+      val filesToDelete = d.listFiles.filter(file => file.getName.contains("decorated") || file.getName.contains("DS_Store"))
       filesToDelete.foreach(file => file.delete())
-      d.listFiles.filter(_.isFile).map(_.toString).toList
+      d.listFiles.filter(file => file.isFile).map(_.toString).toList
     } else {
       List[String]()
     }

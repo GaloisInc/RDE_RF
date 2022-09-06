@@ -1,12 +1,14 @@
 package DocumentEnrichers
 
+import Formatter.LatexFormatter
 import Types.*
-import Types.DocumentInfos.{DocumentInfo, BSVDocumentInfo}
+import Types.DocumentInfos.{BSVDocumentInfo, DocumentInfo}
 
 import java.util.Locale
 import scala.util.matching.Regex
 
-class BSVDocumentEnricher extends DocumentEnricher {
+class BSVDocumentEnricher(override val formatterType: LatexFormatter,
+                          override val skipTodos: Boolean = true) extends DocumentEnricher {
   // Reads a Document to create an object of the necessary information to enrich the document.
   val keyWordsToRemove: Array[String] = Array.empty
 
@@ -30,8 +32,8 @@ class BSVDocumentEnricher extends DocumentEnricher {
     val references = documentInfo.getAllReferences
     getReferenceType(line) match
       case Some(value) => value match
-        case ReferenceType.System => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.System))
-        case ReferenceType.SubSystem => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.SubSystem))
+        case ReferenceType.System => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
+        case ReferenceType.SubSystem => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.SubSystem))
         case _ => line
       case None => line
   }
@@ -39,30 +41,28 @@ class BSVDocumentEnricher extends DocumentEnricher {
   def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
     val referenceType = getReferenceType(line).get
     val name = extractModuleName(line, referenceType)
-    val reference = referenceText(name, s"bsv_${fileName}_${referenceType.toString}")
-    val referenceInfo = ReferenceName(name, reference)
+    val referenceInfo = ReferenceName(name)
 
     DocReference(
       fileName,
       referenceInfo,
       referenceType,
       DocumentType.BSV,
-      line,
-      Some(latexFormatter.enrichLineWithLabel(line, reference))
+      line
     )
   }
 
-  private def extractReferences(filePath: String, referenceType: ReferenceType): Set[DocReference] = {
-    extract(filePath, (line: String, _: String) => filterReferenceTypes(line, referenceType), transformReference)
+  private def extractReferences(filePath: String, getReferenceType: ReferenceType): Set[DocReference] = {
+    extract(filePath, (line: String, _: String) => filterReferenceTypes(line, getReferenceType), transformReference)
   } ensuring ((references: Set[DocReference]) =>
     references.forall(ref =>
-      ref.referenceType == referenceType
-      && ref.documentType == DocumentType.BSV))
+      ref.getReferenceType == getReferenceType
+      && ref.getDocumentType == DocumentType.BSV))
 
 
-  def extractModuleName(str: String, referenceType: ReferenceType): String = {
+  def extractModuleName(str: String, getReferenceType: ReferenceType): String = {
     val cleanLine = trimString(str)
-    val name = referenceType match
+    val name = getReferenceType match
       case ReferenceType.SubSystem => cleanLine.replace("module", "").strip()
       case ReferenceType.System => cleanLine.replace("package", "").strip()
       case _ => cleanLine

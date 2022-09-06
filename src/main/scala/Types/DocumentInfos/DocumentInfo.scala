@@ -17,10 +17,11 @@ abstract class DocumentInfo {
 
   def getRelations: Set[DocRelation]
 
-  require(documentName.nonEmpty)
-  require(filePath.contains(documentName))
+  require(documentName.nonEmpty, "Document name cannot be empty")
+  require(filePath.contains(documentName), "File path must contain document name")
   //All reference names must be unique
-  require(getAllReferences.map(_.referenceName.reference).size == getAllReferences.size, s"Non unique references in $documentName")
+  require(getAllReferences.map(_.getLabelText).size == getAllReferences.size, s"Non unique references in $documentName")
+
 
 }
 

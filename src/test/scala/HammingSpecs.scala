@@ -35,6 +35,10 @@ class HammingSpecs extends AnyFlatSpec with Matchers {
     Hamming.compute("ACCAGGG", "ACTATGG") should be (2)
   }
 
+  it should "compute a relative distance of 2/7" in {
+    //Hamming.computeRelHamming("ACCAGGG", "ACTATGG") should be(2./7.0)
+  }
+
   it should "be undefined for strands of unequal length" in {
     an[IllegalArgumentException] should be thrownBy {
       Hamming.compute("AAACTAGGGG", "AGGCTAGCGGTAGGAC")

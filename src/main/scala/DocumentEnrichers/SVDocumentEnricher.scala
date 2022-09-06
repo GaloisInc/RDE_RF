@@ -1,11 +1,12 @@
 package DocumentEnrichers
 
+import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{DocumentInfo, SVDocumentInfo}
 
 import java.util.Locale
 
-class SVDocumentEnricher extends DocumentEnricher {
+class SVDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher {
   // Reads a Document to create an object of the necessary information to enrich the document.
   val keyWordsToRemove: Array[String] = Array.empty
 
@@ -28,7 +29,7 @@ class SVDocumentEnricher extends DocumentEnricher {
     val references = documentInfo.getAllReferences
     getReferenceType(line) match
       case Some(value) => value match
-        case ReferenceType.System => extractEnrichedText(line, references.filter(_.referenceType == ReferenceType.System))
+        case ReferenceType.System => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
         case _ => line
       case None => line
   }
@@ -36,22 +37,20 @@ class SVDocumentEnricher extends DocumentEnricher {
   def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
     val referenceType = getReferenceType(line).get
     val name = extractModuleName(line, referenceType)
-    val reference = referenceText(name, s"sv_${fileName}_${referenceType.toString}")
-    val referenceInfo = ReferenceName(name, reference)
+    val referenceInfo = ReferenceName(name)
 
     DocReference(
       fileName,
       referenceInfo,
       referenceType,
       DocumentType.SV,
-      line,
-      Some(latexFormatter.enrichLineWithLabel(line, reference))
+      line
     )
   }
 
   private def extractReferences(filePath: String, referenceType: ReferenceType): Set[DocReference] = {
     extract(filePath, (line: String, _: String) => filterReferenceTypes(line, referenceType), transformReference)
-  } ensuring ((references: Set[DocReference]) => references.forall(ref => ref.referenceType == referenceType && ref.documentType == DocumentType.SV))
+  } ensuring ((references: Set[DocReference]) => references.forall(ref => ref.getReferenceType == referenceType && ref.getDocumentType == DocumentType.SV))
 
   def extractModuleName(str: String, referenceType: ReferenceType): String = {
     val cleanLine = trimString(str)

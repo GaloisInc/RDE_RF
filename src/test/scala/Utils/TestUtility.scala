@@ -1,9 +1,17 @@
+package Utils
+
 import DocumentEnrichers.DocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.FileUtil
+import Utils.TestUtility.getClass
 
 object TestUtility {
   private val fileUtil = new FileUtil()
+
+  def getDocumentOfInterest(fileName: String, resourceFolderName: String): Array[String] = {
+    val documents = getClass.getResource(resourceFolderName).getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
+    filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
+  }
 
   def checkExtractReferences(fileName: String,
                              documentEnricher: DocumentEnricher,
@@ -20,10 +28,8 @@ object TestUtility {
                              numberOfTypes: Int = 0
                             ): Boolean = {
 
-    val systemVerilogDocuments = getClass.getResource(resourceFolderName).getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(systemVerilogDocuments).toArray
+    val documentOfInterest = getDocumentOfInterest(fileName, resourceFolderName)
 
-    val documentOfInterest = filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
     assert(documentOfInterest.length == 1)
     val filePath = documentOfInterest.head
 

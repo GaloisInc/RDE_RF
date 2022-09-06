@@ -6,8 +6,7 @@ import Types.DocReference
 import scala.annotation.tailrec
 
 object ReportGenerator {
-
-  val refinementSymbol = "|="
+  private val refinementSymbol: String = "|="
 
   def generateReport(filesToAnalyse: Array[String]): String = {
     val nonSpecializedLandoConstructs = DocumentAnalyzer.nonRefinementLando(filesToAnalyse)

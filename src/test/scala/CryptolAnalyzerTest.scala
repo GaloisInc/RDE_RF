@@ -1,6 +1,6 @@
 import DocumentEnrichers.CryptolDocumentEnricher
-import Types.{ReferenceType, DocumentType}
-import Utils.{Control, FileUtil}
+import Types.{DocumentType, ReferenceType}
+import Utils.{Control, FileUtil, TestUtility}
 import Formatter.InlineFormatter
 import org.scalatest.*
 import org.scalatest.flatspec.*

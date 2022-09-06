@@ -1,6 +1,6 @@
 import DocumentEnrichers.SVDocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil}
+import Utils.{Control, FileUtil, TestUtility}
 import Formatter.InlineFormatter
 import org.scalatest.*
 import org.scalatest.flatspec.*

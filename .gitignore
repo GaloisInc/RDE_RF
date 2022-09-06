@@ -204,9 +204,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/git,sbt,scala,windows,intellij,vim
-*.lando
-*.sysml
-*.cry
 
 
 .idea/libraries/*

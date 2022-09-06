@@ -19,6 +19,36 @@ class SysMLDocumentInfo(
                        ) extends DocumentInfo {
   val fileUtil = new FileUtil()
 
+  def copy(
+            documentName: String = documentName,
+            filePath: String = filePath,
+            packages: Set[DocReference] = packages,
+            parts: Set[DocReference] = parts,
+            connections: Set[DocReference] = connections,
+            usecases: Set[DocReference] = usecases,
+            requirements: Set[DocReference] = requirements,
+            actions: Set[DocReference] = actions,
+            imports: Set[DocReference] = imports,
+            views: Set[DocReference] = views,
+            items: Set[DocReference] = items,
+            documentType: DocumentType = documentType
+          ): SysMLDocumentInfo = {
+    new SysMLDocumentInfo(
+      documentName,
+      filePath,
+      packages,
+      parts,
+      connections,
+      usecases,
+      requirements,
+      actions,
+      imports,
+      views,
+      items,
+      documentType
+    )
+  }
+
   private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component)
 
   require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.SysML && ref.getDocumentName == documentName))

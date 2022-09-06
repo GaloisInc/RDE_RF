@@ -1,0 +1,97 @@
+package Report
+
+import Types.DocumentType
+
+object ListingFormatting {
+
+  lazy val standardCommands: String = {
+    """
+      |\newcommand{\lando}{\textsc{Lando}\xspace}
+      |\newcommand{\lobot}{\textsc{Lobot}\xspace}
+      |\newcommand{\fret}{\textsc{FRET}\xspace}
+      |\newcommand{\rts}{\textsc{RTS}\xspace}
+      |\newcommand{\rde}{\textsc{RDE}\xspace}
+      |\newcommand{\acsl}{\textsc{ACSL}\xspace}
+      |\newcommand{\sysml}{\textsc{SysMLv2}\xspace}
+      |\newcommand{\cryptol}{\textsc{Cryptol}\xspace}
+      |\newcommand{\saw}{\textsc{SAW}\xspace}
+      |\definecolor{keywordcolor}{RGB}{157,0,129}
+      |""".stripMargin
+  }
+
+  lazy val basicFormatListing: String = {
+    """
+      |\lstset{
+      |basicstyle =\scriptsize\ttfamily,
+      |columns = fullflexible,
+      |frame = single,
+      |float = H,
+      |breaklines = true,
+      |numbers = left,
+      |numberstyle =\small\itshape,
+      |stepnumber = 1,
+      |escapeinside = {(*}{*)},
+      |postbreak =\mbox{\textcolor{red}{$\hookrightarrow$\space}}
+    }""".stripMargin
+  }
+
+  def lstFormattings(documentType: DocumentType): LanguageFormatting = {
+    val languageFormatting = documentType match {
+      case DocumentType.Lando =>
+        LanguageFormatting("Lando",
+          keywords = Array("system", "subsystem", "component", "relation", "contains", "inherit", "client", "events", "scenarios"),
+          lineComment = "//",
+          blockComment = BlockComment("/*", "*/"),
+          literates = Array.empty[Literate]
+        )
+      case DocumentType.Cryptol =>
+        LanguageFormatting(
+          "Cryptol",
+          keywords = Array("type", "private", "import", "module", "where", "property", "if", "then", "else", "as", "take", "drop", "zero", "sum", "elem"),
+          lineComment = "//",
+          blockComment = BlockComment("/*", "*/"),
+          literates = Array(Literate("/\\\\", "$\\land$ "), Literate("\\\\/", "$\\lor$ "))
+        )
+      case DocumentType.SysML =>
+        LanguageFormatting(
+          "SysML",
+          Array(
+            "type", "private", "import", "abstract", "item", "def", "part",
+            "port", "out", "in", "attribute", "Boolean", "String", "package", "enum",
+            "requirement", "subject", "action", "alias", "connection", "for", "ref",
+            "end", "view", "flow", "viewpoint", "inout", "stakeholder", "redefines", "connect", "actor", "objective"),
+          "//",
+          BlockComment("/*", "*/"),
+          literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case"))
+        )
+    }
+    languageFormatting
+  }
+
+  def buildLanguageFormatting(languageFormatting: LanguageFormatting): String =
+    s"""\\lstdefinelanguage{${languageFormatting.languageName}}{
+       |basicstyle=\\scriptsize\\ttfamily,
+       |keywordstyle=\\color{keywordcolor}\\bfseries,
+       |commentstyle=\\itshape,
+       |comment = [l]{${languageFormatting.lineComment}},
+       |morecomment = [s]{${languageFormatting.blockComment.startSymbol}}{${languageFormatting.blockComment.endSymbol}},
+       |extendedchars=true,
+       |keywords = {${languageFormatting.keywords.mkString(", ")}},
+       ${languageFormatting.getLiterates}}""".stripMargin
+
+
+  lazy val landoFormatting: String = {
+    val formatting = lstFormattings(DocumentType.Lando)
+    buildLanguageFormatting(formatting)
+  }
+
+  lazy val cryptolFormatting: String = {
+    val formatting = lstFormattings(DocumentType.Cryptol)
+    buildLanguageFormatting(formatting)
+  }
+
+  lazy val sysmlFormatting: String = {
+    val formatting = lstFormattings(DocumentType.SysML)
+    buildLanguageFormatting(formatting)
+  }
+}

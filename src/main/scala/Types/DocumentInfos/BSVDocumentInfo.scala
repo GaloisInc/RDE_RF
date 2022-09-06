@@ -11,6 +11,16 @@ class BSVDocumentInfo(
                       override val documentType: DocumentType = DocumentType.BSV,
                     ) extends DocumentInfo {
 
+  def copy(
+            documentName: String = documentName,
+            filePath: String = filePath,
+            packages: Set[DocReference] = packages,
+            modules: Set[DocReference] = modules,
+            documentType: DocumentType = documentType,
+          ): BSVDocumentInfo = {
+    new BSVDocumentInfo(documentName, filePath, packages, modules, documentType)
+  }
+
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.System, ReferenceType.SubSystem)
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
     && ref.getDocumentName == documentName

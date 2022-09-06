@@ -31,12 +31,10 @@ class DocRelation(
   def getTargetRef: Option[DocReference] = targetRef
 
   override def enrichedLine(formatter: ReferenceFormatter): String = {
-    require(sourceRef.isDefined, "sourceRef must be defined")
-    require(targetRef.isDefined, "targetRef must be defined")
-    val linkToSource = LatexSyntax.addClickableLocalLink(sourceRef.get.getLabelText, sourceRef.get.getName)
-    val linkToTarget = LatexSyntax.addClickableLocalLink(targetRef.get.getLabelText, targetRef.get.getName)
+    val linkToSource = if sourceRef.isDefined then formatter.addReference(sourceRef.get, documentName) else getSourceName
+    val linkToTarget = if targetRef.isDefined then formatter.addReference(targetRef.get, documentName) else getTargetName
 
-    s"relation $linkToSource $relationType.toString $linkToTarget"
+    s"relation $linkToSource ${relationType.toString} $linkToTarget"
   }
 
   def getName: String = {

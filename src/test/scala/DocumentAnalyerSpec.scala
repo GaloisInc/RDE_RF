@@ -4,10 +4,9 @@ import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
 
+import java.nio.file.Path
 import scala.collection.mutable
 import scala.io.Source
-
-import java.nio.file.Path
 
 class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
   private val fileUtil: FileUtil = FileUtil()
@@ -21,25 +20,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
       ++ fileUtil.getListOfFiles(landoDocuments).toArray
       ++ fileUtil.getListOfFiles(cryptolDocuments).toArray
 
-    val decoratedFiles = DocumentAnalyzer.enrichFiles(filesToAnalyze)
-
-    val decoratedLandoFiles = decoratedFiles.filter(_.endsWith("lando"))
-    val decoratedSysMLFiles = decoratedFiles.filter(_.endsWith("sysml"))
-    val decoratedCryptolFiles = decoratedFiles.filter(_.endsWith("cry"))
-
-    decoratedLandoFiles.foreach(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decorated").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
-    })
-    decoratedSysMLFiles.foreach(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decorated").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
-    })
-
-    decoratedCryptolFiles.foreach(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decorated").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
-    })
+    DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze)
   }
 
 }

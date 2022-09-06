@@ -1,11 +1,12 @@
 package Analyzers
 
-import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
-import Types.{DocReference, ReferenceType}
 import DocumentEnrichers.*
-import Referencer.*
-import Utils.*
 import Formatter.InlineFormatter
+import Referencer.*
+import Report.ReportReference
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.{DocReference, ReferenceType}
+import Utils.*
 
 import java.nio.file.Path
 
@@ -22,32 +23,37 @@ object DocumentAnalyzer {
 
   private val fileUtil = FileUtil()
 
-  def enrichAndSortFiles(filesToAnalyze: Array[String]): Array[String] = {
-    val enrichedFiles = enrichFiles(filesToAnalyze)
-    val decoratedLandoFiles = enrichedFiles.filter(_.endsWith("lando"))
-    val decoratedSysMLFiles = enrichedFiles.filter(_.endsWith("sysml"))
-    val decoratedCryptolFiles = enrichedFiles.filter(_.endsWith("cry"))
+  def generateReport(filesToAnalyze: Array[String], title: String): ReportReference = {
+    val enrichedDocuments = enrichAndSortFiles(filesToAnalyze)
+    enrichedDocuments.copy(title = title)
+  }
 
-    val newLandoFiles = decoratedLandoFiles.map(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedLando").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
-    })
-    val newSysMLFiles = decoratedSysMLFiles.map(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedSysML").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
-    })
+  def enrichAndSortFiles(filesToAnalyze: Array[String]): ReportReference = {
+    val references = enrichFiles(filesToAnalyze)
 
-    val newCryptolFiles = decoratedCryptolFiles.map(filePath => {
-      val destinationPath = Path.of(fileUtil.getDirectory(filePath), "decoratedCryptol").toString
-      fileUtil.moveRenameFile(filePath, destinationPath)
+    val newLandoFiles = references.landoDocuments.map(doc => {
+      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedLando").toString
+      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      doc.copy(filePath = filePath)
     })
 
-    newLandoFiles ++ newSysMLFiles ++ newCryptolFiles
-  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
+    val newSysMLFiles = references.sysmlDocuments.map(doc => {
+      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedSysML").toString
+      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      doc.copy(filePath = filePath)
+    })
 
-  def enrichFiles(filesToAnalyze: Array[String]): Array[String] = {
+    val newCryptolFiles = references.cryptolDocuments.map(doc => {
+      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedCryptol").toString
+      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      doc.copy(filePath = filePath)
+    })
+
+    ReportReference(references.title, newLandoFiles, newSysMLFiles, newCryptolFiles)
+  }
+
+  def enrichFiles(filesToAnalyze: Array[String]): ReportReference = {
     require(filesToAnalyze.nonEmpty)
-
     val enrichedDocuments = enrichDocuments(filesToAnalyze)
 
     val enrichedLandoDocuments = fileUtil.getLandoDocuments(enrichedDocuments)
@@ -58,11 +64,22 @@ object DocumentAnalyzer {
     assert(enrichedLandoDocuments.intersect(enrichedSysMLDocuments).isEmpty)
     assert(enrichedCryptolDocuments.intersect(enrichedLandoDocuments).isEmpty)
 
-    val res = enrichedLandoDocuments.map(landoAnalyzer.enrichFile)
-      ++ enrichedSysMLDocuments.map(sysmlAnalyzer.enrichFile)
-      ++ enrichedCryptolDocuments.map(cryptolAnalyzer.enrichFile)
-    res
-  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
+
+    val decoratedLando = enrichedLandoDocuments.map(doc => {
+      val filePath = landoAnalyzer.enrichFile(doc)
+      doc.asInstanceOf[LandoDocumentInfo].copy(filePath = filePath)
+    })
+    val decoratedSysML = enrichedSysMLDocuments.map(doc => {
+      val filePath = sysmlAnalyzer.enrichFile(doc)
+      doc.asInstanceOf[SysMLDocumentInfo].copy(filePath = filePath)
+    })
+    val decoratedCryptol = enrichedCryptolDocuments.map(doc => {
+      val filePath = cryptolAnalyzer.enrichFile(doc)
+      doc.asInstanceOf[CryptolDocumentInfo].copy(filePath = filePath)
+    })
+
+    ReportReference("Test", decoratedLando, decoratedSysML, decoratedCryptol)
+  } ensuring ((res: ReportReference) => res.cryptolDocuments.length + res.sysmlDocuments.length + res.landoDocuments.length == filesToAnalyze.length)
 
 
   def nonRefinementLando(filesToAnalyze: Array[String]): Array[DocReference] = {

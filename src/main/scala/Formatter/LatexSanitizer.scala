@@ -4,13 +4,12 @@ import scala.util.matching.Regex
 
 object LatexSanitizer {
   //Reference Strings in Latex cannot contain arbitrary characters.
-  def sanitizeReferenceName(line: String): String = {
-    require(line.nonEmpty, "Cannot sanitize empty string")
-    line.replaceAll(" ", "_")
+  def sanitizeReferenceName(referenceName: String): String = {
+    require(referenceName.nonEmpty, "Cannot sanitize empty string")
+    referenceName.replaceAll(" ", "_")
       .replaceAll("-", "_")
-      .filterNot(_.equals("&"))
-      .filterNot(_.equals("\\"))
-  } ensuring ((l: String) => !l.contains(" ") && l.length <= line.length)
+      .replaceAll("""\\&""", "_")
+  } ensuring ((l: String) => !l.contains(" ") && l.length <= referenceName.length)
 
   //Reference Strings in Latex cannot contain arbitrary characters.
   def sanitizeName(line: String): String = {

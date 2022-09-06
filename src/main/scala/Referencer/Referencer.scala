@@ -22,9 +22,9 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
     ref.getReferenceType == reference.getReferenceType
       && ref.getDocumentName == reference.getDocumentName
       && ref.getDocumentType == reference.getDocumentType
-      && ref.getName == reference.getLabelText
+      && ref.getName == reference.getName
       && ref.getReferenceType == reference.getReferenceType
-      && ref.getAbstracts == reference.getAbstracts)
+      && ref.getSpecializes == reference.getSpecializes)
 
   protected def addSpecializations(reference: DocReference, specializedReferences: Set[DocReference]): DocReference = {
     require(reference.getSpecializes.isEmpty, "Reference should not have any specializations yet")
@@ -39,7 +39,7 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
       && ref.getDocumentType == reference.getDocumentType
       && ref.getName == reference.getName
       && ref.getReferenceType == reference.getReferenceType
-      && ref.getSpecializes == reference.getSpecializes)
+      && ref.getAbstracts == reference.getAbstracts)
 
   def isSpecialization(referenceName: String, ref: DocReference): Boolean = {
     val referenceNameToMatch = ref.getName.toLowerCase(Locale.US)
@@ -60,7 +60,7 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
       reference.getOriginalLine,
       reference.getAbstracts,
       Some(newSpecializations))
-  } ensuring ((ref: DocReference) => ref.getAbstracts.isDefined)
+  } ensuring ((ref: DocReference) => ref.getSpecializes.isDefined)
 
   protected def enrichSpecializationWithAbstraction(reference: DocReference, abstractions: Set[DocReference]): DocReference = {
     val newAbstractions = reference.getAbstracts.getOrElse(Set.empty) ++ abstractions
@@ -71,6 +71,6 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
       reference.getOriginalLine,
       Some(newAbstractions),
       reference.getSpecializes)
-  } ensuring ((ref: DocReference) => ref.getSpecializes.isDefined)
+  } ensuring ((ref: DocReference) => ref.getAbstracts.isDefined)
 
 }

@@ -105,7 +105,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
     then
       line
     else
-      assert(relevantRefs.size == 1, "There should be only one reference per line")
+    // assert(relevantRefs.size == 1, "There should be only one reference per line")
       relevantRefs.headOption match
         case None => ""
         case Some(value) => value.enrichedLine(latexFormatter)
@@ -113,9 +113,9 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
 
   protected def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {
     if (referenceName.acronym.isDefined) {
-      name.equals(referenceName.acronym.get)
+      name.equalsIgnoreCase(referenceName.acronym.get)
     } else {
-      name.equals(referenceName.name)
+      name.equalsIgnoreCase(referenceName.name)
     }
   }
 

@@ -17,4 +17,8 @@ class LatexSanitizerTest extends AnyFlatSpec with should.Matchers {
     LatexSanitizer.sanitizeWebLink("https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html#lab44") should be("https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html#lab44")
   }
 
+  "LatexSanitizer" should "be able to remove special characters" in {
+    LatexSanitizer.sanitizeReferenceName("Digital Instrumentation \\& Control") should be("Digital_Instrumentation___Control")
+  }
+
 }

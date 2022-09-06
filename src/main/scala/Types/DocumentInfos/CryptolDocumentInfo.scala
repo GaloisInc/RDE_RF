@@ -14,15 +14,25 @@ class CryptolDocumentInfo(
                          ) extends DocumentInfo {
 
 
-  //  def this(document: String, path: String, allRefs: Set[DocReference]) =
-  //    this(document,
-  //      path,
-  //      allRefs.filter(_.getReferenceType == ReferenceType.Import),
-  //      allRefs.filter(_.getReferenceType == ReferenceType.Type),
-  //      allRefs.filter(_.getReferenceType == ReferenceType.Event),
-  //      allRefs.filter(_.getReferenceType == ReferenceType.Requirement)
-  //    )
-
+  def copy(
+            documentName: String = documentName,
+            filePath: String = filePath,
+            imports: Set[DocReference] = imports,
+            types: Set[DocReference] = types,
+            functions: Set[DocReference] = functions,
+            properties: Set[DocReference] = properties,
+            documentType: DocumentType = documentType,
+          ): CryptolDocumentInfo = {
+    new CryptolDocumentInfo(
+      documentName,
+      filePath,
+      imports,
+      types,
+      functions,
+      properties,
+      documentType,
+    )
+  }
 
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
 

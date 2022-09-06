@@ -14,6 +14,28 @@ class LandoDocumentInfo(
                          override val documentType: DocumentType = DocumentType.Lando,
                        ) extends DocumentInfo {
 
+  def copy(
+            documentName: String = documentName,
+            filePath: String = filePath,
+            references: Set[DocReference] = references,
+            relations: Set[DocRelation] = relations,
+            events: Set[DocReference] = events,
+            requirements: Set[DocReference] = requirements,
+            scenarios: Set[DocReference] = scenarios,
+            documentType: DocumentType = documentType,
+          ): LandoDocumentInfo = {
+    new LandoDocumentInfo(
+      documentName,
+      filePath,
+      references,
+      relations,
+      events,
+      requirements,
+      scenarios,
+      documentType,
+    )
+  }
+
   private val fileUtil = new FileUtil()
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 

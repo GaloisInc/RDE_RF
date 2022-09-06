@@ -1,9 +1,9 @@
 package DocumentEnrichers
 
 import Formatter.{LatexFormatter, LatexSanitizer}
+import Types.*
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
-import Types.FileType.{ComponentFile, EventFile, RequirementFile, ScenarioFile, ViewFile}
-import Types.{DocReference, DocRelation, DocumentType, FileType, LandoLineType, ReferenceKeyWords, ReferenceName, ReferenceType, RelationReference, RelationType}
+import Types.FileType.*
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -65,18 +65,16 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     val sourceReference = references.filter(ref => referenceNameMatches(relation.getSourceName, ref.getReference))
     val targetReference = references.filter(ref => referenceNameMatches(relation.getTargetName, ref.getReference))
 
-    assert(sourceReference.size == 1, s"Relation source reference not found: ${relation.getSourceName} in $docName")
-    assert(targetReference.size == 1, s"Relation target reference not found: ${relation.getTargetName} in $docName")
-
-    //val enrichedLine = latexFormatter.enrichLineWithLabel(addRelation(relation, srcRefs, trgRefs, docName), relation.relationReference.relationName)
+    //assert(sourceReference.nonEmpty, s"Relation source reference not found: ${relation.getSourceName} in $docName")
+    //assert(targetReference.nonEmpty, s"Relation target reference not found: ${relation.getTargetName} in $docName")
 
     DocRelation(
       relation.getDocumentName,
       relation.getRelationReference,
       relation.getRelationType,
       relation.getOriginalLine,
-      Some(sourceReference.head),
-      Some(targetReference.head),
+      sourceReference.headOption,
+      targetReference.headOption
     )
   }
 

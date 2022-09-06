@@ -29,5 +29,5 @@ class CryptolReferencer extends Referencer {
 
   override def addSpecializationsToDocument(documentInfo: DocumentInfo, specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
     documentInfo
-  } ensuring ((resDoc: DocumentInfo) => resDoc == documentInfo)
+  } ensuring ((resDoc: DocumentInfo) => resDoc == documentInfo, "addSpecializationsToDocument is not implemented for Cryptol")
 }

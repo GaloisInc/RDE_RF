@@ -52,12 +52,12 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     getLineType(line, documentInfo.filePath) match
       case LandoLineType.EmptyLine => line
       case LandoLineType.Comment => line
+      case LandoLineType.LineToBeSkipped => ""
+      case LandoLineType.Relation => extractEnrichedText(line, documentInfo.getRelations)
       case LandoLineType.Requirement => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Requirement))
       case LandoLineType.Event => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
       case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
       case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.getReferenceType)))
-      case LandoLineType.Relation => extractEnrichedText(line, documentInfo.getRelations)
-      case LandoLineType.LineToBeSkipped => ""
   }
 
   private def enrichRelation(relation: DocRelation, references: Set[DocReference], docName: String): DocRelation = {

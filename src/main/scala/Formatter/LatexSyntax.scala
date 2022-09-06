@@ -9,8 +9,6 @@ object LatexSyntax {
   def addClickableLocalLink(reference: String, nameOfReference: String): String = {
     s"\\hyperref[$reference]{${sanitizeName(nameOfReference)}}"
   }
-  
-  def addPageRef(reference: String): String = s"\\cpageref{$reference}"
 
   def addCref(reference: String): String = s"\\cref{$reference}"
 
@@ -23,13 +21,13 @@ object LatexSyntax {
 
 
   def addReferenceInLatex(reference: DocReference, currentDocument: String): String = {
-    s"${LatexSyntax.addClickableLocalLink(reference.getLabelText, reference.getName)} (${explicitReference(reference, currentDocument)})"
+    s"${addClickableLocalLink(reference.getLabelText, reference.getName)} (${explicitReference(reference, currentDocument)})"
   }
 
   private def explicitReference(ref: DocReference, documentName: String): String = {
     if ref.documentName.equals(documentName)
-    then LatexSyntax.addCref(ref.getLabelText)
-    else LatexSyntax.addVref(ref.getLabelText)
+    then addCref(ref.getLabelText)
+    else addVref(ref.getLabelText)
   } ensuring ((l: String) => l.contains(ref.getLabelText))
 
 

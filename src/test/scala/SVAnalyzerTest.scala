@@ -1,7 +1,8 @@
 import DocumentEnrichers.SVDocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil, TestUtility}
+import Utils.{Control, FileUtil}
 import Formatter.InlineFormatter
+import TestUtils.TestUtility
 import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
@@ -15,21 +16,41 @@ class SVAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val documentAnalyser = SVDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.SV
   private val resourceFolder = "SystemVerilog"
+  private val testUtility = new TestUtility()
+  private val fileUtil = FileUtil()
+
 
   "SVDocumentEnricher" should "be able to extract modules from AcutationUnit" in {
-    TestUtility.checkExtractReferences("actuation_unit_impl", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 7)
+    val fileName = "actuation_unit_impl"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 7)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Actuator Impl" in {
-    TestUtility.checkExtractReferences("actuator_impl", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1)
+    val fileName = "actuator_impl"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Generated" in {
-    TestUtility.checkExtractReferences("instrumentation_impl", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 3)
+    val fileName = "instrumentation_impl"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 3)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Handwritten" in {
-    TestUtility.checkExtractReferences("instrumentation_impl_handwritten", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 2)
+    val fileName = "instrumentation_impl_handwritten"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 2)
+  }
+
+  private def getPathToDocument(fileName: String, resourceFolderName: String): String = {
+    val documents = getClass.getResource(resourceFolderName).getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
+    val documentOfInterest = filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
+
+    assert(documentOfInterest.length == 1)
+    documentOfInterest.head
   }
 }
 

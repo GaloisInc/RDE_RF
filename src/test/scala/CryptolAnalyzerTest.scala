@@ -1,7 +1,8 @@
 import DocumentEnrichers.CryptolDocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil, TestUtility}
+import Utils.{Control, FileUtil}
 import Formatter.InlineFormatter
+import TestUtils.TestUtility
 import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
@@ -16,25 +17,46 @@ class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val documentAnalyser = CryptolDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.Cryptol
   private val resourceFolder = "Cryptol"
+  private val testUtility = TestUtility()
+
 
   "CryptolDocumentEnricher" should "be able to extract types from AcutationUnit" in {
-    TestUtility.checkExtractReferences("ActuationUnit", documentAnalyser, expectedDocumentType, resourceFolder, numberOfTypes = 5, numberOfRequirements = 5, numberOfEvents = 9)
+    val fileName = "ActuationUnit"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfTypes = 5, numberOfRequirements = 5, numberOfEvents = 9)
   }
 
   "CryptolDocumentEnricher" should "be able to extract types from Actuator" in {
-    TestUtility.checkExtractReferences("Actuator", documentAnalyser, expectedDocumentType, resourceFolder, numberOfTypes = 3, numberOfEvents = 3)
+    val fileName = "Actuator"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfTypes = 3, numberOfEvents = 3)
   }
 
   "CryptolDocumentEnricher" should "be able to extract types from InstrumentationUnit" in {
-    TestUtility.checkExtractReferences("InstrumentationUnit", documentAnalyser, expectedDocumentType, resourceFolder, numberOfTypes = 10, numberOfRequirements = 9, numberOfEvents = 9)
+    val fileName = "InstrumentationUnit"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfTypes = 10, numberOfRequirements = 9, numberOfEvents = 9)
   }
 
   "CryptolDocumentEnricher" should "be able to extract types from RTS" in {
-    TestUtility.checkExtractReferences("RTS", documentAnalyser, expectedDocumentType, resourceFolder, numberOfTypes = 10, numberOfRequirements = 6, numberOfEvents = 7)
+    val fileName = "RTS"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfTypes = 10, numberOfRequirements = 6, numberOfEvents = 7)
   }
 
   "CryptolDocumentEnricher" should "be able to extract types from Utils" in {
-    TestUtility.checkExtractReferences("Utils", documentAnalyser, expectedDocumentType, resourceFolder, numberOfEvents = 1)
+    val fileName = "Utils"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfEvents = 1)
+  }
+
+  private def getPathToDocument(fileName: String, resourceFolderName: String): String = {
+    val documents = getClass.getResource(resourceFolderName).getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
+    val documentOfInterest = filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
+
+    assert(documentOfInterest.length == 1)
+    documentOfInterest.head
   }
 }
 

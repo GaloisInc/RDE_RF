@@ -8,9 +8,7 @@ import java.util.Locale
 
 abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
   def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo
-
   def addSpecializationsToDocument(abstractDocument: DocumentInfo, specializedDocuments: Array[DocumentInfo]): DocumentInfo
-
   def addAbstractionsToDocument(specializedDocument: DocumentInfo, abstractDocuments: Array[DocumentInfo]): DocumentInfo
 
   protected def addAbstractions(reference: DocReference, abstractReferences: Set[DocReference]): DocReference = {

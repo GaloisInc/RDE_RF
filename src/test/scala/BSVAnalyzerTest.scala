@@ -1,6 +1,7 @@
 import DocumentEnrichers.BSVDocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil, TestUtility}
+import Utils.{Control, FileUtil}
+import TestUtils.TestUtility
 import Formatter.InlineFormatter
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -11,34 +12,56 @@ import scala.collection.mutable
 import scala.io.Source
 
 class BSVAnalyzerTest extends AnyFlatSpec with should.Matchers {
+  private val fileUtil = FileUtil()
   private val formatterType = InlineFormatter()
   private val documentAnalyser = BSVDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.BSV
   private val resourceFolder = "BSV"
-
+  private val testUtility = TestUtility()
 
   "BSVDocumentEnricher" should "be able to extract modules from Actuation" in {
-    TestUtility.checkExtractReferences("Actuation", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1)
+    val fileName = "Actuation"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1)
   }
 
   "BSVDocumentEnricher" should "be able to extract modules from Actuation_Generated_BVI" in {
-    TestUtility.checkExtractReferences("Actuation_Generated_BVI", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1, numberOfSubSystem = 3)
+    val fileName = "Actuation_Generated_BVI"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1, numberOfSubSystem = 3)
   }
 
   "BSVDocumentEnricher" should "be able to extract modules from Instrumentation_Handwritten_BVI" in {
-    TestUtility.checkExtractReferences("Instrumentation_Handwritten_BVI", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1, numberOfSubSystem = 3)
+    val fileName = "Instrumentation_Handwritten_BVI"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1, numberOfSubSystem = 3)
   }
 
   "BSVDocumentEnricher" should "be able to extract modules from Instrumentation" in {
-    TestUtility.checkExtractReferences("Instrumentation", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1)
+    val fileName = "Instrumentation"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1)
   }
 
   "BSVDocumentEnricher" should "be able to extract modules from Nerv_BVI" in {
-    TestUtility.checkExtractReferences("Nerv_BVI", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1, numberOfSubSystem = 1)
+    val fileName = "Nerv_BVI"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1, numberOfSubSystem = 1)
   }
 
   "BSVDocumentEnricher" should "be able to extract modules from Nerv" in {
-    TestUtility.checkExtractReferences("Nerv", documentAnalyser, expectedDocumentType, resourceFolder, numberOfSystem = 1, numberOfSubSystem = 1)
+    val fileName = "Nerv"
+    val filePath = getPathToDocument(fileName, resourceFolder)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1, numberOfSubSystem = 1)
+  }
+
+  private def getPathToDocument(fileName: String, resourceFolderName: String): String = {
+    val documents = getClass.getResource(resourceFolderName).getPath
+    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
+    val documentOfInterest = filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
+
+    assert(documentOfInterest.length == 1)
+    documentOfInterest.head
   }
 }
 

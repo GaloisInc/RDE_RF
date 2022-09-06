@@ -1,22 +1,14 @@
-package Utils
+package TestUtils
 
 import DocumentEnrichers.DocumentEnricher
 import Types.{DocumentType, ReferenceType}
-import Utils.TestUtility.getClass
+import Utils.FileUtil
 
-object TestUtility {
-  private val fileUtil = new FileUtil()
-
-  def getDocumentOfInterest(fileName: String, resourceFolderName: String): Array[String] = {
-    val documents = getClass.getResource(resourceFolderName).getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
-    filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
-  }
-
+class TestUtility {
   def checkExtractReferences(fileName: String,
                              documentEnricher: DocumentEnricher,
                              expectedDocumentType: DocumentType,
-                             resourceFolderName: String,
+                             filePath: String,
                              numberOfSystem: Int = 0,
                              numberOfSubSystem: Int = 0,
                              numberOfComponent: Int = 0,
@@ -27,12 +19,6 @@ object TestUtility {
                              numberOfViews: Int = 0,
                              numberOfTypes: Int = 0
                             ): Boolean = {
-
-    val documentOfInterest = getDocumentOfInterest(fileName, resourceFolderName)
-
-    assert(documentOfInterest.length == 1)
-    val filePath = documentOfInterest.head
-
     val analyzedDocument = documentEnricher.extractDocumentInfo(filePath)
     assert(analyzedDocument.documentName == fileName, "Document name is not correct")
     assert(analyzedDocument.documentType == expectedDocumentType, "Document type is not correct")

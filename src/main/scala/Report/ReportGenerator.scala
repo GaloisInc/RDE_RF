@@ -17,10 +17,10 @@ object ReportGenerator {
 
   @tailrec
   def formatReferenceChain(docReference: DocReference, acc: String): String = {
-    docReference.getAbstracts match
+    docReference.getAbstractions match
       case Some(refinements) =>
         val arbitraryRefinement = refinements.head
-        assert(refinements.forall(_.getSpecializes == arbitraryRefinement.getSpecializes), "All similar refinements must refine the same abstractions.")
+        assert(refinements.forall(_.getRefinements == arbitraryRefinement.getRefinements), "All similar refinements must refine the same abstractions.")
         val refinementText = refinements.map(ref => ref.getName).mkString("{", ", ", "}")
         val newAcc = acc + refinementSymbol + refinementText
         formatReferenceChain(arbitraryRefinement, newAcc)

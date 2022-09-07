@@ -64,7 +64,6 @@ object DocumentAnalyzer {
     assert(enrichedLandoDocuments.intersect(enrichedSysMLDocuments).isEmpty)
     assert(enrichedCryptolDocuments.intersect(enrichedLandoDocuments).isEmpty)
 
-
     val decoratedLando = enrichedLandoDocuments.map(doc => {
       val filePath = landoAnalyzer.enrichFile(doc)
       doc.asInstanceOf[LandoDocumentInfo].copy(filePath = filePath)
@@ -88,14 +87,14 @@ object DocumentAnalyzer {
     val enrichedDocuments = enrichDocuments(filesToAnalyze)
     val enrichedLandoDocuments = fileUtil.getLandoDocuments(enrichedDocuments)
 
-    val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstracts.isEmpty))
+    val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.isEmpty))
     nonSpecializedConstructs
   }
 
   def nonSpecializedLandoConstructs(documents: Array[DocumentInfo]): Array[DocReference] = {
     require(documents.nonEmpty)
     val enrichedLandoDocuments = fileUtil.getLandoDocuments(documents)
-    val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstracts.isEmpty))
+    val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.isEmpty))
     nonSpecializedConstructs
   } ensuring ((nonSpecialized: Array[DocReference]) => {
     val allReferences = documents.flatMap(doc => doc.getAllReferences).toSet
@@ -150,9 +149,9 @@ object DocumentAnalyzer {
     assert(cryptolDocuments.flatMap(_.getAllReferences.map(_.getLabelText)).toSet.size == cryptolDocuments.flatMap(_.getAllReferences.map(_.getLabelText)).length)
     assert(sysMLDocuments.flatMap(_.getAllReferences.map(_.getLabelText)).toSet.size == sysMLDocuments.flatMap(_.getAllReferences.map(_.getLabelText)).length)
 
-    val enrichedCryptolDocuments = cryptolDocuments.map(doc => cryptolReferencer.addSpecializationAndAbstract(doc, sysMLDocuments.map(_.asInstanceOf[DocumentInfo]), Array.empty[DocumentInfo]))
-    val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addSpecializationAndAbstract(doc, landoDocuments.map(_.asInstanceOf[DocumentInfo]), enrichedCryptolDocuments))
-    val enrichedLandoDocuments = landoDocuments.map(doc => landoReferencer.addSpecializationAndAbstract(doc, Array.empty[DocumentInfo], enrichedSysMLDocuments))
+    val enrichedCryptolDocuments = cryptolDocuments.map(doc => cryptolReferencer.addRefinementRelations(doc, sysMLDocuments.map(_.asInstanceOf[DocumentInfo]), Array.empty[DocumentInfo]))
+    val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addRefinementRelations(doc, landoDocuments.map(_.asInstanceOf[DocumentInfo]), enrichedCryptolDocuments))
+    val enrichedLandoDocuments = landoDocuments.map(doc => landoReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], enrichedSysMLDocuments))
 
     enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments
   } ensuring ((res: Array[DocumentInfo]) => res.length == filesToAnalyze.length)

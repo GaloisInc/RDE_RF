@@ -7,30 +7,33 @@ import Types.DocumentInfos.DocumentInfo
 import java.util.Locale
 
 abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
-  def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo
-  def addSpecializationsToDocument(abstractDocument: DocumentInfo, specializedDocuments: Array[DocumentInfo]): DocumentInfo
-  def addAbstractionsToDocument(specializedDocument: DocumentInfo, abstractDocuments: Array[DocumentInfo]): DocumentInfo
+  def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo
 
-  protected def addAbstractions(reference: DocReference, abstractReferences: Set[DocReference]): DocReference = {
-    val referenceName = reference.getName
-    val abstractions = abstractReferences.filter(isSpecialization(referenceName, _))
+  def addSpecializationsToDocument(abstractDocument: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo
+
+  def addAbstractionsToDocument(specializedDocument: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo
+
+  protected def findRefinementRelation(refiningReference: DocReference, referenceBeingRefined: Set[DocReference]): DocReference = {
+    val referenceName = refiningReference.getName
+    val abstractions = referenceBeingRefined.filter(isSpecialization(referenceName, _))
     if (abstractions.nonEmpty)
-      enrichSpecializationWithAbstraction(reference, abstractions)
+      referenceRefines(refiningReference, abstractions)
     else
-      reference
+      refiningReference
   } ensuring ((ref: DocReference) =>
-    ref.getReferenceType == reference.getReferenceType
-      && ref.getDocumentName == reference.getDocumentName
-      && ref.getDocumentType == reference.getDocumentType
-      && ref.getName == reference.getName
-      && ref.getReferenceType == reference.getReferenceType
-      && ref.getSpecializes == reference.getSpecializes)
+    ref.getReferenceType == refiningReference.getReferenceType
+      && ref.getDocumentName == refiningReference.getDocumentName
+      && ref.getDocumentType == refiningReference.getDocumentType
+      && ref.getName == refiningReference.getName
+      && ref.getReferenceType == refiningReference.getReferenceType
+      && ref.getRefinements == refiningReference.getRefinements)
 
-  protected def addSpecializations(reference: DocReference, specializedReferences: Set[DocReference]): DocReference = {
-    require(reference.getSpecializes.isEmpty, "Reference should not have any specializations yet")
-    val specializations = specializedReferences.filter(ref => ref.getSpecializes.isDefined && ref.getSpecializes.get.contains(reference))
-    if (specializations.nonEmpty)
-      enrichAbstractionWithSpecialization(reference, specializations)
+  protected def addRefinements(reference: DocReference, specializedReferences: Set[DocReference]): DocReference = {
+    require(reference.getRefinements.isEmpty, "Reference should not have any specializations yet")
+    val refinements = specializedReferences.filter(ref => ref.getAbstractions.isDefined
+      && ref.getAbstractions.get.contains(reference))
+    if (refinements.nonEmpty)
+      addRefinementsOfToDocReference(reference, refinements)
     else
       reference
   } ensuring ((ref: DocReference) =>
@@ -39,38 +42,38 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
       && ref.getDocumentType == reference.getDocumentType
       && ref.getName == reference.getName
       && ref.getReferenceType == reference.getReferenceType
-      && ref.getAbstracts == reference.getAbstracts)
+      && ref.getAbstractions == reference.getAbstractions)
 
   def isSpecialization(referenceName: String, ref: DocReference): Boolean = {
     val referenceNameToMatch = ref.getName.toLowerCase(Locale.US)
     val referenceNameAcronym = ref.getAcronym.getOrElse("XXXXXXXXXXX").toLowerCase()
     val referenceNameLower = referenceName.toLowerCase()
-    referenceNameToMatch.equals(referenceNameLower)
-      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equals(referenceNameLower)
-      || referenceNameAcronym.equals(referenceNameLower)
+    referenceNameToMatch.equalsIgnoreCase(referenceNameLower)
+      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equalsIgnoreCase(referenceNameLower)
+      || referenceNameAcronym.equalsIgnoreCase(referenceNameLower)
       || Hamming.computeRelHamming(referenceName, referenceNameToMatch) <= hammingDistanceMeasure
   }
 
-  protected def enrichAbstractionWithSpecialization(reference: DocReference, specializations: Set[DocReference]): DocReference = {
-    val newSpecializations = reference.getSpecializes.getOrElse(Set.empty) ++ specializations
+  protected def addRefinementsOfToDocReference(reference: DocReference, refinements: Set[DocReference]): DocReference = {
+    val newRefinements = reference.getRefinements.getOrElse(Set.empty) ++ refinements
     DocReference(reference.getDocumentName,
       reference.getReference,
       reference.getReferenceType,
       reference.getDocumentType,
       reference.getOriginalLine,
-      reference.getAbstracts,
-      Some(newSpecializations))
-  } ensuring ((ref: DocReference) => ref.getSpecializes.isDefined)
+      reference.getAbstractions,
+      Some(newRefinements))
+  } ensuring ((ref: DocReference) => ref.getRefinements.isDefined)
 
-  protected def enrichSpecializationWithAbstraction(reference: DocReference, abstractions: Set[DocReference]): DocReference = {
-    val newAbstractions = reference.getAbstracts.getOrElse(Set.empty) ++ abstractions
+  protected def referenceRefines(reference: DocReference, abstractions: Set[DocReference]): DocReference = {
+    val newAbstractions = reference.getAbstractions.getOrElse(Set.empty) ++ abstractions
     DocReference(reference.getDocumentName,
       reference.getReference,
       reference.getReferenceType,
       reference.getDocumentType,
       reference.getOriginalLine,
       Some(newAbstractions),
-      reference.getSpecializes)
-  } ensuring ((ref: DocReference) => ref.getAbstracts.isDefined)
+      reference.getRefinements)
+  } ensuring ((ref: DocReference) => ref.getAbstractions.isDefined)
 
 }

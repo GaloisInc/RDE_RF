@@ -31,10 +31,34 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     docReference.getDocumentType should be(documentType)
     docReference.getOriginalLine should be(originalLine)
     docReference.getAcronym should be(None)
-    docReference.getAbstracts should be(None)
-    docReference.getSpecializes should be(None)
-    docReference.getLabelText should be ("documentName_Requirement_referenceName")
+    docReference.getAbstractions should be(None)
+    docReference.getRefinements should be(None)
+    docReference.getLabelText should be("documentName_Requirement_referenceName")
 
     docReference.enrichedLine(formatter) should be("originalLine(*\\label{documentName_Requirement_referenceName}*)")
+  }
+
+
+  "DocReference" should "test abstractions" in {
+    val documentName = "documentName"
+    val referenceName = ReferenceName("referenceName")
+    val referenceType = ReferenceType.Requirement
+    val documentType = DocumentType.Lando
+    val originalLine = "originalLine"
+
+    val referenceNameOfAbstraction = ReferenceName("abstractName")
+    val abstraction = DocReference(documentName, referenceNameOfAbstraction, referenceType, documentType, originalLine)
+    val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
+    docReference.getDocumentName should be(documentName)
+    docReference.getReference should be(referenceName)
+    docReference.getReferenceType should be(referenceType)
+    docReference.getDocumentType should be(documentType)
+    docReference.getOriginalLine should be(originalLine)
+    docReference.getAcronym should be(None)
+    docReference.getAbstractions should be(Some(Set(abstraction)))
+    docReference.getRefinements should be(None)
+    docReference.getLabelText should be("documentName_Requirement_referenceName")
+
+    docReference.enrichedLine(formatter) should be(s"originalLine(*\\label{${docReference.getLabelText}}*)(*($$\\sqsupseteq$$\\hyperref[${abstraction.getLabelText}]{${abstraction.getName}} (\\cref{${abstraction.getLabelText}}))*)")
   }
 }

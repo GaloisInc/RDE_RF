@@ -4,30 +4,30 @@ import Types.*
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare}
 
 class CryptolReferencer extends Referencer {
-  override def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
+  override def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
     require(abstractDocuments.forall(_.documentType == DocumentType.SysML))
     require(documentToExtend.documentType == DocumentType.Cryptol)
     addAbstractionsToDocument(documentToExtend, abstractDocuments)
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
-  override def addAbstractionsToDocument(documentInfo: DocumentInfo, sysMlDocuments: Array[DocumentInfo]): DocumentInfo = {
-    require(sysMlDocuments.forall(_.documentType == DocumentType.SysML))
-    require(documentInfo.documentType == DocumentType.Cryptol)
+  override def addAbstractionsToDocument(refinedDocument: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo = {
+    require(documentsBeingRefined.forall(_.documentType == DocumentType.SysML))
+    require(refinedDocument.documentType == DocumentType.Cryptol)
 
-    val sysmlReferences = sysMlDocuments.flatMap(doc => doc.getAllReferences)
-    val updatedReferences = documentInfo.getAllReferences.map(reference => addAbstractions(reference, sysmlReferences.toSet))
+    val sysmlReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
+    val updatedReferences = refinedDocument.getAllReferences.map(reference => findRefinementRelation(reference, sysmlReferences.toSet))
 
     CryptolDocumentInfo(
-      documentInfo.documentName,
-      documentInfo.filePath,
+      refinedDocument.documentName,
+      refinedDocument.filePath,
       updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
       updatedReferences.filter(_.getReferenceType == ReferenceType.Type),
       updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
       updatedReferences.filter(_.getReferenceType == ReferenceType.Requirement),
     )
-  } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
+  } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, refinedDocument))
 
-  override def addSpecializationsToDocument(documentInfo: DocumentInfo, specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
+  override def addSpecializationsToDocument(documentInfo: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
     documentInfo
-  } ensuring ((resDoc: DocumentInfo) => resDoc == documentInfo, "addSpecializationsToDocument is not implemented for Cryptol")
+  } ensuring ((resDoc: DocumentInfo) => resDoc == documentInfo, "Nothing refines the Cryptol documents.")
 }

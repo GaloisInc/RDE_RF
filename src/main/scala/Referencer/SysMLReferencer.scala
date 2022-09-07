@@ -4,22 +4,22 @@ import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompa
 import Types.{DocumentType, ReferenceType}
 
 class SysMLReferencer extends Referencer {
-  override def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
+  override def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
     require(abstractDocuments.forall(_.documentType == DocumentType.Lando))
-    require(specializedDocuments.forall(_.documentType == DocumentType.Cryptol))
+    require(refinedDocuments.forall(_.documentType == DocumentType.Cryptol))
     require(documentToExtend.documentType == DocumentType.SysML)
 
-    val documentWithSpecializations = this.addSpecializationsToDocument(documentToExtend, specializedDocuments)
+    val documentWithSpecializations = this.addSpecializationsToDocument(documentToExtend, refinedDocuments)
     this.addAbstractionsToDocument(documentWithSpecializations, abstractDocuments)
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
 
-  override def addAbstractionsToDocument(documentInfo: DocumentInfo, landoDocuments: Array[DocumentInfo]): DocumentInfo = {
-    require(landoDocuments.forall(_.documentType == DocumentType.Lando))
+  override def addAbstractionsToDocument(documentInfo: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo = {
+    require(documentsBeingRefined.forall(_.documentType == DocumentType.Lando))
     require(documentInfo.documentType == DocumentType.SysML)
 
-    val landoReferences = landoDocuments.flatMap(doc => doc.getAllReferences)
-    val updatedReferences = documentInfo.getAllReferences.map(sysmlReference => addAbstractions(sysmlReference, landoReferences.toSet))
+    val landoReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
+    val updatedReferences = documentInfo.getAllReferences.map(sysmlReference => findRefinementRelation(sysmlReference, landoReferences.toSet))
 
     SysMLDocumentInfo(
       documentInfo.documentName,
@@ -36,12 +36,12 @@ class SysMLReferencer extends Referencer {
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 
-  override def addSpecializationsToDocument(documentInfo: DocumentInfo, cryptolDocuments: Array[DocumentInfo]): DocumentInfo = {
-    require(cryptolDocuments.forall(_.documentType == DocumentType.Cryptol))
+  override def addSpecializationsToDocument(documentInfo: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
+    require(refinedDocuments.forall(_.documentType == DocumentType.Cryptol))
     require(documentInfo.documentType == DocumentType.SysML)
 
-    val cryptolReferences = cryptolDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getSpecializes.nonEmpty))
-    val updatedReferences = documentInfo.getAllReferences.map(sysmlRef => addSpecializations(sysmlRef, cryptolReferences.toSet))
+    val cryptolReferences = refinedDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.nonEmpty))
+    val updatedReferences = documentInfo.getAllReferences.map(sysmlRef => addRefinements(sysmlRef, cryptolReferences.toSet))
 
     SysMLDocumentInfo(
       documentInfo.documentName,

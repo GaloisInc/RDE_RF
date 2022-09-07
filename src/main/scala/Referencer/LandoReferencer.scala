@@ -4,22 +4,22 @@ import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompa
 import Types.{DocumentType, ReferenceType}
 
 class LandoReferencer extends Referencer {
-  def addSpecializationAndAbstract(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], specializedDocuments: Array[DocumentInfo]): DocumentInfo = {
-    require(specializedDocuments.forall(_.documentType == DocumentType.SysML), "All specialized documents must be SysML documents")
+  def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
+    require(refinedDocuments.forall(_.documentType == DocumentType.SysML), "All specialized documents must be SysML documents")
     require(documentToExtend.documentType == DocumentType.Lando, "The document to extend must be a Lando document")
-    addSpecializationsToDocument(documentToExtend, specializedDocuments)
+    addSpecializationsToDocument(documentToExtend, refinedDocuments)
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
-  def addAbstractionsToDocument(specializedDocument: DocumentInfo, abstractDocument: Array[DocumentInfo]): DocumentInfo = {
+  def addAbstractionsToDocument(specializedDocument: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo = {
     specializedDocument
   } ensuring ((res: DocumentInfo) => res == specializedDocument, "The result is the same as the input - no abstractions are defined for Lando.")
 
-  def addSpecializationsToDocument(documentInfo: DocumentInfo, sysMLDocuments: Array[DocumentInfo]): DocumentInfo = {
-    require(sysMLDocuments.forall(_.documentType == DocumentType.SysML), "All specialization documents for Lando must be SysML documents.")
+  def addSpecializationsToDocument(documentInfo: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
+    require(refinedDocuments.forall(_.documentType == DocumentType.SysML), "All specialization documents for Lando must be SysML documents.")
     require(documentInfo.documentType == DocumentType.Lando, "The document to extend must be a Lando document.")
 
-    val sysmlReferences = sysMLDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getSpecializes.nonEmpty))
-    val updatedReferences = documentInfo.getAllReferences.map(landoRef => addSpecializations(landoRef, sysmlReferences.toSet))
+    val sysmlReferences = refinedDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.nonEmpty))
+    val updatedReferences = documentInfo.getAllReferences.map(landoRef => addRefinements(landoRef, sysmlReferences.toSet))
 
     val componentSet = Set(ReferenceType.Component, ReferenceType.SubSystem, ReferenceType.System)
     LandoDocumentInfo(

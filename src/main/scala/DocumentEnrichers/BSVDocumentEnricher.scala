@@ -3,6 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{BSVDocumentInfo, DocumentInfo}
+import Utils.FileUtil
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -20,8 +21,8 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
 
   def extractDocumentInfo(filePath: String): BSVDocumentInfo = {
     require(filePath.nonEmpty)
-    require(fileUtil.getFileType(filePath) == "bsv")
-    val fileName = fileUtil.getFileName(filePath)
+    require(FileUtil.getFileType(filePath) == "bsv")
+    val fileName = FileUtil.getFileName(filePath)
     val packages: Set[DocReference] = extractReferences(filePath, ReferenceType.System)
     val modules: Set[DocReference] = extractReferences(filePath, ReferenceType.SubSystem)
 

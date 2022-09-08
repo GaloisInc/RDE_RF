@@ -8,9 +8,7 @@ import org.scalatest.matchers.should
 
 import java.io.File
 
-
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
-  private val fileUtil = new FileUtil()
 
   "Latex" should "be in Path" in {
     LatexGenerator.checkLatexInPath() should be(true)
@@ -57,8 +55,8 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
   "LatexGenerator" should "be able to build Latex Document" in {
     val documents = getClass.getResource("../Latex").getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
-    val latexFilePath = filesToAnalyze.filter(path => fileUtil.getFileName(path) == "test").head
+    val filesToAnalyze = FileUtil.getListOfFiles(documents).toArray
+    val latexFilePath = filesToAnalyze.filter(path => FileUtil.getFileName(path) == "test").head
     val latexFile = new File(latexFilePath)
     LatexGenerator.buildLatexFile(latexFile)
   }
@@ -68,11 +66,12 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
     val landoDocuments = getClass.getResource("../Lando").getPath
     val cryptolDocuments = getClass.getResource("../Cryptol").getPath
 
-    val filesToAnalyze = fileUtil.getListOfFiles(sysmlDocuments).toArray
-      ++ fileUtil.getListOfFiles(landoDocuments).toArray
-      ++ fileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray
+      ++ FileUtil.getListOfFiles(landoDocuments).toArray
+      ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, "test")
+    val targetFolder = getClass.getResource("../").getPath
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, "test", targetFolder)
 
     LatexGenerator.generateLatexReport(referenceReport)
   }

@@ -37,6 +37,8 @@ class DocReference(
 
   def getRefinements: Option[Set[DocReference]] = abstractionOf
 
+  def isReferenced: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
+
   override def enrichedLine(formatter: ReferenceFormatter): String = {
     val refinementOfString = getAbstractions match {
       case Some(abstracts) => formatter.addAbstractions(abstracts, documentName)

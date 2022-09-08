@@ -17,7 +17,6 @@ class SysMLDocumentInfo(
                          items: Set[DocReference],
                          override val documentType: DocumentType = DocumentType.SysML
                        ) extends DocumentInfo {
-  val fileUtil = new FileUtil()
 
   def copy(
             documentName: String = documentName,
@@ -72,10 +71,10 @@ class SysMLDocumentInfo(
   override def getRelations: Set[DocRelation] = Set.empty
 
   override def getFileType: FileType = {
-    if (fileUtil.isFileType(filePath, "action")) FileType.EventFile
-    else if (fileUtil.isFileType(filePath, "requirement")) FileType.RequirementFile
-    else if (fileUtil.isFileType(filePath, "use case")) FileType.ScenarioFile
-    else if (fileUtil.isFileType(filePath, "view")) FileType.ViewFile
+    if (FileUtil.isOfFileType(filePath, "action")) FileType.EventFile
+    else if (FileUtil.isOfFileType(filePath, "requirement")) FileType.RequirementFile
+    else if (FileUtil.isOfFileType(filePath, "use case")) FileType.ScenarioFile
+    else if (FileUtil.isOfFileType(filePath, "view")) FileType.ViewFile
     else FileType.ComponentFile
   }
 }

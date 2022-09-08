@@ -1,5 +1,4 @@
-package Report
-
+package Report.ReportTypes
 
 final case class LanguageFormatting(languageName: String,
                                     keywords: Array[String],

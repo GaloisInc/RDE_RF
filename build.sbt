@@ -13,14 +13,10 @@ lazy val root = (project in file("."))
 //wartremoverErrors ++= Warts.unsafe
 
 
-// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-//libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.18.0"
-
-// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api-scala
-//libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
-
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
 
-// From https://alvinalexander.com/scala/how-use-twirl-templates-standalone-play-framework/
-//lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
+libraryDependencies ++= Seq(
+  "org.legogroup" %% "woof-core" % "0.4.5",
+  "org.legogroup" %% "woof-slf4j" % "0.4.5",
+)

@@ -8,7 +8,7 @@ class TestUtility {
   def checkExtractReferences(fileName: String,
                              documentEnricher: DocumentEnricher,
                              expectedDocumentType: DocumentType,
-                             filePath: String,
+                             resourceFolderName: String,
                              numberExprectedSystem: Int = 0,
                              numberOfSubSystem: Int = 0,
                              numberOfComponent: Int = 0,
@@ -19,6 +19,14 @@ class TestUtility {
                              numberOfViews: Int = 0,
                              numberOfTypes: Int = 0
                             ): Boolean = {
+
+    val documents = getClass.getResource(resourceFolderName).getPath
+    val filesToAnalyze = FileUtil.getListOfFiles(documents).toArray
+    val documentOfInterest = filesToAnalyze.filter(path => FileUtil.getFileName(path) == fileName)
+
+    assert(documentOfInterest.length == 1)
+    val filePath = documentOfInterest.head
+
     val analyzedDocument = documentEnricher.extractDocumentInfo(filePath)
     assert(analyzedDocument.documentName == fileName, "Document name is not correct")
     assert(analyzedDocument.documentType == expectedDocumentType, "Document type is not correct")

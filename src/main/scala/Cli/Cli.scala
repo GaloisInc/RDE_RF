@@ -1,91 +1,63 @@
 package Cli
 
 import Analyzers.DocumentAnalyzer
+import Report.LatexGenerator
+import Utils.FileUtil
+import org.legogroup.woof.*
+import scopt.OParser
+
 import scala.io.StdIn
 import scala.util.matching.Regex
-import Utils.FileUtil
 
-class Cli {
 
-  // Makes sure our user CLI inputs are valid
-  private val commandArgPattern: Regex = "(\\w+)\\s*(.*)".r
+object DocumentationEnhancerApp extends App {
 
-  private val fileUtil = FileUtil()
+  val builder = OParser.builder[CLIConfig]
 
-  // Introduction to and explanation of the application
-  def intro(): Unit = println(
-    """
-      |#############################################################################################################################################
-      |
-      |You are interacting with a list of highly rated yet lesser known films.
-      |The purpose of this application is for you to discover quality movies that you otherwise may have never heard of.
-      |If you want more information on the movies such as the director and review scores, there is a command for that, too.
-      |You can choose to look at the entire list or to filter it by genre. You can even add your own movies that I may have missed!""".stripMargin
-  )
-
-  // Ways users can sort through movies
-  def cliOptions(): Unit = {
-    println(
-      """
-        |#############################################################################################################################################
-        |
-        |Enrich your documentation using these options:
-        |------------------------------------------------
-        |Enrich [folder] --- (folder with files to enrich)
-        |EnrichMove files and moves files to: [srcfolder, desFolder]
-        |------------------------------------------------
-        |Input "quit" or "exit" to leave the application.
-        |------------------------------------------------""".stripMargin
+  val parser = {
+    import builder.*
+    OParser.sequence(
+      programName("DocumentationEnhancer"),
+      head("DocumentationEnhancer", "1.0"),
+        opt[String] ('s', "sourceFolder")
+        .required()
+        .action((x, c) => c.copy(sourceFolder = x))
+        .text("sourceFolder is a required string property that specifies the folder where the source/code files are located."),
+        opt[String] ('t', "targetFolder")
+        .required()
+        .action((x, c) => c.copy(targetFolder = x))
+        .text("targetFolder is a required string property that specifies the folder where the enhanced documentation files are located."),
+        opt[Unit] ('l', "generateLatex")
+        .action((_, c) => c.copy(generateLatex = true))
+        .text("generateLatex is an optional boolean property that specifies whether to generate LaTeX documentation files."),
+        opt[String] ('n', "latexTitle")
+        .action((x, c) => c.copy(latexTitle = x))
+        .text("latexTitle is an optional boolean property that specifies whether to generate LaTeX documentation files. " +
+          "If not specified the title of the LaTeX document will be Documentation."),
+        help ("help").text("prints this usage text")
     )
-
-    print(">> ")
   }
 
-  def menu(): Unit = {
+  OParser.parse(parser, args, CLIConfig(), OParserSetup()) match {
+    case Some(config) =>
+      val sourceFolder = config.sourceFolder
+      val targetFolder = config.targetFolder
+      val generateLatex = config.generateLatex
+      val latexTitle = if config.latexTitle.isEmpty then "Documentation" else config.latexTitle
+      val fileTypesOfTypesOfInterest = Set("lando", "sysml", "lobot", "cry", "c", "bsv", "sv")
 
-    intro()
-    var runMenu = true
+      val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
-    while (runMenu) {
-
-      cliOptions()
-
-      val input = StdIn.readLine()
-
-      input match {
-        case commandArgPattern(cmd, _) if cmd.equalsIgnoreCase("quit") || cmd.equalsIgnoreCase("exit") => runMenu = false
-        case commandArgPattern(cmd, arg) if cmd.equalsIgnoreCase("enrich") => enrichFilesInFolder()
-        case commandArgPattern(cmd, arg) if cmd.equalsIgnoreCase("enrichMove") => enrichFilesInFolderAndMoveTo()
-        case commandArgPattern(cmd, arg) => println(s"""unrecognized command: "$cmd" or: "$arg". Please follow menu instructions exactly.""")
-        case _ => println("Please insert a command consistent with the menu options.")
+      require(files.nonEmpty, "No files found in source folder: " + sourceFolder)
+      val documents = DocumentAnalyzer.generateReport(files, latexTitle, targetFolder)
+      println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
+      if (generateLatex) {
+        LatexGenerator.generateLatexReport(documents)
+        println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
       }
-    }
-
-    println("Enjoy your Documentation!")
-  }
-
-  def enrichFilesInFolder(): Unit = {
-    println("------------------------------------------------")
-
-    println("Enter source folder:")
-    val folder = StdIn.readLine()
-
-    val filesToAnalyze = fileUtil.getListOfFiles(folder).toArray
-
-    val enrichedFiles = DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze)
-
-    println("The documents are now enriched with Latex references.")
-  }
-
-  def enrichFilesInFolderAndMoveTo(): Unit = {
-    println("------------------------------------------------")
-
-    println("Enter source folder:")
-    val sourceFolder = StdIn.readLine()
-
-    println("Enter destination folder:")
-    val destinationFolder = StdIn.readLine()
-
+      println("Done!")
+    case _ =>
+      println("Invalid arguments!")
   }
 
 }

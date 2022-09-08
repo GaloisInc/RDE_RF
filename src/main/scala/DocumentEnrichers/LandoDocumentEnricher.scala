@@ -4,6 +4,7 @@ import Formatter.{LatexFormatter, LatexSanitizer}
 import Types.*
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.FileType.*
+import Utils.FileUtil
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -37,14 +38,14 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
 
   def extractDocumentInfo(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
-    require(fileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
+    require(FileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
     val relations: Set[DocRelation] = extractRelations(filePath)
     val requirements: Set[DocReference] = extractReferences(filePath, FileType.RequirementFile)
     val scenarios: Set[DocReference] = extractReferences(filePath, FileType.ScenarioFile)
     val events: Set[DocReference] = extractReferences(filePath, FileType.EventFile)
 
-    val fileName = fileUtil.getFileName(filePath)
+    val fileName = FileUtil.getFileName(filePath)
     val enrichedRelations = enrichRelations(relations, references, fileName)
 
     LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
@@ -179,9 +180,9 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   def getFileType(path: String): FileType = {
-    if (fileUtil.isFileType(path, "events")) return FileType.EventFile
-    if (fileUtil.isFileType(path, "requirements")) return FileType.RequirementFile
-    if (fileUtil.isFileType(path, "scenarios")) return FileType.ScenarioFile
+    if (FileUtil.isOfFileType(path, "events")) return FileType.EventFile
+    if (FileUtil.isOfFileType(path, "requirements")) return FileType.RequirementFile
+    if (FileUtil.isOfFileType(path, "scenarios")) return FileType.ScenarioFile
     FileType.ComponentFile
   }
 

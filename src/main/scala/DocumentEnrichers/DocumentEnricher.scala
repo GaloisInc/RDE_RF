@@ -14,7 +14,6 @@ import scala.util.matching.Regex
 
 abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFormatter(),
                                 val skipTodos: Boolean = false) {
-  val fileUtil = new FileUtil()
   val latexFormatter = new ReferenceFormatter(formatterType)
 
   def keyWordsToRemove: Array[String]
@@ -42,7 +41,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
   def enrichFile(documentInfo: DocumentInfo): String = {
     //documentChecker(documentInfo)
     val filePath = documentInfo.filePath
-    val decoratedFilePath = fileUtil.decorateFileName(filePath)
+    val decoratedFilePath = FileUtil.decorateFileName(filePath)
     val decoratedFile = new File(decoratedFilePath) // Temporary File
     val writer = new PrintWriter(decoratedFile)
     var lastLine = ""
@@ -80,7 +79,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
   def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType) => A): Set[A] = {
     require(filePath.nonEmpty)
     //require(fileCheck(filePath))
-    val fileName = fileUtil.getFileName(filePath)
+    val fileName = FileUtil.getFileName(filePath)
     val fileType = getFileType(filePath)
     Control.using(io.Source.fromFile(filePath)) { source => {
       val lines = source.getLines().toArray

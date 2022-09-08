@@ -43,13 +43,6 @@ class ReferenceFormatter(
     enrichedLine
   } ensuring ((enriched: String) => enriched.startsWith(originalLine) && enriched.contains(referenceText))
 
-  def referenceCrefs(references: Set[DocReference], documentName: String): String = {
-    val referencesNames: String = references.map(_.getLabelText).mkString(",")
-    if references.forall(ref => ref.documentName.equals(documentName))
-    then LatexSyntax.addCref(referencesNames)
-    else LatexSyntax.addVref(referencesNames)
-  } ensuring ((l: String) => references.forall(ref => l.contains(ref.getLabelText)))
-
 
   protected def formatLatexListing(text: String): String = {
     require(text.nonEmpty, "The string to format cannot be empty.")
@@ -59,4 +52,14 @@ class ReferenceFormatter(
     encodedText.startsWith(escapeListingBeginning)
       && encodedText.endsWith(escapeListingEnding)
       && encodedText.contains(text))
+
+  def referenceCrefs(references: Set[DocReference], documentName: String): String = {
+    val referencesNames: String = references.map(_.getLabelText).mkString(",")
+    if references.forall(ref => ref.documentName.equals(documentName))
+    then LatexSyntax.addCref(referencesNames)
+    else LatexSyntax.addVref(referencesNames)
+  } ensuring ((l: String) => references.forall(ref => l.contains(ref.getLabelText)))
+
+
+
 }

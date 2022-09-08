@@ -3,6 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo}
+import Utils.FileUtil
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -22,8 +23,8 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
 
   def extractDocumentInfo(filePath: String): CryptolDocumentInfo = {
     require(filePath.nonEmpty)
-    require(fileUtil.getFileType(filePath) == "cry")
-    val fileName = fileUtil.getFileName(filePath)
+    require(FileUtil.getFileType(filePath) == "cry")
+    val fileName = FileUtil.getFileName(filePath)
     val types: Set[DocReference] = extractReferences(filePath, ReferenceType.Type)
     val properties: Set[DocReference] = extractReferences(filePath, ReferenceType.Requirement)
     val functions: Set[DocReference] = extractReferences(filePath, ReferenceType.Event)

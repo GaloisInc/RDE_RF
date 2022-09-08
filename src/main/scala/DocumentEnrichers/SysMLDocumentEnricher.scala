@@ -3,6 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{DocumentInfo, SysMLDocumentInfo}
+import Utils.FileUtil
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -46,9 +47,9 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
 
   def extractDocumentInfo(filePath: String): SysMLDocumentInfo = {
     require(filePath.nonEmpty)
-    require(fileUtil.getFileType(filePath) == "sysml")
+    require(FileUtil.getFileType(filePath) == "sysml")
 
-    val fileName = fileUtil.getFileName(filePath)
+    val fileName = FileUtil.getFileName(filePath)
     val packages: Set[DocReference] = extractReferences(filePath, ReferenceType.System)
     val parts: Set[DocReference] = extractReferences(filePath, ReferenceType.SubSystem)
     val items: Set[DocReference] = extractReferences(filePath, ReferenceType.Component)
@@ -144,10 +145,10 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   def getFileType(path: String): FileType = {
-    if (fileUtil.isFileType(path, "action")) FileType.EventFile
-    else if (fileUtil.isFileType(path, "requirement")) FileType.RequirementFile
-    else if (fileUtil.isFileType(path, "use case")) FileType.ScenarioFile
-    else if (fileUtil.isFileType(path, "view")) FileType.ViewFile
+    if (FileUtil.isOfFileType(path, "action")) FileType.EventFile
+    else if (FileUtil.isOfFileType(path, "requirement")) FileType.RequirementFile
+    else if (FileUtil.isOfFileType(path, "use case")) FileType.ScenarioFile
+    else if (FileUtil.isOfFileType(path, "view")) FileType.ViewFile
     FileType.ComponentFile
   }
 }

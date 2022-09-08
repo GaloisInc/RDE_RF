@@ -4,7 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class LatexSanitizerTest extends AnyFlatSpec with should.Matchers {
-
   "LatexSanitizer" should "be able to sanitize underscored weblink" in {
     LatexSanitizer.sanitizeWebLink("https://www.dr.dk/test_underscore") should be ("https://www.dr.dk/test\\_underscore")
   }

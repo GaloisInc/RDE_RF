@@ -13,7 +13,6 @@ import scala.collection.mutable
 import scala.io.Source
 
 class ReferencerTest extends AnyFlatSpec with should.Matchers {
-  private val fileUtil = FileUtil()
   private val formatterType = InlineFormatter()
   private val landoDocumentEnricher = LandoDocumentEnricher(formatterType)
   private val sysMLDocumentEnricher = SysMLDocumentEnricher(formatterType)
@@ -45,8 +44,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val sysmlDocuments = getClass.getResource("../SysML").getPath
     val landoDocuments = getClass.getResource("../lando").getPath
 
-    val landoFilesToAnalyse = fileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
-    val sysMLFilesToAnalyse = fileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
+    val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
+    val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
 
     val analysedLandoDocument = landoDocumentEnricher.extractDocumentInfo(landoFilesToAnalyse.head)
     val analysedSysMLDocument = sysMLDocumentEnricher.extractDocumentInfo(sysMLFilesToAnalyse.head)
@@ -60,8 +59,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val sysmlDocuments = getClass.getResource("../SysML_changed").getPath
     val landoDocuments = getClass.getResource("../lando_changed").getPath
 
-    val landoFilesToAnalyse = fileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
-    val sysMLFilesToAnalyse = fileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
+    val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
+    val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
 
     val analysedLandoDocument = landoDocumentEnricher.extractDocumentInfo(landoFilesToAnalyse.head)
     val analysedSysMLDocument = sysMLDocumentEnricher.extractDocumentInfo(sysMLFilesToAnalyse.head)

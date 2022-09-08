@@ -3,7 +3,7 @@ package Analyzers
 import DocumentEnrichers.*
 import Formatter.InlineFormatter
 import Referencer.*
-import Report.ReportReference
+import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.{DocReference, ReferenceType}
 import Utils.*
@@ -21,31 +21,37 @@ object DocumentAnalyzer {
   private val sysMLReferencer = SysMLReferencer()
   private val cryptolReferencer = CryptolReferencer()
 
-  private val fileUtil = FileUtil()
 
-  def generateReport(filesToAnalyze: Array[String], title: String): ReportReference = {
-    val enrichedDocuments = enrichAndSortFiles(filesToAnalyze)
-    enrichedDocuments.copy(title = title)
+  def generateReport(filesToAnalyze: Array[String], latexTitle: String, targetFolder: String): ReportReference = {
+    require(filesToAnalyze.nonEmpty, "No files to analyze")
+    require(latexTitle.nonEmpty, "No title for the latex report")
+    require(targetFolder.nonEmpty, "No target folder for the report")
+
+    val enrichedDocuments = enrichAndSortFiles(filesToAnalyze, targetFolder)
+    enrichedDocuments.copy(title = latexTitle)
   }
 
-  def enrichAndSortFiles(filesToAnalyze: Array[String]): ReportReference = {
+  def enrichAndSortFiles(filesToAnalyze: Array[String], targetFolder: String): ReportReference = {
+    require(filesToAnalyze.nonEmpty, "No files to analyze")
+    require(targetFolder.nonEmpty, "No target folder specified")
+
     val references = enrichFiles(filesToAnalyze)
 
     val newLandoFiles = references.landoDocuments.map(doc => {
-      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedLando").toString
-      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      val destinationPath = Path.of(targetFolder, "decoratedLando").toString
+      val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newSysMLFiles = references.sysmlDocuments.map(doc => {
-      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedSysML").toString
-      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      val destinationPath = Path.of(targetFolder, "decoratedSysML").toString
+      val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newCryptolFiles = references.cryptolDocuments.map(doc => {
-      val destinationPath = Path.of(fileUtil.getDirectory(doc.filePath), "decoratedCryptol").toString
-      val filePath = fileUtil.moveRenameFile(doc.filePath, destinationPath)
+      val destinationPath = Path.of(targetFolder, "decoratedCryptol").toString
+      val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
@@ -56,9 +62,9 @@ object DocumentAnalyzer {
     require(filesToAnalyze.nonEmpty)
     val enrichedDocuments = enrichDocuments(filesToAnalyze)
 
-    val enrichedLandoDocuments = fileUtil.getLandoDocuments(enrichedDocuments)
-    val enrichedSysMLDocuments = fileUtil.getSysMLDocuments(enrichedDocuments)
-    val enrichedCryptolDocuments = fileUtil.getCryptolDocuments(enrichedDocuments)
+    val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
+    val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
+    val enrichedCryptolDocuments = FileUtil.getCryptolDocuments(enrichedDocuments)
 
     assert(enrichedCryptolDocuments.intersect(enrichedSysMLDocuments).isEmpty)
     assert(enrichedLandoDocuments.intersect(enrichedSysMLDocuments).isEmpty)
@@ -85,7 +91,7 @@ object DocumentAnalyzer {
     require(filesToAnalyze.nonEmpty)
 
     val enrichedDocuments = enrichDocuments(filesToAnalyze)
-    val enrichedLandoDocuments = fileUtil.getLandoDocuments(enrichedDocuments)
+    val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
 
     val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.isEmpty))
     nonSpecializedConstructs
@@ -93,7 +99,7 @@ object DocumentAnalyzer {
 
   def nonSpecializedLandoConstructs(documents: Array[DocumentInfo]): Array[DocReference] = {
     require(documents.nonEmpty)
-    val enrichedLandoDocuments = fileUtil.getLandoDocuments(documents)
+    val enrichedLandoDocuments = FileUtil.getLandoDocuments(documents)
     val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.isEmpty))
     nonSpecializedConstructs
   } ensuring ((nonSpecialized: Array[DocReference]) => {
@@ -106,8 +112,8 @@ object DocumentAnalyzer {
 
     val enrichedDocuments = enrichDocuments(filesToAnalyze)
     val nonAbstractedReferences = nonSpecializedLandoConstructs(enrichedDocuments)
-    val enrichedLandoDocuments = fileUtil.getLandoDocuments(enrichedDocuments)
-    val enrichedSysMLDocuments = fileUtil.getSysMLDocuments(enrichedDocuments)
+    val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
+    val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
 
     val cleanedLandoDocuments = enrichedLandoDocuments.foldLeft(Array.empty[DocumentInfo])((documents, document) => {
       val updatedDocument = if (document.documentName.contains("glossary")) {
@@ -133,9 +139,9 @@ object DocumentAnalyzer {
   } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
   def enrichDocuments(filesToAnalyze: Array[String]): Array[DocumentInfo] = {
-    val landoFilesToAnalyse = filesToAnalyze.filter(file => fileUtil.getFileType(file).equals("lando"))
-    val sysmlFilesToAnalyse = filesToAnalyze.filter(file => fileUtil.getFileType(file).equals("sysml"))
-    val cryptolFilesToAnalyse = filesToAnalyze.filter(file => fileUtil.getFileType(file).equals("cry"))
+    val landoFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("lando"))
+    val sysmlFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("sysml"))
+    val cryptolFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("cry"))
 
     val landoDocuments = landoFilesToAnalyse.map(landoAnalyzer.extractDocumentInfo)
     val sysMLDocuments = sysmlFilesToAnalyse.map(sysmlAnalyzer.extractDocumentInfo)

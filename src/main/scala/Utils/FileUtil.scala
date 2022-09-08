@@ -7,7 +7,15 @@ import Utils.Control
 import java.io.File
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
-class FileUtil {
+object FileUtil {
+  def findSourceFiles(sourcePath: String, fileTypesOfTypesOfInterest: Set[String]): Array[String] = {
+    val sourceDir = new File(sourcePath)
+    require(sourceDir.exists(), "Source directory does not exist")
+    require(sourceDir.isDirectory, "Source path is not a directory")
+
+    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
+  }
+
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
   } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lando))
@@ -49,7 +57,7 @@ class FileUtil {
     decoratedFilePath.toString
   } ensuring ((resPath: String) => resPath.contains("_decorated") && getFileType(resPath) == getFileType(path) && resPath.contains(getFileName(path)))
 
-  def isFileType(path: String, filetype: String): Boolean = {
+  def isOfFileType(path: String, filetype: String): Boolean = {
     require(path.nonEmpty)
     Control.using(io.Source.fromFile(path)) { source =>
       source.getLines().exists(_.startsWith(filetype))

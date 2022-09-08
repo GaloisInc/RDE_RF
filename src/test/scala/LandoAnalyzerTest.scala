@@ -15,48 +15,34 @@ class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = InlineFormatter()
   private val landoDocumentEnricher = LandoDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.Lando
-  private val resourceFolder = "lando"
+  private val resourceFolder = "../lando"
   private val testUtility = TestUtility()
-  private val fileUtil = FileUtil()
 
   "LandoDocumentEnricher" should "be able to extract glossary" in {
     val fileName = "glossary"
-    val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, 0, 1, 104)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, 0, 1, 104)
   }
 
   "LandoDocumentEnricher" should "be able to extract system" in {
     val fileName = "RTS"
-    val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, 1, 6)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, 1, 6)
   }
 
   "LandoDocumentEnricher" should "be able to extract events" in {
     val fileName = "events"
-    val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, numberOfEvents = 16)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, numberOfEvents = 16)
   }
 
   "LandoDocumentEnricher" should "be able to extract requirements" in {
     val fileName = "project_requirements"
-    val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, numberOfRequirements = 13)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, numberOfRequirements = 13)
   }
 
   "LandoDocumentEnricher" should "be able to extract scenarios" in {
     val fileName = "test_scenarios"
-    val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, numberOfScenarios = 40)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, numberOfScenarios = 40)
   }
-
-  private def getPathToDocument(fileName: String, resourceFolderName: String): String = {
-    val documents = getClass.getResource(resourceFolderName).getPath
-    val filesToAnalyze = fileUtil.getListOfFiles(documents).toArray
-    val documentOfInterest = filesToAnalyze.filter(path => fileUtil.getFileName(path) == fileName)
-
-    assert(documentOfInterest.length == 1)
-    documentOfInterest.head
-  }
+  
 }
 
 

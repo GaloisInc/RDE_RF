@@ -3,6 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{DocumentInfo, SVDocumentInfo}
+import Utils.FileUtil
 
 import java.util.Locale
 
@@ -18,8 +19,8 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
 
   def extractDocumentInfo(filePath: String): SVDocumentInfo = {
     require(filePath.nonEmpty)
-    require(fileUtil.getFileType(filePath) == "sv")
-    val fileName = fileUtil.getFileName(filePath)
+    require(FileUtil.getFileType(filePath) == "sv")
+    val fileName = FileUtil.getFileName(filePath)
     val modules: Set[DocReference] = extractReferences(filePath, ReferenceType.System)
 
     SVDocumentInfo(fileName, filePath, modules)

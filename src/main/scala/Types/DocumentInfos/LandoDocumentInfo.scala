@@ -36,7 +36,6 @@ class LandoDocumentInfo(
     )
   }
 
-  private val fileUtil = new FileUtil()
   private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
@@ -54,9 +53,9 @@ class LandoDocumentInfo(
   lazy val getRelations: Set[DocRelation] = relations
 
   override def getFileType: FileType = {
-    if (fileUtil.isFileType(filePath, "events")) FileType.EventFile
-    else if (fileUtil.isFileType(filePath, "requirements")) FileType.RequirementFile
-    else if (fileUtil.isFileType(filePath, "scenarios")) FileType.ScenarioFile
+    if (FileUtil.isOfFileType(filePath, "events")) FileType.EventFile
+    else if (FileUtil.isOfFileType(filePath, "requirements")) FileType.RequirementFile
+    else if (FileUtil.isOfFileType(filePath, "scenarios")) FileType.ScenarioFile
     FileType.ComponentFile
   }
 }

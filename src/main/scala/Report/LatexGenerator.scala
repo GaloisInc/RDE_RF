@@ -3,6 +3,7 @@ package Report
 import Formatter.LatexSanitizer
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.DocumentType
+import Report.ReportTypes.{ReportReference}
 import Utils.FileUtil
 
 import java.io.File

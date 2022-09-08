@@ -1,4 +1,4 @@
-package Report
+package Report.ReportTypes
 
 import Types.DocumentInfos.{CryptolDocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 

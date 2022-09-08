@@ -1,5 +1,6 @@
 package Report
 
+import ReportTypes.{BlockComment, LanguageFormatting, Literate}
 import Types.DocumentType
 
 object ListingFormatting {
@@ -38,7 +39,7 @@ object ListingFormatting {
   def lstFormattings(documentType: DocumentType): LanguageFormatting = {
     val languageFormatting = documentType match {
       case DocumentType.Lando =>
-        LanguageFormatting("Lando",
+        ReportTypes.LanguageFormatting("Lando",
           keywords = Array("system", "subsystem", "component", "relation", "contains", "inherit", "client", "events", "scenarios"),
           lineComment = "//",
           blockComment = BlockComment("/*", "*/"),

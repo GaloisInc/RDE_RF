@@ -9,18 +9,18 @@ import scala.collection.mutable
 import scala.io.Source
 
 class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
-  private val fileUtil: FileUtil = FileUtil()
-
   "CryptolReader" should "to enrich references across documents" in {
     val sysmlDocuments = getClass.getResource("SysML").getPath
     val landoDocuments = getClass.getResource("Lando").getPath
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
 
-    val filesToAnalyze = fileUtil.getListOfFiles(sysmlDocuments).toArray
-      ++ fileUtil.getListOfFiles(landoDocuments).toArray
-      ++ fileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray
+      ++ FileUtil.getListOfFiles(landoDocuments).toArray
+      ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
-    DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze)
+    val targetFolder = getClass.getResource("").getPath
+
+    DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze, targetFolder)
   }
 
 }

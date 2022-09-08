@@ -16,4 +16,15 @@ object ReportAnalyzer {
     notReferenced.toSet
   }
 
+  def refinedConstructs(report: ReportReference): Set[DocReference] = {
+    require(report.landoDocuments.nonEmpty, "Report must contain at least one lando document")
+    val allReferences = report.landoDocuments.flatMap(_.getAllReferences)
+      ++ report.sysmlDocuments.flatMap(_.getAllReferences)
+      ++ report.cryptolDocuments.flatMap(_.getAllReferences)
+
+    val referencedConstructs = allReferences.filter(_.isReferenced)
+
+    referencedConstructs.toSet
+  }
+
 }

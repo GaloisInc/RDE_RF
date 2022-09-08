@@ -11,7 +11,10 @@ object ReportGenerator {
   def generateReport(filesToAnalyse: Array[String]): String = {
     val report = DocumentAnalyzer.generateReport(filesToAnalyse, "", "", false)
     val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
+    val refinedReferences = ReportAnalyzer.refinedConstructs(report)
 
+    val refinementChains = refinedReferences.map(ref => formatReferenceChain(ref, ref.getName))
+    
     ""
 
   }
@@ -19,7 +22,7 @@ object ReportGenerator {
 
   @tailrec
   def formatReferenceChain(docReference: DocReference, acc: String): String = {
-    docReference.getAbstractions match
+    docReference.getRefinements match
       case Some(refinements) =>
         val arbitraryRefinement = refinements.head
         assert(refinements.forall(_.getRefinements == arbitraryRefinement.getRefinements), "All similar refinements must refine the same abstractions.")

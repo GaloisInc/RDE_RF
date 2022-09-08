@@ -39,8 +39,6 @@ object LatexGenerator {
       val auxFiles = currentDirectory.listFiles().filter(f => auxFileTypes.exists(f.getName.endsWith))
       auxFiles.foreach(_.delete())
     }
-
-
   }
 
   def includeListing(documentInfo: DocumentInfo): String = {
@@ -51,22 +49,7 @@ object LatexGenerator {
        |{${documentInfo.filePath}}""".stripMargin
   }
 
-  val latexHeader: String = {
-    val latex = new mutable.StringBuilder()
-    latex.append(
-      s"""\\documentclass{article}
-         |\\usepackage[pdftex, colorlinks = true, linkcolor = blue, urlcolor = blue, bookmarks = false]{hyperref}""".stripMargin)
 
-    val packagesString = packages.foldLeft("")((acc, p) => acc +
-      s"""
-         |\\usepackage{$p}""").stripMargin
-    latex.append(packagesString)
-    latex.toString()
-  }
-
-  val beginDocument: String = "\\begin{document}"
-
-  val latexFooter: String = "\\end{document}"
 
   lazy val listingAndDefaultCommands: String = {
     val latex = new mutable.StringBuilder()
@@ -91,7 +74,6 @@ object LatexGenerator {
     s"""\\section{$sectionName}
        |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
   }
-
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
@@ -137,6 +119,22 @@ object LatexGenerator {
     latexContent.toString()
   }
 
+  val latexHeader: String = {
+    val latex = new mutable.StringBuilder()
+    latex.append(
+      s"""\\documentclass{article}
+         |\\usepackage[pdftex, colorlinks = true, linkcolor = blue, urlcolor = blue, bookmarks = false]{hyperref}""".stripMargin)
+
+    val packagesString = packages.foldLeft("")((acc, p) => acc +
+      s"""
+       |\\usepackage{$p}""").stripMargin
+    latex.append(packagesString)
+    latex.toString()
+  }
+
+  val beginDocument: String = "\\begin{document}"
+
+  val latexFooter: String = "\\end{document}"
 
   private val emptyLine: String =
     """|

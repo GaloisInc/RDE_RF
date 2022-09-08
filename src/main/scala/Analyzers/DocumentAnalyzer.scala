@@ -94,7 +94,7 @@ object DocumentAnalyzer {
       doc.asInstanceOf[CryptolDocumentInfo].copy(filePath = filePath)
     })
 
-    ReportReference("Test", "", decoratedLando, decoratedSysML, decoratedCryptol)
+    ReportReference("Test", "Folder", decoratedLando, decoratedSysML, decoratedCryptol)
   } ensuring ((res: ReportReference) => res.cryptolDocuments.length + res.sysmlDocuments.length + res.landoDocuments.length == filesToAnalyze.length)
 
 

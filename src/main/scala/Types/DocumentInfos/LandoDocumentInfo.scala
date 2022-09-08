@@ -13,7 +13,6 @@ class LandoDocumentInfo(
                          scenarios: Set[DocReference],
                          override val documentType: DocumentType = DocumentType.Lando,
                        ) extends DocumentInfo {
-
   def copy(
             documentName: String = documentName,
             filePath: String = filePath,

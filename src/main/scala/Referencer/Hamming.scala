@@ -6,7 +6,7 @@ object Hamming {
   def compute(s1: String, s2: String): Int = {
     //Ensure that both strings have the same length
     require(s1.length == s2.length)
-    s1.zip(s2).count(pair => pair._1 != pair._2)
+    s1.zip(s2).count(pair => pair._1.toLower != pair._2.toLower)
   } ensuring ((res: Int) => res <= math.max(s1.length, s2.length) && res >= 0)
 
   def computeRelHamming(s1: String, s2: String): Double = {

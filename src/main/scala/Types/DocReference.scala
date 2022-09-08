@@ -50,9 +50,12 @@ class DocReference(
       case None => ""
     }
 
-    formatter.enrichLineWithLabel(originalLine, getLabelText) +
-      refinementOfString +
-      abstractionOfString
+    val lineWithLabel = formatter.enrichLineWithLabel(originalLine, getLabelText)
+    if(isReferenced) {
+      lineWithLabel + refinementOfString + abstractionOfString
+    } else {
+      lineWithLabel
+    }
   }
 }
 

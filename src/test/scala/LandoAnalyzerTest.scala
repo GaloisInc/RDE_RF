@@ -40,7 +40,7 @@ class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
   "LandoDocumentEnricher" should "be able to extract requirements" in {
     val fileName = "project_requirements"
     val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, 0, 0, 0, 16, 0, 0, 0, 0)
+    testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, filePath, numberOfRequirements = 13)
   }
 
   "LandoDocumentEnricher" should "be able to extract scenarios" in {

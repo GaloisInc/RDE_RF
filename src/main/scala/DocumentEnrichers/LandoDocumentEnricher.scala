@@ -29,6 +29,12 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     Import = "import",
   )
 
+  val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
+  //All components, systems and subsystems are referenced by their name which start with a capital letter
+  val componentRegex: Regex = """^component\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
+  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+(?:\((.*)\)))?""".r
+  val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
+
   def extractDocumentInfo(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(fileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
@@ -96,7 +102,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   private def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
     val referenceOption = getReferenceTypeBasedOnFileType(line, fileType)
     val getReferenceType = referenceOption.get
-    val referenceName = extractReferenceName(line, getReferenceType, fileName)
+    val referenceName = extractReferenceName(line)
     DocReference(
       fileName, referenceName, getReferenceType, DocumentType.Lando, line
     )
@@ -114,7 +120,9 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   private def isRelation(line: String, prev: String): Boolean = {
-    (line.nonEmpty && !line.startsWith("//")) && getRelationType(line).nonEmpty
+    line match
+      case relationRegex(_, _, _) => true
+      case _ => false
   }
 
   private def isOfType(fileType: FileType, line: String, previousLine: String): Boolean = {
@@ -124,78 +132,47 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
       && getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
   }
 
-  private def extractReferenceName(line: String, getReferenceType: ReferenceType, documentName: String): ReferenceName = {
-    val strippedLine = line.replace(getReferenceType.toString.toLowerCase(Locale.US), "").strip()
+  private def extractReferenceName(line: String): ReferenceName = {
+    def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
 
-    val acronym = extractAcronym(strippedLine)
-    val name = extractReferenceText(strippedLine, acronym, getReferenceType)
-    ReferenceName(name, acronym)
+    val strippedLine = line.strip()
+    strippedLine match
+      case componentRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
+      case systemRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
+      case subsystemRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
+      case _ =>
+        // Events, scenarios and requirements do have an acronym
+        ReferenceName(line.strip())
   }
-
-  private def extractReferenceText(strippedLine: String, acronym: Option[String], getReferenceType: ReferenceType) = {
-    val line = strippedLine.split(" ")
-      .dropRight(if acronym.nonEmpty then 1 else 0)
-      .mkString(" ").strip()
-
-    if getReferenceType == ReferenceType.Scenario && line.exists(_.isDigit) then
-      line.dropWhile(!_.isDigit)
-    else line
-  }
-
-  private def extractAcronym(strippedLine: String): Option[String] = {
-    val acronymRegex = new Regex("\\((.*)\\)")
-    val referenceAcronym = acronymRegex findFirstIn strippedLine
-    referenceAcronym match
-      case Some(value) =>
-        Some(value.replace("(", "").replace(")", ""))
-      case None => None
-  }
-
-  private def extractRelationName(line: String, relationType: RelationType): RelationReference = {
-    val strippedString = line.replace("relation", "")
-    val sourceTargetStrings = strippedString.split(relationType.toString)
-    val source = sourceTargetStrings.head.strip()
-    val target = sourceTargetStrings.last.strip()
-    RelationReference(source, target)
-  }
-
 
   private def getReferenceTypeBasedOnFileType(line: String, fileType: FileType): Option[ReferenceType] = {
     fileType match
       case FileType.RequirementFile => if !line.startsWith("requirements") then Some(ReferenceType.Requirement) else None
       case FileType.ScenarioFile => if !line.startsWith("scenarios") then Some(ReferenceType.Scenario) else None
       case FileType.EventFile => if !line.startsWith("events") then Some(ReferenceType.Event) else None
-      case _ => getReferenceType(line)
+      case FileType.ComponentFile =>
+        line match
+          case componentRegex(_, _) => Some(ReferenceType.Component)
+          case systemRegex(_, _) => Some(ReferenceType.System)
+          case subsystemRegex(_, _) => Some(ReferenceType.SubSystem)
+          case _ => None
   }
 
   // Enhance this
-  private def getRelationType(line: String): Option[RelationType] = {
-    val lowerCaseLine = line.toLowerCase(Locale.US)
-    if lowerCaseLine.startsWith("relation") then
-      if lowerCaseLine.contains("client") then
-        Some(RelationType.client)
-      else if lowerCaseLine.contains("inherit") then
-        Some(RelationType.inherit)
-      else if lowerCaseLine.contains("contains") then
-        Some(RelationType.contains)
-      else
-        None
-    else
-      None
+  private def getRelationType(symbol: String): Option[RelationType] = {
+    symbol match
+      case "client" => Some(RelationType.client)
+      case "contains" => Some(RelationType.contains)
+      case "inherit" => Some(RelationType.inherit)
+      case _ => None
   }
 
   def extractRelations(filePath: String): Set[DocRelation] = {
     def transformRelation(line: String, fileName: String, fileType: FileType): DocRelation = {
-      val relationType = getRelationType(line).get
-      val relationReference = extractRelationName(line, relationType)
-      DocRelation(
-        fileName,
-        relationReference,
-        relationType,
-        line,
-        None,
-        None,
-      )
+      line match
+        case relationRegex(source, symbol, target) =>
+          DocRelation(fileName, RelationReference(source, target), getRelationType(symbol).get, line, None, None)
+        case _ => throw new IllegalArgumentException(s"Could not extract relation name from line: $line")
     }
 
     extract(filePath, isRelation, transformRelation)

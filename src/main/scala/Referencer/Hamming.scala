@@ -10,8 +10,8 @@ object Hamming {
   } ensuring ((res: Int) => res <= math.max(s1.length, s2.length) && res >= 0)
 
   def computeRelHamming(s1: String, s2: String): Double = {
-    require(s1.nonEmpty)
-    require(s2.nonEmpty)
+    require(s1.nonEmpty, "s1 is empty")
+    require(s2.nonEmpty, "s2 is empty")
 
     val cleanedString1 = s1.toLowerCase(Locale.US).strip()
     val cleanedString2 = s2.toLowerCase(Locale.US).strip()

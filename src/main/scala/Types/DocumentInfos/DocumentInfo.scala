@@ -24,7 +24,7 @@ abstract class DocumentInfo {
   require(
     {
       val referenceNames = getAllReferences.map(_.getLabelText)
-      assert(referenceNames.size == referenceNames.toSet.size, "Reference names must be unique")
+      assert(referenceNames.size == referenceNames.size, "Reference names must be unique")
       true
     }
   )

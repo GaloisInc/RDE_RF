@@ -23,25 +23,25 @@ class SVAnalyzerTest extends AnyFlatSpec with should.Matchers {
   "SVDocumentEnricher" should "be able to extract modules from AcutationUnit" in {
     val fileName = "actuation_unit_impl"
     val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 7)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberExprectedSystem = 7)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Actuator Impl" in {
     val fileName = "actuator_impl"
     val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 1)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberExprectedSystem = 1)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Generated" in {
     val fileName = "instrumentation_impl"
     val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 3)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberExprectedSystem = 3)
   }
 
   "SVDocumentEnricher" should "be able to extract modules from Instrumentation Impl Handwritten" in {
     val fileName = "instrumentation_impl_handwritten"
     val filePath = getPathToDocument(fileName, resourceFolder)
-    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberOfSystem = 2)
+    testUtility.checkExtractReferences(fileName, documentAnalyser, expectedDocumentType, filePath, numberExprectedSystem = 2)
   }
 
   private def getPathToDocument(fileName: String, resourceFolderName: String): String = {

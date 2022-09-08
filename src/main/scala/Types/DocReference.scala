@@ -14,12 +14,12 @@ class DocReference(
 
   require(originalLine.nonEmpty, "originalLine must not be empty")
   require(documentName.nonEmpty, "documentName must not be empty")
+  require(getName.nonEmpty, "" +
+    "referenceName must not be empty (documentName: " + documentName + ") and line: " + originalLine)
 
-  lazy val getLabelText: String = {
-    s"${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(referenceName.name)}"
-  }
+  lazy val getLabelText: String = s"${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(getName)}"
 
-  lazy val getName: String = referenceName.name
+  lazy val getName: String = if referenceName.name.isEmpty then referenceName.acronym.get else referenceName.name
 
   def getAcronym: Option[String] = referenceName.acronym
 

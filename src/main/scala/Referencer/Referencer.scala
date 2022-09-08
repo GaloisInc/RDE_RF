@@ -14,8 +14,7 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
   def addAbstractionsToDocument(specializedDocument: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo
 
   protected def findRefinementRelation(refiningReference: DocReference, referenceBeingRefined: Set[DocReference]): DocReference = {
-    val referenceName = refiningReference.getName
-    val abstractions = referenceBeingRefined.filter(isSpecialization(referenceName, _))
+    val abstractions = referenceBeingRefined.filter(isSpecialization(refiningReference, _))
     if (abstractions.nonEmpty)
       referenceRefines(refiningReference, abstractions)
     else
@@ -44,14 +43,16 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
       && ref.getReferenceType == reference.getReferenceType
       && ref.getAbstractions == reference.getAbstractions)
 
-  def isSpecialization(referenceName: String, ref: DocReference): Boolean = {
-    val referenceNameToMatch = ref.getName.toLowerCase(Locale.US)
-    val referenceNameAcronym = ref.getAcronym.getOrElse("XXXXXXXXXXX").toLowerCase()
-    val referenceNameLower = referenceName.toLowerCase()
-    referenceNameToMatch.equalsIgnoreCase(referenceNameLower)
-      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equalsIgnoreCase(referenceNameLower)
-      || referenceNameAcronym.equalsIgnoreCase(referenceNameLower)
-      || Hamming.computeRelHamming(referenceName, referenceNameToMatch) <= hammingDistanceMeasure
+  def isSpecialization(AbstractReference: DocReference, ref: DocReference): Boolean = {
+    val nameOfAbstractReference = AbstractReference.getName
+    val acronymOfAbstractReference = AbstractReference.getAcronym.getOrElse("YYYYYYYYYY")
+    val referenceNameToMatch = ref.getName
+    val referenceNameAcronym = ref.getAcronym.getOrElse("XXXXXXXXXXX")
+    referenceNameToMatch.equalsIgnoreCase(nameOfAbstractReference)
+      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equalsIgnoreCase(nameOfAbstractReference)
+      || referenceNameAcronym.equalsIgnoreCase(acronymOfAbstractReference)
+      || referenceNameToMatch.equalsIgnoreCase(acronymOfAbstractReference)
+      || Hamming.computeRelHamming(nameOfAbstractReference, referenceNameToMatch) <= hammingDistanceMeasure
   }
 
   protected def addRefinementsOfToDocReference(reference: DocReference, refinements: Set[DocReference]): DocReference = {

@@ -87,7 +87,7 @@ component SAWscript
 The proof script language is used to specify the assumptions and proof
 goals of formal verifications to the SAW tool.
 
-component Soft-core
+component soft-core
 A CPU or SoC that is implemented in an HDL and synthesized to a
 bitstream and loaded onto an FPGA.
 

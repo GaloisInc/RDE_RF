@@ -1,8 +1,9 @@
-import Referencer.SysMLReferencer
-import Types.{DocReference, DocumentType, ReferenceName, ReferenceType}
+package Referencer
+
 import DocumentEnrichers.{LandoDocumentEnricher, SysMLDocumentEnricher}
-import Utils.{Control, FileUtil}
 import Formatter.InlineFormatter
+import Types.{DocReference, DocumentType, ReferenceName, ReferenceType}
+import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
 import org.scalatest.matchers.*
@@ -21,6 +22,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
 
   "Reference" should "match coq with Reference" in {
     val searchReferenceName = "Coq"
+
     val referenceBeingDiscovered =
       DocReference("DocumentName",
         ReferenceName("Coq"),
@@ -28,13 +30,20 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
         DocumentType.Lando,
         "component Coq"
       )
-    val result = sysMLReferencer.isSpecialization(searchReferenceName, referenceBeingDiscovered)
+    val refinementBeingDiscovered =
+      DocReference("DocumentName",
+        ReferenceName("Coq"),
+        ReferenceType.Component,
+        DocumentType.SysML,
+        "component Coq"
+      )
+    val result = sysMLReferencer.isSpecialization(referenceBeingDiscovered, refinementBeingDiscovered)
     assert(result)
   }
 
   "Referencer" should "match coq with Reference" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
+    val sysmlDocuments = getClass.getResource("../SysML").getPath
+    val landoDocuments = getClass.getResource("../lando").getPath
 
     val landoFilesToAnalyse = fileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
     val sysMLFilesToAnalyse = fileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
@@ -44,12 +53,12 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
 
     val coqReferenceName = analysedSysMLDocument.getAllReferences.filter(_.getName.equalsIgnoreCase("coq")).head
 
-    assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(coqReferenceName.getName, ref)))
+    assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(coqReferenceName, ref)))
   }
 
-  "Referencer" should "be able to match all SysML References" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
+  "Referencer" should "be able to match all References between modified glossary." in {
+    val sysmlDocuments = getClass.getResource("../SysML_changed").getPath
+    val landoDocuments = getClass.getResource("../lando_changed").getPath
 
     val landoFilesToAnalyse = fileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
     val sysMLFilesToAnalyse = fileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
@@ -59,7 +68,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
 
     analysedSysMLDocument.getAllReferences.forall(
       sysMLRef => {
-        assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(sysMLRef.getReference.name, ref)))
+        assert(analysedLandoDocument.getAllReferences.exists(ref => sysMLReferencer.isSpecialization(sysMLRef, ref)), s"Could not find abstraction for ${sysMLRef.getName} in Lando")
         true
       }
     )

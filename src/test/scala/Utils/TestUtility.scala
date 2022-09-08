@@ -9,7 +9,7 @@ class TestUtility {
                              documentEnricher: DocumentEnricher,
                              expectedDocumentType: DocumentType,
                              filePath: String,
-                             numberOfSystem: Int = 0,
+                             numberExprectedSystem: Int = 0,
                              numberOfSubSystem: Int = 0,
                              numberOfComponent: Int = 0,
                              numberOfRequirements: Int = 0,
@@ -24,7 +24,7 @@ class TestUtility {
     assert(analyzedDocument.documentType == expectedDocumentType, "Document type is not correct")
 
     val extractedReferences = analyzedDocument.getAllReferences
-    assert(extractedReferences.count(_.getReferenceType == ReferenceType.System) == numberOfSystem, "Number of system references is not correct")
+    assert(extractedReferences.count(_.getReferenceType == ReferenceType.System) == numberExprectedSystem, "Number of system references is not correct")
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.SubSystem) == numberOfSubSystem, "Number of subsystem references is not correct")
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Component) == numberOfComponent, "Number of component references is not correct")
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Requirement) == numberOfRequirements, "Number of requirement references is not correct")

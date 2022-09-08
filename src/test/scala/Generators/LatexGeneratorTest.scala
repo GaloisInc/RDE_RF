@@ -71,8 +71,14 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
     val targetFolder = getClass.getResource("../").getPath
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, "test", targetFolder)
+    val latexName = "test"
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexName, targetFolder)
 
     LatexGenerator.generateLatexReport(referenceReport)
+
+    //Ensure that the file was created
+
+    val latexFile = new File(targetFolder + latexName + ".tex")
+    latexFile.exists() should be(true)
   }
 }

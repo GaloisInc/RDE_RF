@@ -28,7 +28,7 @@ object DocumentAnalyzer {
     require(targetFolder.nonEmpty, "No target folder for the report")
 
     val enrichedDocuments = enrichAndSortFiles(filesToAnalyze, targetFolder)
-    enrichedDocuments.copy(title = latexTitle)
+    enrichedDocuments.copy(title = latexTitle, folder = targetFolder)
   }
 
   def enrichAndSortFiles(filesToAnalyze: Array[String], targetFolder: String): ReportReference = {
@@ -55,7 +55,7 @@ object DocumentAnalyzer {
       doc.copy(filePath = filePath)
     })
 
-    ReportReference(references.title, newLandoFiles, newSysMLFiles, newCryptolFiles)
+    references.copy(landoDocuments = newLandoFiles, sysmlDocuments = newSysMLFiles, cryptolDocuments = newCryptolFiles)
   }
 
   def enrichFiles(filesToAnalyze: Array[String]): ReportReference = {
@@ -83,7 +83,7 @@ object DocumentAnalyzer {
       doc.asInstanceOf[CryptolDocumentInfo].copy(filePath = filePath)
     })
 
-    ReportReference("Test", decoratedLando, decoratedSysML, decoratedCryptol)
+    ReportReference("Test", "", decoratedLando, decoratedSysML, decoratedCryptol)
   } ensuring ((res: ReportReference) => res.cryptolDocuments.length + res.sysmlDocuments.length + res.landoDocuments.length == filesToAnalyze.length)
 
 

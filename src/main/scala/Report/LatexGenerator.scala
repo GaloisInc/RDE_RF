@@ -1,9 +1,9 @@
 package Report
 
 import Formatter.LatexSanitizer
+import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.DocumentType
-import Report.ReportTypes.{ReportReference}
 import Utils.FileUtil
 
 import java.io.File
@@ -38,7 +38,7 @@ object LatexGenerator {
        |{${documentInfo.filePath}}""".stripMargin
   }
 
-  lazy val latexHeader: String = {
+  val latexHeader: String = {
     val latex = new mutable.StringBuilder()
     latex.append(
       s"""\\documentclass{article}
@@ -51,20 +51,12 @@ object LatexGenerator {
     latex.toString()
   }
 
-  lazy val beginDocument: String = "\\begin{document}"
+  val beginDocument: String = "\\begin{document}"
 
-  lazy val latexFooter: String = "\\end{document}"
+  val latexFooter: String = "\\end{document}"
 
-  def generateSection(sectionName: String): String = {
-    s"""\\section{$sectionName}
-       |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
-  }
-
-  def generateLatexReport(report: ReportReference): String = {
+  lazy val listingAndDefaultCommands: String = {
     val latex = new mutable.StringBuilder()
-    latex.append(latexHeader)
-
-    latex.append(emptyLine)
     latex.append(ListingFormatting.standardCommands)
     latex.append(emptyLine)
     latex.append(ListingFormatting.basicFormatListing)
@@ -74,45 +66,55 @@ object LatexGenerator {
     latex.append(ListingFormatting.cryptolFormatting)
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
-
     latex.append(emptyLine)
-    latex.append(beginDocument)
-    latex.append(emptyLine)
+    latex.toString()
+  }
 
-    latex.append(generateSection(report.title))
+  def generateLatexDocument(content: String): String = {
+    latexHeader + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + latexFooter
+  }
 
-    latex.append(emptyLine)
+  def generateSection(sectionName: String): String = {
+    s"""\\section{$sectionName}
+       |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
+  }
 
-    latex.append(generateSection("Lando Models"))
+  def generateLatexReport(report: ReportReference): String = {
+    val latexContent = new mutable.StringBuilder()
+
+    latexContent.append(generateSection(report.title))
+
+    latexContent.append(emptyLine)
+
+    latexContent.append(generateSection("Lando Models"))
 
     report.landoDocuments.foreach(m => {
-      latex.append(includeListing(m))
-      latex.append(emptyLine)
+      latexContent.append(includeListing(m))
+      latexContent.append(emptyLine)
     })
 
-    latex.append(generateSection("SysML Models"))
-    latex.append(emptyLine)
+    latexContent.append(generateSection("SysML Models"))
+    latexContent.append(emptyLine)
 
     report.sysmlDocuments.foreach(m => {
-      latex.append(includeListing(m))
-      latex.append(emptyLine)
+      latexContent.append(includeListing(m))
+      latexContent.append(emptyLine)
     })
 
-
-    latex.append(generateSection("Cryptol Specifications"))
-    latex.append(emptyLine)
+    latexContent.append(generateSection("Cryptol Specifications"))
+    latexContent.append(emptyLine)
 
     report.cryptolDocuments.foreach(m => {
-      latex.append(includeListing(m))
-      latex.append(emptyLine)
+      latexContent.append(includeListing(m))
+      latexContent.append(emptyLine)
     })
 
-    latex.append(latexFooter)
+    val latexDocument = generateLatexDocument(latexContent.toString())
 
-    val filePath = Files.write(Paths.get("main.tex"), latex.toString().getBytes(StandardCharsets.UTF_8))
+    val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
     buildLatexFile(new File(filePath.toString))
-    latex.toString()
+    latexContent.toString()
   }
 
 

@@ -22,13 +22,24 @@ object DocumentAnalyzer {
   private val cryptolReferencer = CryptolReferencer()
 
 
-  def generateReport(filesToAnalyze: Array[String], latexTitle: String, targetFolder: String): ReportReference = {
+  def generateReport(filesToAnalyze: Array[String], latexTitle: String, targetFolder: String, sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     require(latexTitle.nonEmpty, "No title for the latex report")
     require(targetFolder.nonEmpty, "No target folder for the report")
 
-    val enrichedDocuments = enrichAndSortFiles(filesToAnalyze, targetFolder)
-    enrichedDocuments.copy(title = latexTitle, folder = targetFolder)
+    val report =
+      if sortFiles then
+        enrichAndSortFiles(filesToAnalyze, targetFolder)
+      else {
+        val enrichedDocuments = enrichDocuments(filesToAnalyze)
+        ReportReference(latexTitle,
+          targetFolder,
+          FileUtil.getLandoDocuments(enrichedDocuments).map(_.asInstanceOf[LandoDocumentInfo]),
+          FileUtil.getSysMLDocuments(enrichedDocuments).map(_.asInstanceOf[SysMLDocumentInfo]),
+          FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]))
+      }
+
+    report.copy(title = latexTitle, folder = targetFolder)
   }
 
   def enrichAndSortFiles(filesToAnalyze: Array[String], targetFolder: String): ReportReference = {

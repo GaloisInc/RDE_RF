@@ -52,7 +52,7 @@ object DocumentationEnhancerApp extends App {
       val documents = DocumentAnalyzer.generateReport(files, latexTitle, targetFolder)
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (generateLatex) {
-        LatexGenerator.generateLatexReport(documents)
+        LatexGenerator.generateLatexReportOfSources(documents)
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
       }
       println("Done!")

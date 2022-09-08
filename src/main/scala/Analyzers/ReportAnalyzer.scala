@@ -3,10 +3,7 @@ package Analyzers
 import Report.ReportTypes.ReportReference
 import Types.DocReference
 
-class ReportAnalyzer {
-
-
-
+object ReportAnalyzer {
 
   def notRefinedConstructs(report: ReportReference): Set[DocReference] = {
     require(report.landoDocuments.nonEmpty, "Report must contain at least one lando document")

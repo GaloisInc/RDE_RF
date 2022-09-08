@@ -7,6 +7,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
 
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
@@ -54,11 +56,13 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to build Latex Document" in {
-    val documents = getClass.getResource("../Latex").getPath
-    val filesToAnalyze = FileUtil.getListOfFiles(documents).toArray
-    val latexFilePath = filesToAnalyze.filter(path => FileUtil.getFileName(path) == "test").head
-    val latexFile = new File(latexFilePath)
-    LatexGenerator.buildLatexFile(latexFile)
+    val latexDocument = LatexGenerator.generateLatexDocument("")
+    val tempFile = Files.createTempFile("test", ".tex")
+    val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
+    val latexFile = new File(filePath.toString)
+    LatexGenerator.buildLatexFile(latexFile, false)
+    latexFile.exists() should be(true)
+    latexFile.delete()
   }
 
   "LatexGenerator" should "be able to generate Latex Document from References" in {
@@ -72,9 +76,9 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val targetFolder = getClass.getResource("../").getPath
     val latexName = "test"
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexName, targetFolder)
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexName, targetFolder, true)
 
-    LatexGenerator.generateLatexReport(referenceReport)
+    LatexGenerator.generateLatexReportOfSources(referenceReport)
 
     //Ensure that the file was created
 

@@ -23,11 +23,24 @@ object LatexGenerator {
     true
   }
 
-  def buildLatexFile(latexFile: File): Unit = {
+  def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
     val cmd = s"""$latexBuildCmd ${fPath}"""
     val exitCode = Process(cmd).!
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
+    if (buildTwice) {
+      val exitCode = Process(cmd).!
+      assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
+    }
+
+    if (removeAuxFiles) {
+      val currentDirectory = new java.io.File(".")
+      val auxFileTypes = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
+      val auxFiles = currentDirectory.listFiles().filter(f => auxFileTypes.exists(f.getName.endsWith))
+      auxFiles.foreach(_.delete())
+    }
+
+
   }
 
   def includeListing(documentInfo: DocumentInfo): String = {
@@ -79,7 +92,8 @@ object LatexGenerator {
        |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
   }
 
-  def generateLatexReport(report: ReportReference): String = {
+
+  def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
 
     latexContent.append(generateSection(report.title))
@@ -89,6 +103,8 @@ object LatexGenerator {
     latexContent.append(generateSection("Lando Models"))
 
     report.landoDocuments.foreach(m => {
+      //latexContent.append(generateSubSection(m.getCaption))
+      latexContent.append(emptyLine)
       latexContent.append(includeListing(m))
       latexContent.append(emptyLine)
     })
@@ -97,6 +113,8 @@ object LatexGenerator {
     latexContent.append(emptyLine)
 
     report.sysmlDocuments.foreach(m => {
+      //latexContent.append(generateSubSection(m.getCaption))
+      latexContent.append(emptyLine)
       latexContent.append(includeListing(m))
       latexContent.append(emptyLine)
     })
@@ -105,6 +123,8 @@ object LatexGenerator {
     latexContent.append(emptyLine)
 
     report.cryptolDocuments.foreach(m => {
+      //latexContent.append(generateSubSection(m.getCaption))
+      latexContent.append(emptyLine)
       latexContent.append(includeListing(m))
       latexContent.append(emptyLine)
     })
@@ -113,7 +133,7 @@ object LatexGenerator {
 
     val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
-    buildLatexFile(new File(filePath.toString))
+    buildLatexFile(new File(filePath.toString), buildTwice = true)
     latexContent.toString()
   }
 

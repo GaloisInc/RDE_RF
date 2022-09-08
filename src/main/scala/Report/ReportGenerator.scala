@@ -1,6 +1,6 @@
 package Report
 
-import Analyzers.DocumentAnalyzer
+import Analyzers.{DocumentAnalyzer, ReportAnalyzer}
 import Types.DocReference
 
 import scala.annotation.tailrec
@@ -9,9 +9,11 @@ object ReportGenerator {
   private val refinementSymbol: String = "|="
 
   def generateReport(filesToAnalyse: Array[String]): String = {
-    val nonSpecializedLandoConstructs = DocumentAnalyzer.nonRefinementLando(filesToAnalyse)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyse, "", "", false)
+    val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
 
     ""
+
   }
 
 

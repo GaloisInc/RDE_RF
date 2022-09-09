@@ -15,7 +15,7 @@ object LatexSyntax {
       case LatexReferenceType.Refinement => s"\\refinementLink{$reference}{$sanitizedReference}"
       case LatexReferenceType.Link => s"\\link{$reference}{$sanitizedReference}"
       case LatexReferenceType.CryptolProperty => s"\\script{$reference}{$sanitizedReference}"
-      case LatexReferenceType.ConnectionArtifact => s"\\hyperlink[$reference]{$sanitizedReference}"
+      case LatexReferenceType.ConnectionArtifact => s"\\hyperref[$reference]{$sanitizedReference}"
   }
 
 
@@ -44,20 +44,17 @@ object LatexSyntax {
 
   def generateSection(sectionName: String): String = {
     s"""\\section{${LatexSanitizer.sanitizeName(sectionName)}}
-       |\\ label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}
-       |""".stripMargin
+       |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
   }
 
   def generateSubSection(name: String): String = {
     s"""\\subsection{${LatexSanitizer.sanitizeName(name)}}
-       |\\label{subsec:${LatexSanitizer.sanitizeReferenceName(name)}}
-       |""".stripMargin
+       |\\label{subsec:${LatexSanitizer.sanitizeReferenceName(name)}}""".stripMargin
   }
 
   def generateSubSubSection(name: String, labelText: String): String = {
     s"""\\subsubsection{$name}
-       |\\label{subsubsec:${LatexSanitizer.sanitizeReferenceName(labelText)}}
-       |""".stripMargin
+       |\\label{subsubsec:${LatexSanitizer.sanitizeReferenceName(labelText)}}""".stripMargin
   }
 
   val beginDocument: String = "\\begin{document}"

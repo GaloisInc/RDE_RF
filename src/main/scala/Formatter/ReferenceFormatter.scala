@@ -23,7 +23,7 @@ class ReferenceFormatter(
   def addReference(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
     val hyperref = LatexSyntax.addReferenceInLatex(reference, currentDocument, referenceType)
     formatLatexListing(hyperref)
-  } ensuring ((l: String) => l.contains("\\hyperref") && l.contains(reference.getLabelText))
+  } ensuring ((l: String) => l.contains(reference.getLabelText))
 
   def addAbstractions(abstractions: Set[DocReference], currentDocument: String): String = {
     val abstractionLinks = abstractions.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceType.Abstraction))

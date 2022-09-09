@@ -18,9 +18,21 @@ object ListingFormatting {
       |\definecolor{keywordcolor}{RGB}{157,0,129}
       |\newcommand{\link}[2]{{\color{blue}\href{#1}{#2}}}
       |\newcommand{\script}[2]{{\color{purple}\href{#1}{#2}}}
-      |\newcommand{\abstractionLink}[2]{{\color{red}\hyperlink[#1]{#2}}}
-      |\newcommand{\refinementLink}[2]{{\color{green}\hyperlink[#1]{#2}}}
-      |\newcommand{\fileLink}[2]{{\color{orange}\href{run:./#1}{#2}}}
+      |\newcommand{\abstractionLink}[2]{
+        \hypersetup{linkcolor=red}
+          \hyperref[#1]{#2}
+        \hypersetup{linkcolor=blue}
+      }
+      |\newcommand{\refinementLink}[2]{
+        \hypersetup{linkcolor=green}
+           \hyperref[#1]{#2}
+        \hypersetup{linkcolor=blue}
+      }
+      |\newcommand{\fileLink}[2]{
+        \hypersetup{linkcolor=orange}
+          \href{run:./#1}{#2}
+        \hypersetup{linkcolor=blue}
+      }
       |""".stripMargin
   }
 

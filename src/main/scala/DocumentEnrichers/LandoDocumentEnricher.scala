@@ -87,7 +87,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
 
 
   private def getLineType(line: String, documentPath: String): LandoLineType = {
-    val lowerLine = line.toLowerCase(Locale.US).strip()
+    val lowerLine = line.strip()
     if (lowerLine.isEmpty) return LandoLineType.EmptyLine
     if (lowerLine.startsWith("//")) return LandoLineType.Comment
     if (lowerLine.startsWith("relation")) return LandoLineType.Relation

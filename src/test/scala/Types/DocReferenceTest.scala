@@ -59,6 +59,6 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     docReference.getRefinements should be(None)
     docReference.getLabelText should be("documentName_Requirement_referenceName")
 
-    docReference.enrichedLine(formatter) should be(s"originalLine(*\\label{${docReference.getLabelText}}*)(*($$\\sqsupseteq$$\\hyperref[${abstraction.getLabelText}]{${abstraction.getName}} (\\cref{${abstraction.getLabelText}}))*)")
+    docReference.enrichedLine(formatter) should be(s"originalLine(*\\label{${docReference.getLabelText}}*)(*($$\\sqsupseteq$$\\abstractionLink[${abstraction.getLabelText}]{${abstraction.getName}} (\\cref{${abstraction.getLabelText}}))*)")
   }
 }

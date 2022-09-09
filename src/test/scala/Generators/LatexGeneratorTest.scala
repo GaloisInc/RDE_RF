@@ -85,5 +85,6 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val latexFile = new File(targetFolder + latexName + ".tex")
     latexFile.exists() should be(true)
+    latexFile.delete()
   }
 }

@@ -3,11 +3,9 @@ package Report
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
 import java.io.File
 
 class ReportGeneratorTest extends AnyFlatSpec with Matchers {
-
   "ReportGenerator" should "generate a report" in {
     val sysmlDocuments = getClass.getResource("../SysML").getPath
     val landoDocuments = getClass.getResource("../Lando").getPath
@@ -17,7 +15,7 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
       ++ FileUtil.getListOfFiles(landoDocuments).toArray
       ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
-    val reportName = "report"
+    val reportName = "Report"
     val reportPath = getClass.getResource(".").getPath
     val reportFilePath = ReportGenerator.generateRefinementReport(filesToAnalyze, reportName, reportPath)
 
@@ -26,5 +24,4 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
     reportFile.exists() should be(true)
     reportFile.delete()
   }
-
 }

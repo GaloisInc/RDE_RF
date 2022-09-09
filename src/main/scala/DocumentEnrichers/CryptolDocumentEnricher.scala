@@ -20,7 +20,6 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     Requirement = "property",
   )
 
-
   def extractDocumentInfo(filePath: String): CryptolDocumentInfo = {
     require(filePath.nonEmpty)
     require(FileUtil.getFileType(filePath) == "cry")

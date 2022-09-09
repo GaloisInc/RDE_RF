@@ -2,7 +2,9 @@ package Report
 
 import Analyzers.{DocumentAnalyzer, ReportAnalyzer}
 import Formatter.{LatexSanitizer, LatexSyntax}
-import Types.{DocReference, LatexReferenceType}
+import Report.ReportTypes.ReportReference
+import Types.DocReference.DocReference
+import Types.LatexReferenceType
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -11,10 +13,9 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 object ReportGenerator {
-  private val refinementSymbol: String = "=>"
+  private val refinementSymbol: String = "|-"
 
-  def generateRefinementReport(filesToAnalyse: Array[String], reportName: String, targetFolder: String): String = {
-    val report = DocumentAnalyzer.generateReport(filesToAnalyse, reportName, targetFolder, false)
+  def generateRefinementReport(report: ReportReference) = {
     val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
     val refinedReferences = ReportAnalyzer.refinedConstructs(report)
 
@@ -22,7 +23,7 @@ object ReportGenerator {
 
     val topOfRefinementChain = ReportAnalyzer.topOfRefinementChain(refinedReferences)
 
-    val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref, ref.sanitizedName))
+    val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref, s"${ref.documentName}.${ref.sanitizedName}"))
 
     val reportString = mutable.StringBuilder()
 
@@ -30,10 +31,8 @@ object ReportGenerator {
 
     reportString.append(LatexGenerator.emptyLine)
 
-    refinementChains.foreach(refinementChain => {
-      reportString.append(refinementChain)
-      reportString.append(LatexGenerator.emptyLine)
-    })
+    reportString.append(LatexGenerator.addContentInsideEnvironment(refinementChains.toArray, "alltt"))
+
 
     reportString.append(LatexSyntax.generateSection("NonRefined"))
     reportString.append(LatexGenerator.emptyLine)
@@ -72,7 +71,7 @@ object ReportGenerator {
       case Some(refinements) =>
         val arbitraryRefinement = refinements.head
         //assert(refinements.forall(_.getRefinements == arbitraryRefinement.getRefinements), "All similar refinements must refine the same abstractions.")
-        val refinementText = refinements.map(ref => ref.sanitizedName).mkString("{", ", ", "}")
+        val refinementText = refinements.map(ref => s"${ref.documentName}.${ref.sanitizedName}").mkString("\\{", ", ", "\\}")
         val newAcc = acc + refinementSymbol + refinementText
         formatReferenceChain(arbitraryRefinement, newAcc)
       case None => acc

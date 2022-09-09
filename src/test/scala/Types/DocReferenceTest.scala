@@ -3,6 +3,7 @@ package Types
 import Formatter.{InlineFormatter, ReferenceFormatter}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import DocReference.DocReference
 
 class DocReferenceTest extends AnyFlatSpec with should.Matchers {
   private val formatter: ReferenceFormatter = ReferenceFormatter(new InlineFormatter)
@@ -59,6 +60,6 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     docReference.getRefinements should be(None)
     docReference.getLabelText should be("documentName_Requirement_referenceName")
 
-    docReference.enrichedLine(formatter) should be(s"originalLine(*\\label{${docReference.getLabelText}}*)(*($$\\sqsupseteq$$\\abstractionLink[${abstraction.getLabelText}]{${abstraction.getName}} (\\cref{${abstraction.getLabelText}}))*)")
+    docReference.enrichedLine(formatter) should be(s"originalLine(*\\label{${docReference.getLabelText}}*)(*($$\\sqsupseteq$$\\abstractionLink{${abstraction.getLabelText}}{${abstraction.getName}} (\\cref{${abstraction.getLabelText}}))*)")
   }
 }

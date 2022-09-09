@@ -2,6 +2,7 @@ package Referencer
 
 import Formatter.InlineFormatter
 import Types.*
+import Types.DocReference.DocReference
 import Types.DocumentInfos.DocumentInfo
 
 import java.util.Locale

@@ -1,7 +1,7 @@
 package Analyzers
 
 import Report.ReportTypes.ReportReference
-import Types.DocReference
+import Types.DocReference.DocReference
 
 object ReportAnalyzer {
 

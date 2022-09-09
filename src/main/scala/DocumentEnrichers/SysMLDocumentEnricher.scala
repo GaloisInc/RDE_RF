@@ -2,6 +2,7 @@ package DocumentEnrichers
 
 import Formatter.LatexFormatter
 import Types.*
+import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, SysMLDocumentInfo}
 import Types.Reference.{Ref, RefinementRef, TypeRef}
 import Utils.FileUtil
@@ -23,7 +24,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   val importRegex: Regex = """^import\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*('(.*?)')?""".r
   val viewRegex: Regex = """^view\s*(?:def)?\s*(?:id)?\s*(?:'(.*?)')(?:\s*:\s*(?:'(.*)'))?""".r
   val viewPointRegex: Regex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
-  val connectionRegex: Regex = """^connect\s*(\.*)\s*to(.*?)""".r
+  val connectionRegex: Regex = """^connect\s*(\.*)\s=to\s+(.*?)""".r
 
 
   //SysML
@@ -98,7 +99,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
       case _ => line
   }
 
-  def cleanString(line: String): String = {
+  private def cleanString(line: String): String = {
     line.strip().stripSuffix(";;").stripSuffix(";").stripSuffix("}").stripSuffix("{").strip()
   }
 
@@ -129,10 +130,10 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
       case requirementRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Requirement, DocumentType.SysML, line, references = refinementRefs(symbol, references))
       case actionRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Event, DocumentType.SysML, line, references = refinementRefs(symbol, references))
       case importRegex(name) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.Import, DocumentType.SysML, line)
-      case viewRegex(name, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.View, DocumentType.SysML, line)
+      case viewRegex(name, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.View, DocumentType.SysML, line, references = refinementRefs(":", references))
       case viewPointRegex(name) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.ViewPoint, DocumentType.SysML, line)
       case usecaseRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Scenario, DocumentType.SysML, line, references = refinementRefs(symbol, references))
-      //case connectionRegex(source, target) => DocReference(fileName, ReferenceName(name, noneIfNull(acronym)), ReferenceType.Connection, DocumentType.SysML, line, )
+      //case connectionRegex(source, target) => DocRelation(fileName, ReferenceName(name, noneIfNull(acronym)), ReferenceType.Connection, DocumentType.SysML, line,)
       case _ => DocReference(fileName, ReferenceName("Unknown", None), ReferenceType.Type, DocumentType.SysML, line)
 
     extractedReference
@@ -140,7 +141,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
 
   private def extractReferences(filePath: String, getReferenceType: ReferenceType): Set[DocReference] = {
     extract(filePath, (line: String, _: String) => filterReferenceTypes(line, getReferenceType), transformReference)
-  } ensuring ((refs: Set[DocReference]) => refs.forall(_.getReferenceType == getReferenceType), "All references must be of the correct type " + getReferenceType + " in file " + filePath)
+  } ensuring((refs: Set[DocReference]) => refs.forall(_.getReferenceType == getReferenceType), "All references must be of the correct type " + getReferenceType + " in file " + filePath)
 
   private def filterReferenceTypes(line: String, referenceType: ReferenceType): Boolean = {
     val cleanedString = cleanString(line)

@@ -16,7 +16,8 @@ enum ReferenceType {
   View,
   ViewPoint,
   Type,
-  Attribute
+  Attribute,
+  Relation
 }
 
 enum RelationType {

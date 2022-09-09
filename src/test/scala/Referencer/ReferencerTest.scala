@@ -2,7 +2,8 @@ package Referencer
 
 import DocumentEnrichers.{LandoDocumentEnricher, SysMLDocumentEnricher}
 import Formatter.InlineFormatter
-import Types.{DocReference, DocumentType, ReferenceName, ReferenceType}
+import Types.DocReference.DocReference
+import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*

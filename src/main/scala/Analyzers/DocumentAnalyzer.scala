@@ -5,7 +5,8 @@ import Formatter.InlineFormatter
 import Referencer.*
 import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
-import Types.{DocReference, ReferenceType}
+import Types.{ReferenceType}
+import Types.DocReference.DocReference
 import Utils.*
 
 import java.nio.file.Path

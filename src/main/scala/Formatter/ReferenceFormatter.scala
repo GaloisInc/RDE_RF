@@ -1,6 +1,7 @@
 package Formatter
 
-import Types.{DocReference, LatexReferenceType}
+import Types.DocReference.DocReference
+import Types.LatexReferenceType
 
 import scala.util.matching.Regex
 
@@ -44,6 +45,16 @@ class ReferenceFormatter(
     enrichedLine
   } ensuring ((enriched: String) => enriched.startsWith(originalLine) && enriched.contains(referenceText))
 
+  def highlightLineWithReferences(originalLine: String, referencesToLinkTo: Option[Set[DocReference]]): String = {
+    if (referencesToLinkTo.isEmpty) {
+      originalLine
+    } else {
+      val references = referencesToLinkTo.get
+      val referenceNameToLabelText = references.map(ref => ref.getName -> formatLatexListing(LatexSyntax.addClickableLocalLink(ref.getLabelText, ref.getName, LatexReferenceType.ConnectionArtifact)))
+      val enrichedLine = referenceNameToLabelText.foldLeft(originalLine)((line, reference) => line.replace(reference._1, reference._2))
+      enrichedLine
+    }
+  }
 
   protected def formatLatexListing(text: String): String = {
     require(text.nonEmpty, "The string to format cannot be empty.")

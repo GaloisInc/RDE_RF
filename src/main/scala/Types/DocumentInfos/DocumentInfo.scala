@@ -1,7 +1,8 @@
 package Types.DocumentInfos
 
 import Formatter.LatexSanitizer
-import Types.{DocReference, DocRelation, DocumentType, FileType}
+import Types.DocReference.DocReference
+import Types.{DocRelation, DocumentType, FileType}
 import Utils.FileUtil
 
 abstract class DocumentInfo {

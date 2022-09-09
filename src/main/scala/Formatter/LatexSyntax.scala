@@ -1,16 +1,16 @@
 package Formatter
 
 import Formatter.LatexSanitizer.{sanitizeName, sanitizeWebLink}
-import Types.{DocReference, LatexReferenceType}
+import Types.DocReference.DocReference
+import Types.LatexReferenceType
 
 object LatexSyntax {
   def addLabel(reference: String): String = s"\\label{$reference}" // \\hypertarget{$reference}{}"
 
-
   def addClickableLocalLink(reference: String, nameOfReference: String, referenceType: LatexReferenceType): String = {
     val sanitizedReference = sanitizeName(nameOfReference)
     referenceType match
-      case LatexReferenceType.File => s"\\fileLink{$reference}{$sanitizedReference}"
+      case LatexReferenceType.File => s"\\href{run./$reference}{$sanitizedReference}"
       case LatexReferenceType.Abstraction => s"\\abstractionLink{$reference}{$sanitizedReference}"
       case LatexReferenceType.Refinement => s"\\refinementLink{$reference}{$sanitizedReference}"
       case LatexReferenceType.Link => s"\\link{$reference}{$sanitizedReference}"
@@ -19,9 +19,15 @@ object LatexSyntax {
   }
 
 
-  def addCref(reference: String): String = s"\\cref{$reference}"
+  def addCref(reference: String): String = {
+    require(reference.nonEmpty, "Reference must not be empty")
+    s"\\cref{$reference}"
+  } ensuring (_.contains(reference))
 
-  def addVref(reference: String): String = s"\\vref{$reference}"
+  def addVref(reference: String): String = {
+    require(reference.nonEmpty, "Reference must not be empty")
+    s"\\vref{$reference}"
+  } ensuring (_.contains(reference))
 
   def addReferenceInLatex(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
     s"${addClickableLocalLink(reference.getLabelText, reference.getName, referenceType)} (${explicitReference(reference, currentDocument)})"

@@ -2,6 +2,7 @@ package DocumentEnrichers
 
 import Formatter.LatexFormatter
 import Types.*
+import Types.DocReference.DocReference
 import Types.DocumentInfos.{BSVDocumentInfo, DocumentInfo}
 import Utils.FileUtil
 

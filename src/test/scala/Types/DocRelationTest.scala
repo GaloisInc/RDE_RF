@@ -1,8 +1,10 @@
 package Types
 
 import Formatter.{InlineFormatter, ReferenceFormatter}
+import Types.DocReference.DocReference
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+
 
 class DocRelationTest extends AnyFlatSpec with should.Matchers {
   private val formatter: ReferenceFormatter = ReferenceFormatter(new InlineFormatter)
@@ -10,15 +12,21 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
   "DocRelation" should "be able to be created" in {
     val documentName = "documentName"
     val relationReference = RelationReference("source", "target")
-    val relationType = RelationType.client
+    val sourceReferenceName = ReferenceName("sourceRef")
+    val targetReferenceName = ReferenceName("targetRef")
+    val referenceType = ReferenceType.Requirement
+    val documentType = DocumentType.Lando
     val originalLine = "originalLine"
+    val sourceRef = DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
+    val targetRef = DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
+    val relationType = RelationType.client
     val docRelation = DocRelation(
       documentName,
       relationReference,
       relationType,
       originalLine,
-      None,
-      None,
+      Some(sourceRef),
+      Some(targetRef),
     )
 
     docRelation should not be null
@@ -35,10 +43,9 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     val sourceRef = DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
     val targetRef = DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
 
-    val relationReference = RelationReference(sourceRef.getName, targetRef.getName)
     val docRelation = DocRelation(
       documentName,
-      relationReference,
+      RelationReference(sourceReferenceName.name, targetReferenceName.name),
       RelationType.client,
       originalLine,
       Some(sourceRef),

@@ -1,6 +1,7 @@
 package Types.DocumentInfos
 
 import Types.*
+import Types.DocReference.DocReference
 import Utils.FileUtil
 
 class SysMLDocumentInfo(

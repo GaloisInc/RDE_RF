@@ -1,7 +1,9 @@
 package DocumentEnrichers
 
+import Utils.Matcher.referenceNameMatches
 import Formatter.{LatexFormatter, LatexSanitizer}
 import Types.*
+import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.FileType.*
 import Utils.FileUtil
@@ -75,13 +77,9 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     //assert(sourceReference.nonEmpty, s"Relation source reference not found: ${relation.getSourceName} in $docName")
     //assert(targetReference.nonEmpty, s"Relation target reference not found: ${relation.getTargetName} in $docName")
 
-    DocRelation(
-      relation.getDocumentName,
-      relation.getRelationReference,
-      relation.getRelationType,
-      relation.getOriginalLine,
-      sourceReference.headOption,
-      targetReference.headOption
+    relation.copy(
+      sourceRef = sourceReference.headOption,
+      targetRef = targetReference.headOption
     )
   }
 

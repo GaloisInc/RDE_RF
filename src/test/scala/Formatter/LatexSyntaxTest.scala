@@ -36,7 +36,7 @@ class LatexSyntaxTest extends AnyFlatSpec with should.Matchers {
     val nameOfReference = "nameOf_Reference"
     val reference = LatexSyntax.addClickableLocalLink(labelText, nameOfReference, LatexReferenceType.File)
     val sanitizedName = LatexSanitizer.sanitizeName(nameOfReference)
-    reference should be(s"\\fileLink{$labelText}{$sanitizedName}")
+    reference should be(s"\\href{run./$labelText}{$sanitizedName}")
   }
 
 }

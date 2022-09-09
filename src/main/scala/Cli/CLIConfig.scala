@@ -5,4 +5,5 @@ case class CLIConfig(
                       targetFolder: String = "target",
                       generateLatex: Boolean = false,
                       latexTitle: String = "",
+                      showRefinement: Boolean = false,
                     )

@@ -1,7 +1,6 @@
 package Formatter
 
-import Types.DocReference
-
+import Types.DocReference.DocReference
 import scala.collection.mutable
 
 class InlineFormatter extends LatexFormatter {

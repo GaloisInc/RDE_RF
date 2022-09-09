@@ -38,6 +38,19 @@ object LatexGenerator {
     sb.toString()
   }
 
+  def addContentInsideEnvironment(content: Array[String], environment: String): String = {
+    val sb = new StringBuilder()
+    sb.append("\\begin{" + environment + "}")
+    sb.append(emptyLine)
+    for (line <- content) {
+      sb.append(line)
+      sb.append(emptyLine)
+    }
+    sb.append("\\end{" + environment + "}")
+    sb.append(emptyLine)
+    sb.toString()
+  }
+
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
     val cmd = s"""$latexBuildCmd ${fPath}"""
@@ -141,7 +154,6 @@ object LatexGenerator {
     latex.append(packagesString)
     latex.toString()
   }
-
 
 
   val emptyLine: String =

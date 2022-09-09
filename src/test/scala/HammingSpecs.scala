@@ -1,5 +1,6 @@
 import Referencer.{Hamming, SysMLReferencer}
-import Types.{DocReference, DocumentType, ReferenceName, ReferenceType}
+import Types.DocReference.DocReference
+import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.Control
 import org.scalatest.*
 import org.scalatest.flatspec.*

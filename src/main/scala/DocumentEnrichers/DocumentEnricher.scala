@@ -98,7 +98,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
   }
 
 
-  protected def extractEnrichedText[A <: EnrichableString](line: String, references: Set[A]): String = {
+  protected def extractEnrichedText[A <: EnrichableString ](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)
     if relevantRefs.isEmpty
     then
@@ -108,14 +108,6 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFo
       relevantRefs.headOption match
         case None => ""
         case Some(value) => value.enrichedLine(latexFormatter)
-  }
-
-  protected def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {
-    if (referenceName.acronym.isDefined) {
-      name.equalsIgnoreCase(referenceName.acronym.get)
-    } else {
-      name.equalsIgnoreCase(referenceName.name)
-    }
   }
 
   protected def getReferenceType(line: String): Option[ReferenceType] = {

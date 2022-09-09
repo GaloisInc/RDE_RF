@@ -12,6 +12,8 @@ import scala.None
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.matching.Regex
+import DocReference.DocReference
+
 
 class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = InlineFormatter()

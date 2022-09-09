@@ -1,6 +1,11 @@
 package Types
 
 import Formatter.{LatexSanitizer, ReferenceFormatter}
+import Types.Reference.Ref
+
+
+
+
 
 class DocReference(
                     override val documentName: String,
@@ -10,6 +15,7 @@ class DocReference(
                     override val originalLine: String,
                     refinementOf: Option[Set[DocReference]] = None,
                     abstractionOf: Option[Set[DocReference]] = None,
+                    references: Option[Set[Ref]] = None,
                   ) extends EnrichableString {
 
   require(originalLine.nonEmpty, "originalLine must not be empty")
@@ -20,6 +26,8 @@ class DocReference(
   lazy val getLabelText: String = s"${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(getName)}"
 
   lazy val getName: String = if referenceName.name.isEmpty then referenceName.acronym.get else referenceName.name
+
+  lazy val sanitizedName : String = LatexSanitizer.sanitizeName(getName)
 
   def getAcronym: Option[String] = referenceName.acronym
 
@@ -37,7 +45,7 @@ class DocReference(
 
   def getRefinements: Option[Set[DocReference]] = abstractionOf
 
-  def isReferenced: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
+  def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
 
   override def enrichedLine(formatter: ReferenceFormatter): String = {
     val refinementOfString = getAbstractions match {
@@ -51,7 +59,7 @@ class DocReference(
     }
 
     val lineWithLabel = formatter.enrichLineWithLabel(originalLine, getLabelText)
-    if(isReferenced) {
+    if (isInRefinementChain) {
       lineWithLabel + refinementOfString + abstractionOfString
     } else {
       lineWithLabel

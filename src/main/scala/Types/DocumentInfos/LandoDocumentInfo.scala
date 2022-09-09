@@ -43,7 +43,6 @@ class LandoDocumentInfo(
   require(events.forall(_.getReferenceType == ReferenceType.Event), "All events must be of type Event")
   require(scenarios.forall(_.getReferenceType == ReferenceType.Scenario), "All scenarios must be of type Scenario")
   require(requirements.forall(_.getReferenceType == ReferenceType.Requirement), "All requirements must be of type Requirement")
-  //require(references.forall(_.getReferenceType ))
 
   override lazy val getAllReferences: Set[DocReference] = {
     references ++ events ++ requirements ++ scenarios

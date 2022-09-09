@@ -23,6 +23,19 @@ object LatexGenerator {
     true
   }
 
+  def generateList(list: List[String]): String = {
+    val sb = new StringBuilder()
+    sb.append(emptyLine)
+    sb.append("\\begin{itemize}")
+    for (item <- list) {
+      sb.append(s"\\item $item")
+      sb.append(emptyLine)
+    }
+    sb.append("\\end{itemize}")
+    sb.append(emptyLine)
+    sb.toString()
+  }
+
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
     val cmd = s"""$latexBuildCmd ${fPath}"""
@@ -50,7 +63,6 @@ object LatexGenerator {
   }
 
 
-
   lazy val listingAndDefaultCommands: String = {
     val latex = new mutable.StringBuilder()
     latex.append(ListingFormatting.standardCommands)
@@ -71,8 +83,21 @@ object LatexGenerator {
   }
 
   def generateSection(sectionName: String): String = {
-    s"""\\section{$sectionName}
-       |\\label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}""".stripMargin
+    s"""\\section{${LatexSanitizer.sanitizeName(sectionName)}}
+       |\\ label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}
+       |""".stripMargin
+  }
+
+  def generateSubSection(name: String): String = {
+    s"""\\subsection{${LatexSanitizer.sanitizeName(name)}}
+       |\\label{subsec:${LatexSanitizer.sanitizeReferenceName(name)}}
+       |""".stripMargin
+  }
+
+  def generateSubSubSection(name: String): String = {
+    s"""\\subsubsection{${LatexSanitizer.sanitizeName(name)}}
+       |\\label{subsubsec:${LatexSanitizer.sanitizeReferenceName(name)}}
+       |""".stripMargin
   }
 
   def generateLatexReportOfSources(report: ReportReference): String = {
@@ -136,7 +161,7 @@ object LatexGenerator {
 
   val latexFooter: String = "\\end{document}"
 
-  private val emptyLine: String =
+  val emptyLine: String =
     """|
        |""".stripMargin
 

@@ -3,6 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Types.*
 import Types.DocumentInfos.{DocumentInfo, SysMLDocumentInfo}
+import Types.Reference.{Ref, RefinementRef, TypeRef}
 import Utils.FileUtil
 
 import java.util.Locale
@@ -14,15 +15,15 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
 
   val systemRegex: Regex = """^(?:package)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r
   val componentRegex: Regex = """^(?:abstract)?\s*(?:item)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
-  val subsystemRegex = """^(?:abstract)?\s*part\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
-  val attributeRegex = """^(?:abstract)?\s*attribute\s*(?:def)?\s*(?:id)?\s*(?=.)\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
-  val requirementRegex = """^requirement\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
-  val usecaseRegex = """^use case\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
-  val actionRegex = """^action\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(:>|:)?\s*(.*)""".r
-  val importRegex = """^import\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*('(.*?)')?""".r
-  val viewRegex = """^view\s*(?:def)?\s*(?:id)?\s*(?:'(.*?)')(?:\s*:\s*(?:'(.*)'))?""".r
-  val viewPointRegex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
-  val connectionRegex = """^connect\s*(\.*)\s*to(.*?)""".r
+  val subsystemRegex: Regex = """^(?:abstract)?\s*part\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
+  val attributeRegex: Regex = """^(?:abstract)?\s*attribute\s*(?:def)?\s*(?:id)?\s*(?=.)\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
+  val requirementRegex: Regex = """^requirement\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
+  val usecaseRegex: Regex = """^use case\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
+  val actionRegex: Regex = """^action\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(:>|:)?\s*(.*)""".r
+  val importRegex: Regex = """^import\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*('(.*?)')?""".r
+  val viewRegex: Regex = """^view\s*(?:def)?\s*(?:id)?\s*(?:'(.*?)')(?:\s*:\s*(?:'(.*)'))?""".r
+  val viewPointRegex: Regex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
+  val connectionRegex: Regex = """^connect\s*(\.*)\s*to(.*?)""".r
 
 
   //SysML
@@ -103,28 +104,43 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
 
   def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
     def emptyIfNull(s: String): String = if (s == null) "" else s
+
     def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
+
+    def createRef(symbol: String, name: String): Ref = {
+      require(symbol.nonEmpty, "symbol cannot be empty")
+      require(name.nonEmpty, "ref cannot be empty")
+      require(symbol == ":" || symbol == ":>", "symbol must be : or :>")
+      if symbol == ":>" then RefinementRef(name, symbol)
+      else TypeRef(name, symbol)
+    }
+
+    def refinementRefs(symbol: String, referenceString: String): Option[Set[Ref]] = {
+      if symbol == null || symbol.isEmpty || referenceString == null || referenceString.isEmpty then None
+      else
+        Some(referenceString.split(",").map(_.trim).map(createRef(symbol.strip(), _)).toSet)
+    }
 
     val extractedReference: DocReference = cleanString(line) match
       case systemRegex(acronym, name) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.System, DocumentType.SysML, line)
-      case componentRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Component, DocumentType.SysML, line)
-      case subsystemRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.SubSystem, DocumentType.SysML, line)
-      case attributeRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Attribute, DocumentType.SysML, line)
-      case requirementRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Requirement, DocumentType.SysML, line)
-      case usecaseRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Scenario, DocumentType.SysML, line)
-      case actionRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Event, DocumentType.SysML, line)
+      case componentRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Component, DocumentType.SysML, line, references = refinementRefs(symbol, references))
+      case subsystemRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.SubSystem, DocumentType.SysML, line, references = refinementRefs(symbol, references))
+      case attributeRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Attribute, DocumentType.SysML, line, references = refinementRefs(symbol, references))
+      case requirementRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Requirement, DocumentType.SysML, line, references = refinementRefs(symbol, references))
+      case actionRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Event, DocumentType.SysML, line, references = refinementRefs(symbol, references))
       case importRegex(name) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.Import, DocumentType.SysML, line)
       case viewRegex(name, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.View, DocumentType.SysML, line)
       case viewPointRegex(name) => DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.ViewPoint, DocumentType.SysML, line)
-      //case connectionRegex(source, target) => DocReference(fileName, ReferenceName(name, noneIfNull(acronym)), ReferenceType.Connection, DocumentType.SysML, line)
-      case _ => DocReference(fileName, ReferenceName("", None), ReferenceType.Type, DocumentType.SysML, line)
+      case usecaseRegex(acronym, name, symbol, references) => DocReference(fileName, ReferenceName(emptyIfNull(name), noneIfNull(acronym)), ReferenceType.Scenario, DocumentType.SysML, line, references = refinementRefs(symbol, references))
+      //case connectionRegex(source, target) => DocReference(fileName, ReferenceName(name, noneIfNull(acronym)), ReferenceType.Connection, DocumentType.SysML, line, )
+      case _ => DocReference(fileName, ReferenceName("Unknown", None), ReferenceType.Type, DocumentType.SysML, line)
 
     extractedReference
   }
 
   private def extractReferences(filePath: String, getReferenceType: ReferenceType): Set[DocReference] = {
     extract(filePath, (line: String, _: String) => filterReferenceTypes(line, getReferenceType), transformReference)
-  } ensuring ((refs: Set[DocReference]) => refs.forall(_.getReferenceType == getReferenceType))
+  } ensuring ((refs: Set[DocReference]) => refs.forall(_.getReferenceType == getReferenceType), "All references must be of the correct type " + getReferenceType + " in file " + filePath)
 
   private def filterReferenceTypes(line: String, referenceType: ReferenceType): Boolean = {
     val cleanedString = cleanString(line)
@@ -139,7 +155,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
       case ReferenceType.Import => cleanedString.matches(importRegex.toString())
       case ReferenceType.View => cleanedString.matches(viewRegex.toString())
       case ReferenceType.ViewPoint => cleanedString.matches(viewPointRegex.toString())
-      case ReferenceType.Connection => cleanedString.matches(connectionRegex.toString())
+      //case ReferenceType.Connection => cleanedString.matches(connectionRegex.toString())
       case _ => false
     returnValue
   }

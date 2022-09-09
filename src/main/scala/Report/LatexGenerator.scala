@@ -1,10 +1,12 @@
 package Report
 
 import Formatter.LatexSanitizer
+import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
 import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 import Types.DocumentType
 import Utils.FileUtil
+import sun.font.Decoration.Label
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -79,26 +81,9 @@ object LatexGenerator {
   }
 
   def generateLatexDocument(content: String): String = {
-    latexHeader + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + latexFooter
+    latexHeader + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + endDocument
   }
 
-  def generateSection(sectionName: String): String = {
-    s"""\\section{${LatexSanitizer.sanitizeName(sectionName)}}
-       |\\ label{sec:${LatexSanitizer.sanitizeReferenceName(sectionName)}}
-       |""".stripMargin
-  }
-
-  def generateSubSection(name: String): String = {
-    s"""\\subsection{${LatexSanitizer.sanitizeName(name)}}
-       |\\label{subsec:${LatexSanitizer.sanitizeReferenceName(name)}}
-       |""".stripMargin
-  }
-
-  def generateSubSubSection(name: String): String = {
-    s"""\\subsubsection{${LatexSanitizer.sanitizeName(name)}}
-       |\\label{subsubsec:${LatexSanitizer.sanitizeReferenceName(name)}}
-       |""".stripMargin
-  }
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
@@ -157,9 +142,7 @@ object LatexGenerator {
     latex.toString()
   }
 
-  val beginDocument: String = "\\begin{document}"
 
-  val latexFooter: String = "\\end{document}"
 
   val emptyLine: String =
     """|

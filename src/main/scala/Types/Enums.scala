@@ -23,6 +23,16 @@ enum RelationType {
   case client, inherit, contains, Link
 }
 
+enum LatexReferenceType {
+  case
+  File,
+  Abstraction,
+  Refinement,
+  Link,
+  CryptolProperty,
+  ConnectionArtifact
+}
+
 enum DocumentType {
   case Lando, Lobot, SysML, Cryptol, Saw, SV, BSV
 }

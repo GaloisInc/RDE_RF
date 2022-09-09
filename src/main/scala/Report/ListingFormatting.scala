@@ -1,10 +1,9 @@
 package Report
 
-import ReportTypes.{BlockComment, LanguageFormatting, Literate}
+import Report.ReportTypes.{BlockComment, LanguageFormatting, Literate}
 import Types.DocumentType
 
 object ListingFormatting {
-
   lazy val standardCommands: String = {
     """
       |\newcommand{\lando}{\textsc{Lando}\xspace}
@@ -17,6 +16,11 @@ object ListingFormatting {
       |\newcommand{\cryptol}{\textsc{Cryptol}\xspace}
       |\newcommand{\saw}{\textsc{SAW}\xspace}
       |\definecolor{keywordcolor}{RGB}{157,0,129}
+      |\newcommand{\link}[2]{{\color{blue}\href{#1}{#2}}}
+      |\newcommand{\script}[2]{{\color{purple}\href{#1}{#2}}}
+      |\newcommand{\abstractionLink}[2]{{\color{red}\hyperlink[#1]{#2}}}
+      |\newcommand{\refinementLink}[2]{{\color{green}\hyperlink[#1]{#2}}}
+      |\newcommand{\fileLink}[2]{{\color{orange}\href{run:./#1}{#2}}}
       |""".stripMargin
   }
 
@@ -69,7 +73,7 @@ object ListingFormatting {
     languageFormatting
   }
 
-  def buildLanguageFormatting(languageFormatting: LanguageFormatting): String =
+  private def buildLanguageFormatting(languageFormatting: LanguageFormatting): String =
     s"""\\lstdefinelanguage{${languageFormatting.languageName}}{
        |basicstyle=\\scriptsize\\ttfamily,
        |keywordstyle=\\color{keywordcolor}\\bfseries,

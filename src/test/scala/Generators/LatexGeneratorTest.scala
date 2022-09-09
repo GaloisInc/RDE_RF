@@ -1,6 +1,7 @@
 package Generators
 
 import Analyzers.DocumentAnalyzer
+import Formatter.LatexSyntax
 import Report.LatexGenerator
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
@@ -37,12 +38,12 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to generate footer" in {
-    LatexGenerator.latexFooter should be("\\end{document}")
+    LatexSyntax.endDocument should be("\\end{document}")
   }
 
   "LatexGenerator" should "be able to generate section" in {
     val sectionName = "Section"
-    val section = LatexGenerator.generateSection(sectionName)
+    val section = LatexSyntax.generateSection(sectionName)
     section should be(
       s"""\\section{$sectionName}
          |\\label{sec:$sectionName}""".stripMargin)
@@ -50,7 +51,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
   "LatexGenerator" should "be able to generate section for two words" in {
     val sectionName = "Section TwoWords"
-    LatexGenerator.generateSection(sectionName) should be(
+    LatexSyntax.generateSection(sectionName) should be(
       s"""\\section{$sectionName}
          |\\label{sec:Section_TwoWords}""".stripMargin)
   }

@@ -31,8 +31,8 @@ class DocRelation(
   def getTargetRef: Option[DocReference] = targetRef
 
   override def enrichedLine(formatter: ReferenceFormatter): String = {
-    val linkToSource = if sourceRef.isDefined then formatter.addReference(sourceRef.get, documentName) else getSourceName
-    val linkToTarget = if targetRef.isDefined then formatter.addReference(targetRef.get, documentName) else getTargetName
+    val linkToSource = if sourceRef.isDefined then formatter.addReference(sourceRef.get, documentName, LatexReferenceType.ConnectionArtifact) else getSourceName
+    val linkToTarget = if targetRef.isDefined then formatter.addReference(targetRef.get, documentName, LatexReferenceType.ConnectionArtifact) else getTargetName
 
     s"relation $linkToSource ${relationType.toString} $linkToTarget"
   }

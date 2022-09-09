@@ -1,8 +1,8 @@
 package Report
 
 import Analyzers.{DocumentAnalyzer, ReportAnalyzer}
-import Formatter.LatexSanitizer
-import Types.DocReference
+import Formatter.{LatexSanitizer, LatexSyntax}
+import Types.{DocReference, LatexReferenceType}
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -18,13 +18,15 @@ object ReportGenerator {
     val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
     val refinedReferences = ReportAnalyzer.refinedConstructs(report)
 
+    val documentNameToFilePath = report.allDocumentNamesToPaths
+
     val topOfRefinementChain = ReportAnalyzer.topOfRefinementChain(refinedReferences)
 
     val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref, ref.sanitizedName))
 
     val reportString = mutable.StringBuilder()
 
-    reportString.append(LatexGenerator.generateSection("Refinement"))
+    reportString.append(LatexSyntax.generateSection("Refinement"))
 
     reportString.append(LatexGenerator.emptyLine)
 
@@ -33,16 +35,18 @@ object ReportGenerator {
       reportString.append(LatexGenerator.emptyLine)
     })
 
-    reportString.append(LatexGenerator.generateSection("NonRefined"))
+    reportString.append(LatexSyntax.generateSection("NonRefined"))
     reportString.append(LatexGenerator.emptyLine)
 
     val mapOfReferencesPerDocumentType = noneRefinedReferences.groupBy(_.getDocumentType)
       .map(docTypeRef => (docTypeRef._1, docTypeRef._2.groupBy(_.getDocumentName)))
 
     mapOfReferencesPerDocumentType.foreach(docTypeRef => {
-      reportString.append(LatexGenerator.generateSubSection(docTypeRef._1.toString))
+      reportString.append(LatexSyntax.generateSubSection(docTypeRef._1.toString))
       docTypeRef._2.foreach(docRef => {
-        reportString.append(LatexGenerator.generateSubSubSection(docRef._1))
+        val subsecHref = LatexSyntax.addClickableLocalLink(documentNameToFilePath(docRef._1), docRef._1, LatexReferenceType.File)
+        val subsecLabel = LatexSanitizer.sanitizeReferenceName(docRef._1)
+        reportString.append(LatexSyntax.generateSubSubSection(subsecHref, subsecLabel))
         val listsOfReferences = docRef._2.map(formatReference).toList.sorted
         reportString.append(LatexGenerator.generateList(listsOfReferences))
       })

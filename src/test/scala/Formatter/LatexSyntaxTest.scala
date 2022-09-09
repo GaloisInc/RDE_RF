@@ -2,6 +2,7 @@ package Formatter
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import Types.LatexReferenceType
 
 class LatexSyntaxTest extends AnyFlatSpec with should.Matchers {
 
@@ -26,14 +27,14 @@ class LatexSyntaxTest extends AnyFlatSpec with should.Matchers {
   "LatexSyntax" should "add addClickable reference" in {
     val labelText = "reference1"
     val nameOfReference = "nameOfReference"
-    val reference = LatexSyntax.addClickableLocalLink(labelText, nameOfReference)
+    val reference = LatexSyntax.addClickableLocalLink(labelText, nameOfReference, LatexReferenceType.Link)
     reference should be(s"\\hyperref[$labelText]{$nameOfReference}")
   }
 
   "LatexSyntax" should "add addClickable reference and sanitizeName" in {
     val labelText = "reference1"
     val nameOfReference = "nameOf_Reference"
-    val reference = LatexSyntax.addClickableLocalLink(labelText, nameOfReference)
+    val reference = LatexSyntax.addClickableLocalLink(labelText, nameOfReference, LatexReferenceType.Link)
     val sanitizedName = LatexSanitizer.sanitizeName(nameOfReference)
     reference should be(s"\\hyperref[$labelText]{$sanitizedName}")
   }

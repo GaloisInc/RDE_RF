@@ -10,7 +10,7 @@ class MarginFomatter extends LatexFormatter {
          |${line}
          |\\end{$fontSize}
          |\\par
-         }""".stripMargin
+         |}""".stripMargin
     formattedString
   } ensuring ((res: String) => res.nonEmpty && res.startsWith("\\marginpar{") && res.endsWith("}") && res.contains(line))
 

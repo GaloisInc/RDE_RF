@@ -16,8 +16,12 @@ class LatexSanitizerTest extends AnyFlatSpec with should.Matchers {
     LatexSanitizer.sanitizeWebLink("https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html#lab44") should be("https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html#lab44")
   }
 
-  "LatexSanitizer" should "be able to remove special characters" in {
+  "LatexSanitizer" should "be able to remove special characters and spaces" in {
     LatexSanitizer.sanitizeReferenceName("Digital Instrumentation \\& Control") should be("Digital_Instrumentation___Control")
+  }
+
+  "LatexSanitizer" should "be able to escape underscores in links" in {
+    LatexSanitizer.sanitizeName("Digital_Instrumentation_Control") should be("Digital\\_Instrumentation\\_Control")
   }
 
 }

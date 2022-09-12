@@ -1,7 +1,7 @@
 import DocumentEnrichers.LandoDocumentEnricher
 import Formatter.InlineFormatter
 import TestUtils.TestUtility
-import Types.{DocumentType, ReferenceType}
+import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -41,6 +41,13 @@ class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
   "LandoDocumentEnricher" should "be able to extract scenarios" in {
     val fileName = "test_scenarios"
     testUtility.checkExtractReferences(fileName, landoDocumentEnricher, expectedDocumentType, resourceFolder, numberOfScenarios = 40)
+  }
+
+  it should "be able to extract referenceName" in {
+    landoDocumentEnricher.extractReferenceName("component RTS (RTS)") should be (ReferenceName("RTS", Some("RTS")))
+    landoDocumentEnricher.extractReferenceName("system Real Time System (RTS)") should be (ReferenceName("Real Time System", Some("RTS")))
+    landoDocumentEnricher.extractReferenceName("subsystem Event 1 (E1)") should be (ReferenceName("Event 1", Some("E1")))
+    landoDocumentEnricher.extractReferenceName("subsystem Event 1") should be (ReferenceName("Event 1", None))
   }
   
 }

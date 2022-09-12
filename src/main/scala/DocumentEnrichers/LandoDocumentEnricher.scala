@@ -131,7 +131,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
       && getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
   }
 
-  private def extractReferenceName(line: String): ReferenceName = {
+  def extractReferenceName(line: String): ReferenceName = {
     def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
 
     val strippedLine = line.strip()

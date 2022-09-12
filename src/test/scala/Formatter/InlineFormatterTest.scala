@@ -27,3 +27,5 @@ class InlineFormatterTest extends AnyFlatSpec with should.Matchers {
   }
 }
 
+
+

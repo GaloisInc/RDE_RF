@@ -11,7 +11,7 @@ import java.util.Locale
 import scala.util.matching.Regex
 
 class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
-                            override val skipTodos: Boolean = true) extends DocumentEnricher {
+                            override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
   val keyWordsToRemove: Array[String] = Array("private", "abstract", "id", "def", ";", "\\{")
 
   val systemRegex: Regex = """^(?:package)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r

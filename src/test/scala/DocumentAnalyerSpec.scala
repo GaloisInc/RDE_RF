@@ -1,4 +1,4 @@
-import Analyzers.DocumentAnalyzer
+import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -7,6 +7,8 @@ import org.scalatest.matchers.*
 import java.nio.file.Path
 import scala.collection.mutable
 import scala.io.Source
+import Report.PaperLayout
+import Formatter.InlineFormatter
 
 class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
   "CryptolReader" should "to enrich references across documents" in {
@@ -19,8 +21,10 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
       ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
     val targetFolder = getClass.getResource("").getPath
+    val title = "Test"
 
-    DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze, targetFolder)
+    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, InlineFormatter())
+    DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze, latexDocumentation)
   }
 
 }

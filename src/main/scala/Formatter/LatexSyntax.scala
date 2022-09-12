@@ -30,7 +30,7 @@ object LatexSyntax {
   } ensuring (_.contains(reference))
 
   def addReferenceInLatex(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
-    s"${addClickableLocalLink(reference.getLabelText, reference.getName, referenceType)} (${explicitReference(reference, currentDocument)})"
+    s"${addClickableLocalLink(reference.getLabelText, reference.getShortName, referenceType)} (${explicitReference(reference, currentDocument)})"
   }
 
   private def explicitReference(ref: DocReference, documentName: String): String = {

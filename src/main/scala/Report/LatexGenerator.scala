@@ -17,7 +17,7 @@ import scala.sys.process.*
 object LatexGenerator {
   private val latexBuildCmd = "pdflatex"
   private val packages = Array[String]("listings", "url", "alltt", "amssymb", "amsthm", "xspace",
-    "lstautogobble", "tcolorbox", "float", "xcolor", "graphicx", "varioref", "hyperref", "cleveref")
+    "lstautogobble", "tcolorbox", "float", "xcolor", "graphicx", "todonotes", "varioref", "hyperref", "cleveref", "marginnote")
 
   def checkLatexInPath(): Boolean = {
     val path = System.getenv("PATH")
@@ -26,7 +26,7 @@ object LatexGenerator {
   }
 
   def generateList(list: List[String]): String = {
-    val sb = new StringBuilder()
+    val sb = new mutable.StringBuilder()
     sb.append(emptyLine)
     sb.append("\\begin{itemize}")
     for (item <- list) {
@@ -39,7 +39,7 @@ object LatexGenerator {
   }
 
   def addContentInsideEnvironment(content: Array[String], environment: String): String = {
-    val sb = new StringBuilder()
+    val sb = new mutable.StringBuilder()
     sb.append("\\begin{" + environment + "}")
     sb.append(emptyLine)
     for (line <- content) {
@@ -47,13 +47,12 @@ object LatexGenerator {
       sb.append(emptyLine)
     }
     sb.append("\\end{" + environment + "}")
-    sb.append(emptyLine)
     sb.toString()
   }
 
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
-    val cmd = s"""$latexBuildCmd ${fPath}"""
+    val cmd = s"""$latexBuildCmd $fPath"""
     val exitCode = Process(cmd).!
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
@@ -90,11 +89,12 @@ object LatexGenerator {
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
+
     latex.toString()
   }
 
-  def generateLatexDocument(content: String): String = {
-    latexHeader + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + endDocument
+  def generateLatexDocument(content: String, paperLayout: PaperLayout): String = {
+    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + endDocument
   }
 
 
@@ -134,7 +134,7 @@ object LatexGenerator {
       latexContent.append(emptyLine)
     })
 
-    val latexDocument = generateLatexDocument(latexContent.toString())
+    val latexDocument = generateLatexDocument(latexContent.toString(), report.layout)
 
     val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
@@ -142,24 +142,46 @@ object LatexGenerator {
     latexContent.toString()
   }
 
-  val latexHeader: String = {
-    val latex = new mutable.StringBuilder()
-    latex.append(
+  def latexHeader(paperLayout: PaperLayout): String = {
+    val documentClass =
       s"""\\documentclass{article}
-         |\\usepackage[pdftex, colorlinks = true, linkcolor = blue, urlcolor = blue, bookmarks = false]{hyperref}""".stripMargin)
+         |\\usepackage[pdftex, colorlinks = true, linkcolor = blue, urlcolor = blue, bookmarks = false]{hyperref}""".stripMargin
+
+    val layout = extractLatexLayout(paperLayout)
 
     val packagesString = packages.foldLeft("")((acc, p) => acc +
       s"""
        |\\usepackage{$p}""").stripMargin
-    latex.append(packagesString)
-    latex.toString()
+
+
+    documentClass
+      + layout
+      + packagesString
+      + emptyLine
+      //Needed for the margin notes to work
+      + "\\maxdeadcycles=500"
+      + emptyLine
   }
 
+
+  private def extractLatexLayout(paperLayout: PaperLayout): String = {
+    paperLayout match
+      case PaperLayout.A4 =>
+        s"""
+           |\\usepackage[a4paper, margin=1in]{geometry}""".stripMargin
+      case PaperLayout.B4 =>
+        s"""
+           |\\usepackage[b4paper, marginparwidth=8cm, marginparsep=3mm, includemp, heightrounded, outer=1cm]{geometry}""".stripMargin
+  }
 
   val emptyLine: String =
     """|
        |""".stripMargin
 
+}
+
+enum PaperLayout {
+  case A4, B4
 }
 
 

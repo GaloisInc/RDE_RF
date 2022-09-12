@@ -1,12 +1,14 @@
 package Report.ReportTypes
 
+import Report.PaperLayout
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 
 case class ReportReference(title: String,
                            folder: String,
                            landoDocuments: Array[LandoDocumentInfo],
                            sysmlDocuments: Array[SysMLDocumentInfo],
-                           cryptolDocuments: Array[CryptolDocumentInfo]
+                           cryptolDocuments: Array[CryptolDocumentInfo],
+                           layout: PaperLayout,
                           ) {
   require(title.nonEmpty, "title must not be empty")
   require(folder.nonEmpty, "folder must not be empty")

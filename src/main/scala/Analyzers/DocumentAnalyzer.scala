@@ -1,53 +1,59 @@
 package Analyzers
 
 import DocumentEnrichers.*
-import Formatter.InlineFormatter
+import Formatter.{InlineFormatter, LatexFormatter}
 import Referencer.*
+import Report.PaperLayout
 import Report.ReportTypes.ReportReference
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
-import Types.{ReferenceType}
 import Types.DocReference.DocReference
+import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.ReferenceType
 import Utils.*
 
 import java.nio.file.Path
 
+final case class LatexDocumentData(
+                                    title: String,
+                                    folder: String,
+                                    layout: PaperLayout,
+                                    latexFormatter: LatexFormatter
+                                  ) {
+  require(title.nonEmpty, "Title must not be empty")
+  require(folder.nonEmpty, "Folder must not be empty")
+}
+
 object DocumentAnalyzer {
-  private val formatterType = InlineFormatter()
-  //Analyzers
-  private val landoAnalyzer = LandoDocumentEnricher(formatterType)
-  private val sysmlAnalyzer = SysMLDocumentEnricher(formatterType)
-  private val cryptolAnalyzer = CryptolDocumentEnricher(formatterType)
   //Referencers
   private val landoReferencer = LandoReferencer()
   private val sysMLReferencer = SysMLReferencer()
   private val cryptolReferencer = CryptolReferencer()
 
 
-  def generateReport(filesToAnalyze: Array[String], latexTitle: String, targetFolder: String, sortFiles: Boolean = true): ReportReference = {
+  def generateReport(filesToAnalyze: Array[String],
+                     latexDocumentData: LatexDocumentData,
+                     sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
-    require(latexTitle.nonEmpty, "No title for the latex report")
-    require(targetFolder.nonEmpty, "No target folder for the report")
 
-    val report =
       if sortFiles then
-        enrichAndSortFiles(filesToAnalyze, targetFolder)
+        enrichAndSortFiles(filesToAnalyze, latexDocumentData)
       else {
-        val enrichedDocuments = enrichDocuments(filesToAnalyze)
-        ReportReference(latexTitle,
-          targetFolder,
+        val enrichedDocuments = enrichDocuments(filesToAnalyze, latexDocumentData.latexFormatter)
+        ReportReference(
+          latexDocumentData.title,
+          latexDocumentData.folder,
           FileUtil.getLandoDocuments(enrichedDocuments).map(_.asInstanceOf[LandoDocumentInfo]),
           FileUtil.getSysMLDocuments(enrichedDocuments).map(_.asInstanceOf[SysMLDocumentInfo]),
-          FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]))
+          FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]),
+          latexDocumentData.layout
+        )
       }
-
-    report.copy(title = latexTitle, folder = targetFolder)
   }
 
-  def enrichAndSortFiles(filesToAnalyze: Array[String], targetFolder: String): ReportReference = {
+  def enrichAndSortFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
-    require(targetFolder.nonEmpty, "No target folder specified")
+    val references = enrichFiles(filesToAnalyze, latexDocumentData)
 
-    val references = enrichFiles(filesToAnalyze)
+    val targetFolder = latexDocumentData.folder
 
     val newLandoFiles = references.landoDocuments.map(doc => {
       val destinationPath = Path.of(targetFolder, "decoratedLando").toString
@@ -70,9 +76,14 @@ object DocumentAnalyzer {
     references.copy(landoDocuments = newLandoFiles, sysmlDocuments = newSysMLFiles, cryptolDocuments = newCryptolFiles)
   }
 
-  def enrichFiles(filesToAnalyze: Array[String]): ReportReference = {
-    require(filesToAnalyze.nonEmpty)
-    val enrichedDocuments = enrichDocuments(filesToAnalyze)
+  def enrichFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData): ReportReference = {
+    require(filesToAnalyze.nonEmpty, "No files to analyze")
+    val formatter: LatexFormatter = latexDocumentData.latexFormatter
+    val landoAnalyzer = LandoDocumentEnricher(formatter)
+    val sysMLAnalyzer = SysMLDocumentEnricher(formatter)
+    val cryptolAnalyzer = CryptolDocumentEnricher(formatter)
+
+    val enrichedDocuments = enrichDocuments(filesToAnalyze, formatter)
 
     val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
     val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
@@ -87,7 +98,7 @@ object DocumentAnalyzer {
       doc.asInstanceOf[LandoDocumentInfo].copy(filePath = filePath)
     })
     val decoratedSysML = enrichedSysMLDocuments.map(doc => {
-      val filePath = sysmlAnalyzer.enrichFile(doc)
+      val filePath = sysMLAnalyzer.enrichFile(doc)
       doc.asInstanceOf[SysMLDocumentInfo].copy(filePath = filePath)
     })
     val decoratedCryptol = enrichedCryptolDocuments.map(doc => {
@@ -95,14 +106,14 @@ object DocumentAnalyzer {
       doc.asInstanceOf[CryptolDocumentInfo].copy(filePath = filePath)
     })
 
-    ReportReference("Test", "Folder", decoratedLando, decoratedSysML, decoratedCryptol)
+    ReportReference(latexDocumentData.title, latexDocumentData.folder, decoratedLando, decoratedSysML, decoratedCryptol, latexDocumentData.layout)
   } ensuring ((res: ReportReference) => res.cryptolDocuments.length + res.sysmlDocuments.length + res.landoDocuments.length == filesToAnalyze.length)
 
 
   def nonRefinementLando(filesToAnalyze: Array[String]): Array[DocReference] = {
     require(filesToAnalyze.nonEmpty)
 
-    val enrichedDocuments = enrichDocuments(filesToAnalyze)
+    val enrichedDocuments = enrichDocuments(filesToAnalyze, InlineFormatter())
     val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
 
     val nonSpecializedConstructs = enrichedLandoDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.isEmpty))
@@ -119,38 +130,12 @@ object DocumentAnalyzer {
     nonSpecialized.toSet.subsetOf(allReferences)
   })
 
-  def cleanUpUnusedGlossaries(filesToAnalyze: Array[String]): Array[String] = {
-    require(filesToAnalyze.nonEmpty)
+  def enrichDocuments(filesToAnalyze: Array[String], formatter: LatexFormatter): Array[DocumentInfo] = {
+    require(filesToAnalyze.nonEmpty, "No files to analyze")
+    val landoAnalyzer = LandoDocumentEnricher(formatter)
+    val sysmlAnalyzer = SysMLDocumentEnricher(formatter)
+    val cryptolAnalyzer = CryptolDocumentEnricher(formatter)
 
-    val enrichedDocuments = enrichDocuments(filesToAnalyze)
-    val nonAbstractedReferences = nonSpecializedLandoConstructs(enrichedDocuments)
-    val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
-    val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
-
-    val cleanedLandoDocuments = enrichedLandoDocuments.foldLeft(Array.empty[DocumentInfo])((documents, document) => {
-      val updatedDocument = if (document.documentName.contains("glossary")) {
-        val specializedReference = document.getAllReferences.filterNot(ref => nonAbstractedReferences.contains(ref))
-        assert(specializedReference.size < document.getAllReferences.size)
-        LandoDocumentInfo(
-          document.documentName,
-          document.filePath,
-          specializedReference.filter(ref => Set(ReferenceType.Component, ReferenceType.System, ReferenceType.SubSystem).contains(ref.getReferenceType)),
-          document.getRelations,
-          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Event)),
-          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Requirement)),
-          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Scenario))
-        )
-      } else {
-        document
-      }
-      documents ++ Array[DocumentInfo](updatedDocument)
-    })
-
-    val res = cleanedLandoDocuments.map(landoAnalyzer.enrichFile) ++ enrichedSysMLDocuments.map(sysmlAnalyzer.enrichFile)
-    res
-  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
-
-  def enrichDocuments(filesToAnalyze: Array[String]): Array[DocumentInfo] = {
     val landoFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("lando"))
     val sysmlFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("sysml"))
     val cryptolFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("cry"))
@@ -173,4 +158,37 @@ object DocumentAnalyzer {
 
     enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments
   } ensuring ((res: Array[DocumentInfo]) => res.length == filesToAnalyze.length)
+
+
+  //  def cleanUpUnusedGlossaries(filesToAnalyze: Array[String]): Array[String] = {
+  //    require(filesToAnalyze.nonEmpty)
+  //
+  //    val enrichedDocuments = enrichDocuments(filesToAnalyze)
+  //    val nonAbstractedReferences = nonSpecializedLandoConstructs(enrichedDocuments)
+  //    val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
+  //    val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
+  //
+  //    val cleanedLandoDocuments = enrichedLandoDocuments.foldLeft(Array.empty[DocumentInfo])((documents, document) => {
+  //      val updatedDocument = if (document.documentName.contains("glossary")) {
+  //        val specializedReference = document.getAllReferences.filterNot(ref => nonAbstractedReferences.contains(ref))
+  //        assert(specializedReference.size < document.getAllReferences.size)
+  //        LandoDocumentInfo(
+  //          document.documentName,
+  //          document.filePath,
+  //          specializedReference.filter(ref => Set(ReferenceType.Component, ReferenceType.System, ReferenceType.SubSystem).contains(ref.getReferenceType)),
+  //          document.getRelations,
+  //          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Event)),
+  //          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Requirement)),
+  //          specializedReference.filter(_.getReferenceType.equals(ReferenceType.Scenario))
+  //        )
+  //      } else {
+  //        document
+  //      }
+  //      documents ++ Array[DocumentInfo](updatedDocument)
+  //    })
+  //
+  //    val res = cleanedLandoDocuments.map(landoAnalyzer.enrichFile) ++ enrichedSysMLDocuments.map(sysmlAnalyzer.enrichFile)
+  //    res
+  //  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
+
 }

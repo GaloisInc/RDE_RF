@@ -8,7 +8,7 @@ import Utils.FileUtil
 
 import java.util.Locale
 
-class SVDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher {
+class SVDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher(formatterType) {
   // Reads a Document to create an object of the necessary information to enrich the document.
   val keyWordsToRemove: Array[String] = Array.empty
 

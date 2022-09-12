@@ -10,7 +10,7 @@ import java.util.Locale
 import scala.util.matching.Regex
 
 class BSVDocumentEnricher(override val formatterType: LatexFormatter,
-                          override val skipTodos: Boolean = true) extends DocumentEnricher {
+                          override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
   // Reads a Document to create an object of the necessary information to enrich the document.
   val keyWordsToRemove: Array[String] = Array.empty
 

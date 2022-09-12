@@ -12,10 +12,11 @@ import java.nio.file.{Files, Paths}
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-object ReportGenerator {
+object RefinementReport {
   private val refinementSymbol: String = "|-"
 
-  def generateRefinementReport(report: ReportReference) = {
+
+  def generateRefinementReport(report: ReportReference): String = {
     val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
     val refinedReferences = ReportAnalyzer.refinedConstructs(report)
 
@@ -51,7 +52,7 @@ object ReportGenerator {
       })
     })
 
-    val latexDocument = LatexGenerator.generateLatexDocument(reportString.toString())
+    val latexDocument = LatexGenerator.generateLatexDocument(reportString.toString(), report.layout)
 
     val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
@@ -61,7 +62,7 @@ object ReportGenerator {
   }
 
 
-  def formatReference(reference: DocReference): String = {
+  private def formatReference(reference: DocReference): String = {
     reference.sanitizedName + " (" + LatexSanitizer.sanitizeName(reference.documentName) + ")"
   }
 

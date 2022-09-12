@@ -15,7 +15,7 @@ class ReferenceFormatter(
   def createWebLink(url: String): String = {
     require(url.nonEmpty, "url must not be empty")
     val webLink = LatexSyntax.createWebLink(url)
-    formatLatexListing(webLink)
+    latexInsideListing(webLink)
   } ensuring ((formatted: String) => formatted.startsWith(escapeListingBeginning)
     && formatted.endsWith(escapeListingEnding)
     && formatted.contains(url)
@@ -23,7 +23,7 @@ class ReferenceFormatter(
 
   def addReference(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
     val hyperref = LatexSyntax.addReferenceInLatex(reference, currentDocument, referenceType)
-    formatLatexListing(hyperref)
+    latexInsideListing(hyperref)
   } ensuring ((l: String) => l.contains(reference.getLabelText))
 
   def addAbstractions(abstractions: Set[DocReference], currentDocument: String): String = {
@@ -41,7 +41,7 @@ class ReferenceFormatter(
   def enrichLineWithLabel(originalLine: String, referenceText: String): String = {
     val cleanedLine = referenceText.trim()
     val label = LatexSyntax.addLabel(cleanedLine)
-    val enrichedLine = originalLine + formatLatexListing(label)
+    val enrichedLine = originalLine + latexInsideListing(label)
     enrichedLine
   } ensuring ((enriched: String) => enriched.startsWith(originalLine) && enriched.contains(referenceText))
 
@@ -50,16 +50,20 @@ class ReferenceFormatter(
       originalLine
     } else {
       val references = referencesToLinkTo.get
-      val referenceNameToLabelText = references.map(ref => ref.getName -> formatLatexListing(LatexSyntax.addClickableLocalLink(ref.getLabelText, ref.getName, LatexReferenceType.ConnectionArtifact)))
+      val referenceNameToLabelText = references.map(ref => ref.getName -> latexInsideListing(LatexSyntax.addClickableLocalLink(ref.getLabelText, ref.getName, LatexReferenceType.ConnectionArtifact)))
       val enrichedLine = referenceNameToLabelText.foldLeft(originalLine)((line, reference) => line.replace(reference._1, reference._2))
       enrichedLine
     }
   }
 
+  protected def latexInsideListing(latexListing: String): String = {
+    escapeListingBeginning + latexListing + escapeListingEnding
+  }
+
   protected def formatLatexListing(text: String): String = {
     require(text.nonEmpty, "The string to format cannot be empty.")
-    val escapedText = escapeListingBeginning + text + escapeListingEnding
-    styleFormatter.formatLatex(escapedText)
+    val formattedLatex = styleFormatter.formatLatex(text).trim.replaceAll("\\s+", " ")
+    latexInsideListing(formattedLatex)
   } ensuring ((encodedText: String) =>
     encodedText.startsWith(escapeListingBeginning)
       && encodedText.endsWith(escapeListingEnding)

@@ -24,6 +24,8 @@ class DocReference(
 
   lazy val getName: String = if referenceName.name.isEmpty then referenceName.acronym.get else referenceName.name
 
+  lazy val getShortName: String = if referenceName.acronym.isDefined && referenceName.acronym.nonEmpty then referenceName.acronym.get else referenceName.name
+
   lazy val sanitizedName: String = LatexSanitizer.sanitizeName(getName)
 
   def getAcronym: Option[String] = referenceName.acronym

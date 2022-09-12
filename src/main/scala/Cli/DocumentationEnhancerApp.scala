@@ -1,7 +1,8 @@
 package Cli
 
-import Analyzers.DocumentAnalyzer
-import Report.{LatexGenerator, ReportGenerator}
+import Analyzers.{DocumentAnalyzer, LatexDocumentData}
+import Formatter.{LatexFormatter, InlineFormatter, MarginFomatter}
+import Report.{LatexGenerator, PaperLayout, RefinementReport}
 import Utils.FileUtil
 import org.legogroup.woof.*
 import scopt.OParser
@@ -30,6 +31,9 @@ object DocumentationEnhancerApp extends App {
       opt[Unit]('l', "generateLatex")
         .action((_, c) => c.copy(generateLatex = true))
         .text("generateLatex is an optional boolean property that specifies whether to generate LaTeX documentation files."),
+      opt[String]('d', "layoutOfDocumentation")
+        .action((x, c) => c.copy(layout = x))
+        .text("dimensions is an optional boolean property that specifies the dimensions of the paper, allowed values (a4,b4)."),
       opt[String]('n', "latexTitle")
         .action((x, c) => c.copy(latexTitle = x))
         .text("latexTitle is an optional boolean property that specifies whether to generate LaTeX documentation files. " +
@@ -48,26 +52,39 @@ object DocumentationEnhancerApp extends App {
       val generateLatex = config.generateLatex
       val latexTitle = if config.latexTitle.isEmpty then "Documentation" else config.latexTitle
       val showRefinements = config.showRefinement
+      val layout = if config.layout.equalsIgnoreCase("b4") || config.layout.equalsIgnoreCase("a4") then config.layout else "a4"
       val fileTypesOfTypesOfInterest = Set("lando", "sysml", "lobot", "cry", "c", "bsv", "sv")
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
       require(files.nonEmpty, "No files found in source folder: " + sourceFolder)
-      val documents = DocumentAnalyzer.generateReport(files, latexTitle, targetFolder)
+
+      val latexDimensions = layoutStringToPaperSize(layout)
+
+      val latexGenerationData = LatexDocumentData(latexTitle, targetFolder, latexDimensions._1, latexDimensions._2)
+
+      val documents = DocumentAnalyzer.generateReport(files, latexGenerationData)
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (generateLatex) {
         LatexGenerator.generateLatexReportOfSources(documents)
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
       }
-
       if (showRefinements) {
-        ReportGenerator.generateRefinementReport(documents)
+        RefinementReport.generateRefinementReport(documents)
       }
       println("Done!")
       System.exit(0)
     case _ =>
       println("Invalid arguments!")
       System.exit(1)
+  }
+
+  def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {
+    layout.toLowerCase match {
+      case "a4" => (PaperLayout.A4, InlineFormatter())
+      case "b4" => (PaperLayout.B4, MarginFomatter())
+      case _ => (PaperLayout.A4, InlineFormatter())
+    }
   }
 
 }

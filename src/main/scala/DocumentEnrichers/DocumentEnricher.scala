@@ -12,7 +12,7 @@ import java.util.Locale
 import scala.collection.mutable
 import scala.util.matching.Regex
 
-abstract class DocumentEnricher(val formatterType: LatexFormatter = new InlineFormatter(),
+abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) {
   val latexFormatter = new ReferenceFormatter(formatterType)
 

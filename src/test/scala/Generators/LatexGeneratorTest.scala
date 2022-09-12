@@ -3,6 +3,7 @@ package Generators
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import Formatter.{InlineFormatter, LatexSyntax, MarginFomatter}
 import Report.{LatexGenerator, PaperLayout}
+import Types.DocumentInfos.DocumentInfoCompare
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -117,14 +118,6 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to generate A4 Latex Document from References" in {
-    val sysmlDocuments = getClass.getResource("../SysML").getPath
-    val landoDocuments = getClass.getResource("../Lando").getPath
-    val cryptolDocuments = getClass.getResource("../Cryptol").getPath
-
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray
-      ++ FileUtil.getListOfFiles(landoDocuments).toArray
-      ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
-
     val destinationDirectory = getClass.getResource("../").getPath + "/A4"
     val directory = new File(destinationDirectory)
     if (!directory.exists) {
@@ -134,18 +127,23 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
     }
     val latexName = "Test_SourceReport_A4"
     val latexDocumentData = LatexDocumentData(latexName, directory.getPath, PaperLayout.A4, InlineFormatter())
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
 
-    LatexGenerator.generateLatexReportOfSources(referenceReport)
-
-    //Ensure that the file was created
-
-    val latexFile = new File(directory.getPath + "/" + latexName + ".tex")
-    latexFile.exists() should be(true)
-    latexFile.delete()
+    generateReport(latexDocumentData)
   }
 
   "LatexGenerator" should "be able to generate B4 Latex Document from References" in {
+    val destinationDirectory = getClass.getResource("../").getPath + "/B4"
+    val directory = new File(destinationDirectory)
+    if (!directory.exists) {
+      directory.mkdir
+    }
+    val latexName = "Test_SourceReport_B4"
+    val latexDocumentData = LatexDocumentData(latexName, directory.getPath, PaperLayout.B4, MarginFomatter())
+
+    generateReport(latexDocumentData)
+  }
+
+  private def generateReport(latexDocumentData: LatexDocumentData): Unit = {
     val sysmlDocuments = getClass.getResource("../SysML").getPath
     val landoDocuments = getClass.getResource("../Lando").getPath
     val cryptolDocuments = getClass.getResource("../Cryptol").getPath
@@ -154,23 +152,13 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       ++ FileUtil.getListOfFiles(landoDocuments).toArray
       ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
-    val destinationDirectory = getClass.getResource("../").getPath + "/B4"
-    val directory = new File(destinationDirectory)
-    if (!directory.exists) {
-      directory.mkdir
-      // If you require it to make the entire directory path including parents,
-      // use directory.mkdirs(); here instead.
-    }
-    val latexName = "Test_SourceReport_B4"
-    val latexDocumentData = LatexDocumentData(latexName, directory.getPath, PaperLayout.B4, MarginFomatter())
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
 
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)
 
     //Ensure that the file was created
-
-    val latexFile = new File(directory.getPath + "/" + latexName + ".tex")
+    val latexFile = new File(latexDocumentData.folder + "/" + latexDocumentData.title + ".tex")
     latexFile.exists() should be(true)
-    //latexFile.delete()
+    latexFile.delete()
   }
 }

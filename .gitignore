@@ -228,3 +228,4 @@ $RECYCLE.BIN/
 .idea/libraries/sbt__org_scalatest_scalatest_wordspec_3_3_2_13_jar.xml
 .idea/codeStyles/codeStyleConfig.xml
 *.pdf
+*.aux

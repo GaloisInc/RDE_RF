@@ -27,14 +27,13 @@ object LatexGenerator {
 
   def generateList(list: List[String]): String = {
     val sb = new mutable.StringBuilder()
-    sb.append(emptyLine)
     sb.append("\\begin{itemize}")
+    sb.append(emptyLine)
     for (item <- list) {
       sb.append(s"\\item $item")
       sb.append(emptyLine)
     }
     sb.append("\\end{itemize}")
-    sb.append(emptyLine)
     sb.toString()
   }
 

@@ -81,6 +81,14 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
            |\end{alltt}""".stripMargin)
   }
 
+  "LatexGenerator" should "be able to generate itemize" in {
+    LatexGenerator.generateList(List("content")) should
+      be(
+        """|\begin{itemize}
+           |\item content
+           |\end{itemize}""".stripMargin)
+  }
+
 
   "LatexGenerator" should "be able to generate section" in {
     val sectionName = "Section"

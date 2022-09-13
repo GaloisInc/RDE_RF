@@ -13,7 +13,6 @@ class SysMLReferencer extends Referencer {
     this.addAbstractionsToDocument(documentWithSpecializations, abstractDocuments)
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
-
   override def addAbstractionsToDocument(documentInfo: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo = {
     require(documentsBeingRefined.forall(_.documentType == DocumentType.Lando))
     require(documentInfo.documentType == DocumentType.SysML)
@@ -32,7 +31,8 @@ class SysMLReferencer extends Referencer {
       updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
       updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
       updatedReferences.filter(_.getReferenceType == ReferenceType.View),
-      updatedReferences.filter(_.getReferenceType == ReferenceType.Component)
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Component),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Attribute),
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 
@@ -54,7 +54,8 @@ class SysMLReferencer extends Referencer {
       updatedReferences.filter(_.getReferenceType == ReferenceType.Event),
       updatedReferences.filter(_.getReferenceType == ReferenceType.Import),
       updatedReferences.filter(_.getReferenceType == ReferenceType.View),
-      updatedReferences.filter(_.getReferenceType == ReferenceType.Component)
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Component),
+      updatedReferences.filter(_.getReferenceType == ReferenceType.Attribute),
     )
   } ensuring ((resDoc: SysMLDocumentInfo) => DocumentInfoCompare.compare(resDoc, documentInfo))
 }

@@ -18,10 +18,8 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
 
   def keyWordsToRemove: Array[String]
 
-  //require(keyWordsToRemove.forall(_.forall(_.isLower)), "All keywords are lower case")
-
+  //require(keyWordsToRemove.forall(_.forall(_.isLower)), "All keywords are lower case")x
   def keyWordsToReference: ReferenceKeyWords
-
 
   def extractDocumentInfo(fileString: String): DocumentInfo
 
@@ -77,8 +75,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
   } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
   def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType) => A): Set[A] = {
-    require(filePath.nonEmpty)
-    //require(fileCheck(filePath))
+    require(filePath.nonEmpty, "The file path should not be empty")
     val fileName = FileUtil.getFileName(filePath)
     val fileType = getFileType(filePath)
     Control.using(io.Source.fromFile(filePath)) { source => {

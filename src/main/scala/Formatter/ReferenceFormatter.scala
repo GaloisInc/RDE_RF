@@ -2,6 +2,7 @@ package Formatter
 
 import Types.DocReference.DocReference
 import Types.LatexReferenceType
+import Types.Reference.Ref
 
 import scala.util.matching.Regex
 
@@ -45,20 +46,33 @@ class ReferenceFormatter(
     enrichedLine
   } ensuring ((enriched: String) => enriched.startsWith(originalLine) && enriched.contains(referenceText))
 
-  def highlightLineWithReferences(originalLine: String, referencesToLinkTo: Option[Set[DocReference]]): String = {
-    if (referencesToLinkTo.isEmpty) {
-      originalLine
-    } else {
-      val references = referencesToLinkTo.get
-      val referenceNameToLabelText = references.map(ref => ref.getName -> latexInsideListing(LatexSyntax.addClickableLocalLink(ref.getLabelText, ref.getName, LatexReferenceType.ConnectionArtifact)))
-      val enrichedLine = referenceNameToLabelText.foldLeft(originalLine)((line, reference) => line.replace(reference._1, reference._2))
-      enrichedLine
+  def highlightLineWithReferences(originalLine: String,
+                                  symbol: String,
+                                  referencesToLinkTo: Map[String, DocReference]): String = {
+    if (referencesToLinkTo.isEmpty) originalLine
+    else {
+      val firstPart = originalLine.split(symbol).head
+      val secondPart = originalLine.split(symbol).last
+      val enrichedSecondPart =
+        referencesToLinkTo
+          .toList
+          .sortBy(_._1.length)
+          .foldLeft(secondPart)((line, ref) => {
+          val label = latexInsideListing(LatexSyntax.addClickableLocalLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceType.ConnectionArtifact))
+          line.replace(ref._1, label)
+        })
+      val resultString = firstPart + " " + symbol + " " + enrichedSecondPart
+      resultString
     }
   }
 
+
   protected def latexInsideListing(latexListing: String): String = {
     escapeListingBeginning + latexListing + escapeListingEnding
-  }
+  } ensuring ((formatted: String) => formatted.startsWith(escapeListingBeginning)
+    && formatted.endsWith(escapeListingEnding)
+    && formatted.contains(latexListing)
+    && formatted.length > latexListing.length)
 
   protected def formatLatexListing(text: String): String = {
     require(text.nonEmpty, "The string to format cannot be empty.")

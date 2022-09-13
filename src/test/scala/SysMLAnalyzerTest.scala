@@ -1,7 +1,9 @@
+import Analyzers.DocumentAnalyzer
 import DocumentEnrichers.SysMLDocumentEnricher
-import Formatter.InlineFormatter
+import Formatter.{InlineFormatter, ReferenceFormatter}
 import TestUtils.TestUtility
 import Types.*
+import Types.DocReference.DocReference
 import Utils.{Control, FileUtil}
 import org.scalatest.*
 import org.scalatest.flatspec.*
@@ -12,7 +14,6 @@ import scala.None
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.matching.Regex
-import DocReference.DocReference
 
 
 class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
@@ -98,6 +99,38 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     val fileName = "RTS_Actions"
     testUtility.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, numberExprectedSystem = 4, numberOfEvents = 20)
   }
+
+  "SysMLReader" should "to extract and Enrich Glossary" in {
+    val fileName = "RTS_Glossary"
+    val file = getClass.getResource(s"SysML/$fileName.sysml").getFile
+    val documentInfo = documentEnricher.extractDocumentInfo(file)
+    val referencesWithReferences = documentInfo.getAllReferences.filter(_.isReferencingAnything)
+    assert(referencesWithReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
+    DocumentAnalyzer.addReferences(documentInfo, documentInfo.getAllReferences)
+    val referencesWithActualReferences = documentInfo.getAllReferences.filter(_.getReferences.nonEmpty)
+    assert(referencesWithActualReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
+
+    val formatter = ReferenceFormatter(InlineFormatter())
+
+    val reference = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Synthesizer")).get
+    val enrichedLineSynthesize = reference.enrichedLine(formatter)
+
+    assert(enrichedLineSynthesize.contains("\\hyperref"), "Synthesizer not enriched")
+
+    val referenceASIC = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("ASIC")).get
+    val enrichedLineASIC = referenceASIC.enrichedLine(formatter)
+
+    assert(enrichedLineASIC.contains("\\hyperref"), "ASIC not enriched")
+
+    val referenceUniversalSerialBus = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Universal Serial Bus")).get
+    val enrichedLineUniversalSerialBus = referenceUniversalSerialBus.enrichedLine(formatter)
+
+    assert(enrichedLineUniversalSerialBus.contains("\\hyperref"), "Universal Serial Bus not enriched with reference.")
+
+    val differences = referencesWithReferences.diff(referencesWithActualReferences)
+    differences.size should be(7)
+  }
+
 
 }
 

@@ -160,7 +160,6 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       ++ FileUtil.getListOfFiles(landoDocuments).toArray
       ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
 
-
     val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)
 

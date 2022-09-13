@@ -19,12 +19,13 @@ object LandoParser extends Parser {
 
   def parse(fileToAnalyze: String): ParsedDocument = {
     require(fileToAnalyze.nonEmpty, "File to analyze cannot be empty")
+    val fileName = FileUtil.getFileName(fileToAnalyze)
 
     val lines = Utils.Control.using(io.Source.fromFile(fileToAnalyze)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
 
-    val parsedLines = lines.map(parseLine).filter(_.isDefined).map(_.get)
+    val parsedLines = lines.map(l => parseLine(l, fileName)).filter(_.isDefined).map(_.get)
     val documentName = FileUtil.getFileName(fileToAnalyze)
 
     ParsedDocument(
@@ -35,13 +36,13 @@ object LandoParser extends Parser {
     )
   }
 
-  def parseLine(line: String): Option[ParsedReference] = {
+  def parseLine(line: String, documentName: String): Option[ParsedReference] = {
     cleanLine(line) match {
       case lineCommentsRegex() | multiLineCommentsRegex() | emptyLineRegex() => None
-      case relationRegex(source, relationType, target) => Some(Relation("", line, ReferenceType.Relation, source, relationType, target))
-      case componentRegex(name, acronym) => Some(ParsedRef(name, line, ReferenceType.Component, acronym))
-      case systemRegex(name, acronym) => Some(ParsedRef(name, line, ReferenceType.System, acronym))
-      case subsystemRegex(name, acronym) => Some(ParsedRef(name, line, ReferenceType.SubSystem, acronym))
+      case relationRegex(source, relationType, target) => Some(Relation("", line, documentName, DocumentType.Lando, ReferenceType.Relation, source, relationType, target))
+      case componentRegex(name, acronym) => Some(ParsedRef(name, line, documentName, DocumentType.Lando, ReferenceType.Component, acronym))
+      case systemRegex(name, acronym) => Some(ParsedRef(name, line, documentName, DocumentType.Lando, ReferenceType.System, acronym))
+      case subsystemRegex(name, acronym) => Some(ParsedRef(name, line, documentName, DocumentType.Lando, ReferenceType.SubSystem, acronym))
       case _ => None
     }
   }

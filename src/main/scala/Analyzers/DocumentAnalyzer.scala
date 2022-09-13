@@ -34,19 +34,19 @@ object DocumentAnalyzer {
                      sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
 
-      if sortFiles then
-        enrichAndSortFiles(filesToAnalyze, latexDocumentData)
-      else {
-        val enrichedDocuments = enrichDocuments(filesToAnalyze, latexDocumentData.latexFormatter)
-        ReportReference(
-          latexDocumentData.title,
-          latexDocumentData.folder,
-          FileUtil.getLandoDocuments(enrichedDocuments).map(_.asInstanceOf[LandoDocumentInfo]),
-          FileUtil.getSysMLDocuments(enrichedDocuments).map(_.asInstanceOf[SysMLDocumentInfo]),
-          FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]),
-          latexDocumentData.layout
-        )
-      }
+    if sortFiles then
+      enrichAndSortFiles(filesToAnalyze, latexDocumentData)
+    else {
+      val enrichedDocuments = enrichDocuments(filesToAnalyze, latexDocumentData.latexFormatter)
+      ReportReference(
+        latexDocumentData.title,
+        latexDocumentData.folder,
+        FileUtil.getLandoDocuments(enrichedDocuments).map(_.asInstanceOf[LandoDocumentInfo]),
+        FileUtil.getSysMLDocuments(enrichedDocuments).map(_.asInstanceOf[SysMLDocumentInfo]),
+        FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]),
+        latexDocumentData.layout
+      )
+    }
   }
 
   def enrichAndSortFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData): ReportReference = {
@@ -156,8 +156,28 @@ object DocumentAnalyzer {
     val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addRefinementRelations(doc, landoDocuments.map(_.asInstanceOf[DocumentInfo]), enrichedCryptolDocuments))
     val enrichedLandoDocuments = landoDocuments.map(doc => landoReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], enrichedSysMLDocuments))
 
+    enrichedLandoDocuments.foreach(doc => addReferences(doc, enrichedLandoDocuments.flatMap(_.getAllReferences).toSet))
+    enrichedSysMLDocuments.foreach(doc => addReferences(doc, enrichedSysMLDocuments.flatMap(_.getAllReferences).toSet))
+    enrichedCryptolDocuments.foreach(doc => addReferences(doc, enrichedCryptolDocuments.flatMap(_.getAllReferences).toSet))
+
     enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments
   } ensuring ((res: Array[DocumentInfo]) => res.length == filesToAnalyze.length)
+
+
+  def addReferences(document: DocumentInfo, references: Set[DocReference]): Unit = {
+    val referencesToUpdate: Set[DocReference] = document.getAllReferences.filter(ref => ref.isReferencingAnything)
+    referencesToUpdate.foreach(reference => {
+      val potentialReferences: Map[String, DocReference] =
+        references.flatMap(r => {
+          reference.getStringReferences.get
+            .map(ref => Matcher.getReferenceName(ref.name, r.getReferenceName))
+            .filter(_.isDefined)
+            .map(_.get)
+            .map(ref => (ref, r))
+        }).toMap
+      potentialReferences.foreach(ref => reference.addReference(ref))
+    })
+  }
 
 
   //  def cleanUpUnusedGlossaries(filesToAnalyze: Array[String]): Array[String] = {

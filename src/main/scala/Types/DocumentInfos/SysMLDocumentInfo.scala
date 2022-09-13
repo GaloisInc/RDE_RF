@@ -16,6 +16,7 @@ class SysMLDocumentInfo(
                          imports: Set[DocReference],
                          views: Set[DocReference],
                          items: Set[DocReference],
+                         attributes: Set[DocReference],
                          override val documentType: DocumentType = DocumentType.SysML
                        ) extends DocumentInfo {
 
@@ -31,6 +32,7 @@ class SysMLDocumentInfo(
             imports: Set[DocReference] = imports,
             views: Set[DocReference] = views,
             items: Set[DocReference] = items,
+            attributes: Set[DocReference] = attributes,
             documentType: DocumentType = documentType
           ): SysMLDocumentInfo = {
     new SysMLDocumentInfo(
@@ -45,11 +47,12 @@ class SysMLDocumentInfo(
       imports,
       views,
       items,
+      attributes,
       documentType
     )
   }
 
-  private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component)
+  private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
 
   require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.SysML && ref.getDocumentName == documentName))
   require(parts.forall(_.getReferenceType == ReferenceType.SubSystem))
@@ -60,13 +63,14 @@ class SysMLDocumentInfo(
   require(imports.forall(_.getReferenceType == ReferenceType.Import))
   require(usecases.forall(_.getReferenceType == ReferenceType.Scenario))
   require(items.forall(_.getReferenceType == ReferenceType.Component))
+  require(attributes.forall(_.getReferenceType == ReferenceType.Attribute))
 
   //All referenceNames must be unique
 
   require(requirements.forall(_.getReferenceType == ReferenceType.Requirement))
 
   override lazy val getAllReferences: Set[DocReference] = {
-    packages ++ parts ++ connections ++ usecases ++ requirements ++ actions ++ imports ++ views ++ items
+    packages ++ parts ++ connections ++ usecases ++ requirements ++ actions ++ imports ++ views ++ items ++ attributes
   }
 
   override def getRelations: Set[DocRelation] = Set.empty

@@ -27,7 +27,7 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine)
 
     docReference.getDocumentName should be(documentName)
-    docReference.getReference should be(referenceName)
+    docReference.getReferenceName should be(referenceName)
     docReference.getReferenceType should be(referenceType)
     docReference.getDocumentType should be(documentType)
     docReference.getOriginalLine should be(originalLine)
@@ -51,7 +51,7 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val abstraction = DocReference(documentName, referenceNameOfAbstraction, referenceType, documentType, originalLine)
     val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
     docReference.getDocumentName should be(documentName)
-    docReference.getReference should be(referenceName)
+    docReference.getReferenceName should be(referenceName)
     docReference.getReferenceType should be(referenceType)
     docReference.getDocumentType should be(documentType)
     docReference.getOriginalLine should be(originalLine)

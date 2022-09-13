@@ -58,24 +58,11 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
 
   protected def addRefinementsOfToDocReference(reference: DocReference, refinements: Set[DocReference]): DocReference = {
     val newRefinements = reference.getRefinements.getOrElse(Set.empty) ++ refinements
-    DocReference(reference.getDocumentName,
-      reference.getReference,
-      reference.getReferenceType,
-      reference.getDocumentType,
-      reference.getOriginalLine,
-      reference.getAbstractions,
-      Some(newRefinements))
+    reference.copy(abstractionOf = Some(newRefinements))
   } ensuring ((ref: DocReference) => ref.getRefinements.isDefined)
 
   protected def referenceRefines(reference: DocReference, abstractions: Set[DocReference]): DocReference = {
     val newAbstractions = reference.getAbstractions.getOrElse(Set.empty) ++ abstractions
-    DocReference(reference.getDocumentName,
-      reference.getReference,
-      reference.getReferenceType,
-      reference.getDocumentType,
-      reference.getOriginalLine,
-      Some(newAbstractions),
-      reference.getRefinements)
+    reference.copy(refinementOf = Some(newAbstractions))
   } ensuring ((ref: DocReference) => ref.getAbstractions.isDefined)
-
 }

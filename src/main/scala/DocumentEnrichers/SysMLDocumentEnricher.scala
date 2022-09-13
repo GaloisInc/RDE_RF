@@ -21,7 +21,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   val requirementRegex: Regex = """^requirement\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
   val usecaseRegex: Regex = """^use case\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
   val actionRegex: Regex = """^action\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(:>|:)?\s*(.*)""".r
-  val importRegex: Regex = """^import\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*('(.*?)')?""".r
+  val importRegex: Regex = """^import\\s*('(.*?)')::.*""".r
   val viewRegex: Regex = """^view\s*(?:def)?\s*(?:id)?\s*(?:'(.*?)')(?:\s*:\s*(?:'(.*)'))?""".r
   val viewPointRegex: Regex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
   val connectionRegex: Regex = """^connect\s*(\.*)\s=to\s+(.*?)""".r
@@ -63,8 +63,8 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     val imports: Set[DocReference] = Set.empty[DocReference]
     val views: Set[DocReference] = extractReferences(filePath, ReferenceType.View)
     val viewPoints: Set[DocReference] = extractReferences(filePath, ReferenceType.ViewPoint)
-    val attributes: Set[DocReference] = extractReferences(filePath, ReferenceType.Attribute)
-    //val ports: Set[DocReference] = extractAttributes(filePath)
+    val attributes: Set[DocReference] = Set.empty[DocReference]//extractReferences(filePath, ReferenceType.Attribute)
+    //val ports: Set[DocReference] = extractReferences(filePath, ReferenceType.Port)
 
     SysMLDocumentInfo(
       fileName,
@@ -78,7 +78,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
       imports,
       views,
       items,
-      //attributes
+      attributes
     )
   }
 

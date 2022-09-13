@@ -5,8 +5,9 @@ final case class RelationReference(
                               targetName: String,
                             ){
 
-  require(sourceName != targetName, "sourceName and targetName must be different")
   require(sourceName.nonEmpty, "sourceName must not be empty")
   require(targetName.nonEmpty, "targetName must not be empty")
+  require(sourceName != targetName, "sourceName and targetName must be different")
+
   override def toString: String = s"$sourceName -> $targetName"
 }

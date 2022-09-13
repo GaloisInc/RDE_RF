@@ -10,8 +10,4 @@ trait EnrichableString {
   require(originalLine.nonEmpty, "originalLine must not be empty")
 }
 
-trait DocumentReference {
-  def documentName: String
 
-  require(documentName.nonEmpty, "documentName must not be empty")
-}

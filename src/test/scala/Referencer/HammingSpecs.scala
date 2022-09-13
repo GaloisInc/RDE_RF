@@ -1,4 +1,5 @@
-import Referencer.{Hamming, SysMLReferencer}
+package Referencer
+
 import Types.DocReference.DocReference
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.Control

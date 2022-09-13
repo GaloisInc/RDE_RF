@@ -15,7 +15,6 @@ import scala.collection.mutable
 object RefinementReport {
   private val refinementSymbol: String = "|-"
 
-
   def generateRefinementReport(report: ReportReference): String = {
     val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
     val refinedReferences = ReportAnalyzer.refinedConstructs(report)
@@ -33,7 +32,6 @@ object RefinementReport {
     reportString.append(LatexGenerator.emptyLine)
 
     reportString.append(LatexGenerator.addContentInsideEnvironment(refinementChains.toArray, "alltt"))
-
 
     reportString.append(LatexSyntax.generateSection("NonRefined"))
     reportString.append(LatexGenerator.emptyLine)

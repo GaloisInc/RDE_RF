@@ -18,8 +18,8 @@ object LandoEnricher {
 
   private def enrichRelation(relation: DocRelationFromParser, references: Set[DocReference], docName: String): DocRelation = {
     require(references.nonEmpty, "references must not be empty")
-    val sourceReference = references.filter(ref => Matcher.referenceNameMatches(relation.getSourceName, ref.getReference))
-    val targetReference = references.filter(ref => Matcher.referenceNameMatches(relation.getTargetName, ref.getReference))
+    val sourceReference = references.filter(ref => Matcher.referenceNameMatches(relation.getSourceName, ref.getReferenceName))
+    val targetReference = references.filter(ref => Matcher.referenceNameMatches(relation.getTargetName, ref.getReferenceName))
 
     assert(sourceReference.nonEmpty, s"Relation source reference not found: ${relation.getSourceName} in $docName")
     assert(targetReference.nonEmpty, s"Relation target reference not found: ${relation.getTargetName} in $docName")

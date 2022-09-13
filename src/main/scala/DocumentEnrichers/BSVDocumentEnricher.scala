@@ -15,9 +15,9 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   val systemRegex: Regex = """^package\s+(\w+)\s*""".r
   val subsystemRegex: Regex = """^module\s+(\w+)\s*\((\w+)\)\s*""".r
 
-  def extractDocumentInfo(filePath: String): BSVDocumentInfo = {
-    require(filePath.nonEmpty)
-    require(FileUtil.getFileType(filePath) == "bsv")
+  def parseDocument(filePath: String): BSVDocumentInfo = {
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(FileUtil.getFileType(filePath) == "bsv", "filePath must be a BSV file")
 
     val fileName = FileUtil.getFileName(filePath)
     val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
@@ -47,5 +47,4 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     line.trim.stripSuffix(";").stripSuffix(",").stripSuffix("]").stripSuffix("}").stripSuffix("{")
   }
 
-  override def getFileType(path: String): FileType = FileType.ComponentFile
 }

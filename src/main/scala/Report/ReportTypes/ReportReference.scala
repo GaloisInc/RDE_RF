@@ -1,6 +1,7 @@
 package Report.ReportTypes
 
 import Report.PaperLayout
+import Types.DocReference.DocReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
 
 case class ReportReference(title: String,
@@ -20,4 +21,20 @@ case class ReportReference(title: String,
     val docMap = allDocuments.map(doc => doc.documentName -> doc.filePath).toMap
     docMap
   } //ensuring(_.size == allDocuments.length, "All documents must be present in the map")
+  
+  lazy val getAllReferences = allDocuments.flatMap(_.getAllReferences)
+
+  def getNonRefinedReferences: Set[DocReference] = {
+    val allReferences = getAllReferences
+    val notReferenced = allReferences.filterNot(_.isInRefinementChain)
+    notReferenced.toSet
+  } ensuring(_.subsetOf(getAllReferences.toSet), "All non-refined references must be in the set of all references")
+
+  def getRefinedReferences: Set[DocReference] = {
+    val allReferences = getAllReferences
+    val referenced = allReferences.filter(_.isInRefinementChain)
+    referenced.toSet
+  } ensuring(_.subsetOf(getAllReferences.toSet), "All refined references must be in the set of all references")
+  
+  
 }

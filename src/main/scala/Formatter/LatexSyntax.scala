@@ -2,7 +2,7 @@ package Formatter
 
 import Formatter.LatexSanitizer.{sanitizeName, sanitizeWebLink}
 import Types.DocReference.DocReference
-import Types.LatexReferenceType
+import Types.{DocumentType, LatexReferenceType}
 
 object LatexSyntax {
   def addLabel(reference: String): String = s"\\label{$reference}" // \\hypertarget{$reference}{}"
@@ -18,6 +18,19 @@ object LatexSyntax {
       case LatexReferenceType.ConnectionArtifact => s"\\hyperref[$reference]{$sanitizedReference}"
   }
 
+
+  def colorText(text: String, documentType: DocumentType): String = {
+    require(text.nonEmpty, "Text must not be empty")
+    val color = documentType match
+      case DocumentType.Lando => "blue"
+      case DocumentType.Lobot => "red"
+      case DocumentType.SysML => "green"
+      case DocumentType.Cryptol => "purple"
+      case DocumentType.Saw => "orange"
+      case DocumentType.SV => "brown"
+      case DocumentType.BSV => "pink"
+    s"\\textcolor{$color}{$text}"
+  } ensuring(coloredString => coloredString.contains(text), "Text must be contained in colored string")
 
   def addCref(reference: String): String = {
     require(reference.nonEmpty, "Reference must not be empty")

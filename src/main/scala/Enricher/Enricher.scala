@@ -26,9 +26,4 @@ object LandoEnricher {
     DocRelation(relation.documentName, relation.relationReference, relation.relationType, relation.originalLine, sourceReference.headOption, targetReference.headOption)
   } ensuring (res => res.documentName == relation.documentName && res.getRelationType == relation.relationType && res.originalLine == relation.originalLine)
 
-  //def enrichDocument(doc: ParsedDocument, references: Set[DocReference]): LandoDocumentInfo = {
-  //val relations = enrichRelations(doc.relations, references, doc.documentName)
-  // LandoDocumentInfo(doc.documentName, doc.documentType, doc.originalLines, relations, references)
-  // }
-
 }

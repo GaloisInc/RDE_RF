@@ -48,8 +48,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
     val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
 
-    val analysedLandoDocument = landoDocumentEnricher.extractDocumentInfo(landoFilesToAnalyse.head)
-    val analysedSysMLDocument = sysMLDocumentEnricher.extractDocumentInfo(sysMLFilesToAnalyse.head)
+    val analysedLandoDocument = landoDocumentEnricher.parseDocument(landoFilesToAnalyse.head)
+    val analysedSysMLDocument = sysMLDocumentEnricher.parseDocument(sysMLFilesToAnalyse.head)
 
     val coqReferenceName = analysedSysMLDocument.getAllReferences.filter(_.getName.equalsIgnoreCase("coq")).head
 
@@ -63,8 +63,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
     val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
 
-    val analysedLandoDocument = landoDocumentEnricher.extractDocumentInfo(landoFilesToAnalyse.head)
-    val analysedSysMLDocument = sysMLDocumentEnricher.extractDocumentInfo(sysMLFilesToAnalyse.head)
+    val analysedLandoDocument = landoDocumentEnricher.parseDocument(landoFilesToAnalyse.head)
+    val analysedSysMLDocument = sysMLDocumentEnricher.parseDocument(sysMLFilesToAnalyse.head)
 
     analysedSysMLDocument.getAllReferences.forall(
       sysMLRef => {

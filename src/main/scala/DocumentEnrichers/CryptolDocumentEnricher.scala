@@ -12,16 +12,15 @@ import scala.util.matching.Regex
 class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
                               override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
   // Reads a Document to create an object of the necessary information to enrich the document.
-
   //Regex to match
   val typeRegex: Regex = """^type\s+(.*?)\s*=\s*.*""".r
   val propertyRegex: Regex = """^property\s+(.*?)\s+.*""".r
   val eventRegex: Regex = """^(.*?)\s*:\s*.*\s*->.*""".r
   val importRegex: Regex = """^import\s+(\w*)\s*::\s*(\w*).*""".r
 
-  def extractDocumentInfo(filePath: String): CryptolDocumentInfo = {
-    require(filePath.nonEmpty)
-    require(FileUtil.getFileType(filePath) == "cry")
+  def parseDocument(filePath: String): CryptolDocumentInfo = {
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(FileUtil.getFileType(filePath) == "cry", "filePath must be a Cryptol file")
     val fileName = FileUtil.getFileName(filePath)
     val references = Control.extractReferences(filePath, (l:String) => transformReference(l, fileName))
     val types: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.Type)
@@ -53,9 +52,5 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
 
   def cleanString(str: String): String = {
     str.strip()
-  }
-
-  def getFileType(path: String): FileType = {
-    FileType.ComponentFile
   }
 }

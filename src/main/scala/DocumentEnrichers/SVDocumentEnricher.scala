@@ -13,7 +13,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
   // Reads a Document to create an object of the necessary information to enrich the document.
   val subsystemRegex: Regex = """^module\s+(\w+)\s*""".r
 
-  def extractDocumentInfo(filePath: String): SVDocumentInfo = {
+  def parseDocument(filePath: String): SVDocumentInfo = {
     require(filePath.nonEmpty)
     require(FileUtil.getFileType(filePath) == "sv")
     val fileName = FileUtil.getFileName(filePath)
@@ -30,7 +30,6 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
       case _ => line
   }
 
-
   def transformReference(line: String, fileName: String): Option[DocReference] = {
     cleanString(line) match
       case subsystemRegex(systemName) => Some(DocReference(fileName, ReferenceName(systemName, None), ReferenceType.System, DocumentType.SV, line))
@@ -41,7 +40,4 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     line.strip()
   } ensuring ((res: String) => res.length <= line.length)
 
-  def getFileType(path: String): FileType = {
-    FileType.ComponentFile
-  }
 }

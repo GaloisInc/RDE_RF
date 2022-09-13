@@ -16,14 +16,14 @@ object RefinementReport {
   private val refinementSymbol: String = "|-"
 
   def generateRefinementReport(report: ReportReference): String = {
-    val noneRefinedReferences = ReportAnalyzer.notRefinedConstructs(report)
-    val refinedReferences = ReportAnalyzer.refinedConstructs(report)
+    val noneRefinedReferences = report.getNonRefinedReferences
+    val refinedReferences = report.getRefinedReferences
 
     val documentNameToFilePath = report.allDocumentNamesToPaths
 
     val topOfRefinementChain = ReportAnalyzer.topOfRefinementChain(refinedReferences)
 
-    val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref, s"${ref.documentName}.${ref.sanitizedName}"))
+    val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref))
 
     val reportString = mutable.StringBuilder()
 
@@ -64,16 +64,23 @@ object RefinementReport {
     reference.sanitizedName + " (" + LatexSanitizer.sanitizeName(reference.documentName) + ")"
   }
 
-  @tailrec
-  def formatReferenceChain(docReference: DocReference, acc: String): String = {
-    docReference.getRefinements match
-      case Some(refinements) =>
-        val arbitraryRefinement = refinements.head
-        //assert(refinements.forall(_.getRefinements == arbitraryRefinement.getRefinements), "All similar refinements must refine the same abstractions.")
-        val refinementText = refinements.map(ref => s"${ref.documentName}.${ref.sanitizedName}").mkString("\\{", ", ", "\\}")
-        val newAcc = acc + refinementSymbol + refinementText
-        formatReferenceChain(arbitraryRefinement, newAcc)
-      case None => acc
-  }
+  def formatReferenceChain(reference: DocReference): String = {
+    @tailrec
+    def formatReferenceChainRec(docReference: DocReference, acc: String): String = {
+      docReference.getRefinements match
+        case Some(refinements) =>
+          val arbitraryRefinement = refinements.head
+          val refinementText = refinements.map(ref => {
+            val text = s"${ref.documentName}.${ref.sanitizedName}"
+            LatexSyntax.colorText(text, ref.getDocumentType)
+          }).mkString("\\{", ", ", "\\}")
+          val newAcc = acc + refinementSymbol + refinementText
+          formatReferenceChainRec(arbitraryRefinement, newAcc)
+        case None => acc
+    }
 
+    val startString = s"${reference.documentName}.${reference.sanitizedName}"
+    val coloredStartString = LatexSyntax.colorText(startString, reference.getDocumentType)
+    formatReferenceChainRec(reference, coloredStartString)
+  }
 }

@@ -17,14 +17,11 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
   val latexFormatter = new ReferenceFormatter(formatterType)
 
 
-  def extractDocumentInfo(fileString: String): DocumentInfo
-
-  def getFileType(path: String): FileType
+  def parseDocument(fileString: String): DocumentInfo
 
   def formatLine(line: String, documentInfo: DocumentInfo): String
 
-  def enrichFile(documentInfo: DocumentInfo): String = {
-    //documentChecker(documentInfo)
+  def decorateFile(documentInfo: DocumentInfo): String = {
     val filePath = documentInfo.filePath
     val decoratedFilePath = FileUtil.decorateFileName(filePath)
     val decoratedFile = new File(decoratedFilePath) // Temporary File
@@ -56,37 +53,17 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
   def enrichDocuments(filesToAnalyze: Array[String]): Array[String] = {
     filesToAnalyze.indices.map(idx => {
       val currentFile = filesToAnalyze(idx)
-      val documentInfo = extractDocumentInfo(currentFile)
-      enrichFile(documentInfo)
+      val documentInfo = parseDocument(currentFile)
+      decorateFile(documentInfo)
     }).toArray
   } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
-  def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType) => A): Set[A] = {
-    require(filePath.nonEmpty, "The file path should not be empty")
-    val fileName = FileUtil.getFileName(filePath)
-    val fileType = getFileType(filePath)
-    Control.using(io.Source.fromFile(filePath)) { source => {
-      val lines = source.getLines().toArray
-      lines
-        .indices.filter(idx => {
-        val line = lines(idx)
-        val prevInd = if idx > 0 then idx - 1 else idx
-        val previousLine = lines(prevInd)
-        filter(line, previousLine)
-      }).map(idx => {
-        val line = lines(idx)
-        transformer(line, fileName, fileType)
-      }).toSet
-    }
-    }
-  }
-  protected def extractEnrichedText[A <: EnrichableString ](line: String, references: Set[A]): String = {
+  protected def extractEnrichedText[A <: EnrichableString](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)
     if relevantRefs.isEmpty
     then
       line
     else
-    // assert(relevantRefs.size == 1, "There should be only one reference per line")
       relevantRefs.headOption match
         case None => ""
         case Some(value) => value.enrichedLine(latexFormatter)

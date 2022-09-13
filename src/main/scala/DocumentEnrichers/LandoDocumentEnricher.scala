@@ -6,7 +6,7 @@ import Types.*
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.FileType.*
-import Utils.FileUtil
+import Utils.{Control, FileUtil}
 
 import java.util.Locale
 import scala.util.matching.Regex
@@ -21,7 +21,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+(?:\((.*)\)))?""".r
   val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
 
-  def extractDocumentInfo(filePath: String): LandoDocumentInfo = {
+  def parseDocument(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(FileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
@@ -165,6 +165,26 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     if (FileUtil.isOfFileType(path, "requirements")) return FileType.RequirementFile
     if (FileUtil.isOfFileType(path, "scenarios")) return FileType.ScenarioFile
     FileType.ComponentFile
+  }
+
+  def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType) => A): Set[A] = {
+    require(filePath.nonEmpty, "The file path should not be empty")
+    val fileName = FileUtil.getFileName(filePath)
+    val fileType = getFileType(filePath)
+    Control.using(io.Source.fromFile(filePath)) { source => {
+      val lines = source.getLines().toArray
+      lines
+        .indices.filter(idx => {
+        val line = lines(idx)
+        val prevInd = if idx > 0 then idx - 1 else idx
+        val previousLine = lines(prevInd)
+        filter(line, previousLine)
+      }).map(idx => {
+        val line = lines(idx)
+        transformer(line, fileName, fileType)
+      }).toSet
+    }
+    }
   }
 
 

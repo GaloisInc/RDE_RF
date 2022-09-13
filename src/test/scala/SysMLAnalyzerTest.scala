@@ -105,7 +105,7 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
   "SysMLReader" should "to extract and Enrich Glossary" in {
     val fileName = "RTS_Glossary"
     val file = getClass.getResource(s"SysML/$fileName.sysml").getFile
-    val documentInfo = documentEnricher.extractDocumentInfo(file)
+    val documentInfo = documentEnricher.parseDocument(file)
     val referencesWithReferences = documentInfo.getAllReferences.filter(_.isReferencingAnything)
     assert(referencesWithReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
     DocumentAnalyzer.addReferences(documentInfo, documentInfo.getAllReferences)

@@ -27,7 +27,7 @@ class TestUtility {
     assert(documentOfInterest.length == 1)
     val filePath = documentOfInterest.head
 
-    val analyzedDocument = documentEnricher.extractDocumentInfo(filePath)
+    val analyzedDocument = documentEnricher.parseDocument(filePath)
     assert(analyzedDocument.documentName == fileName, "Document name is not correct")
     assert(analyzedDocument.documentType == expectedDocumentType, "Document type is not correct")
 

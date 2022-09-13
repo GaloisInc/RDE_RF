@@ -25,7 +25,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   val viewPointRegex: Regex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
   val connectionRegex: Regex = """^connect\s*(\.*)\s=to\s+(.*?)""".r
 
-  def extractDocumentInfo(filePath: String): SysMLDocumentInfo = {
+  def parseDocument(filePath: String): SysMLDocumentInfo = {
     require(filePath.nonEmpty)
     require(FileUtil.getFileType(filePath) == "sysml")
 
@@ -120,12 +120,4 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     extractedReference
   }
 
-
-  def getFileType(path: String): FileType = {
-    if (FileUtil.isOfFileType(path, "action")) FileType.EventFile
-    else if (FileUtil.isOfFileType(path, "requirement")) FileType.RequirementFile
-    else if (FileUtil.isOfFileType(path, "use case")) FileType.ScenarioFile
-    else if (FileUtil.isOfFileType(path, "view")) FileType.ViewFile
-    FileType.ComponentFile
-  }
 }

@@ -16,25 +16,12 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) {
   val latexFormatter = new ReferenceFormatter(formatterType)
 
-  def keyWordsToRemove: Array[String]
-
-  //require(keyWordsToRemove.forall(_.forall(_.isLower)), "All keywords are lower case")x
-  def keyWordsToReference: ReferenceKeyWords
 
   def extractDocumentInfo(fileString: String): DocumentInfo
 
   def getFileType(path: String): FileType
 
   def formatLine(line: String, documentInfo: DocumentInfo): String
-
-  def removeKeyWords(line: String): String = {
-    keyWordsToRemove.foldRight(line)((keyWord, l) => {
-      l.replaceAll(keyWord, "")
-    }).strip()
-      .replaceAll(" +", " ")
-  } ensuring((res: String) => res.length <= line.length
-    && keyWordsToRemove.forall(unwantedKeyword => !res.contains(unwantedKeyword)), "The result should not contain any of the keywords")
-
 
   def enrichFile(documentInfo: DocumentInfo): String = {
     //documentChecker(documentInfo)
@@ -56,7 +43,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
         if line.isEmpty && lastLine.isEmpty
         then lastLine = line
         else
-          val highLighted = highlightLinks(line)
+          val highLighted = highlightURLLinks(line)
           writer.println(highLighted)
           lastLine = line
       })
@@ -93,8 +80,6 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
     }
     }
   }
-
-
   protected def extractEnrichedText[A <: EnrichableString ](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)
     if relevantRefs.isEmpty
@@ -107,42 +92,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
         case Some(value) => value.enrichedLine(latexFormatter)
   }
 
-  protected def getReferenceType(line: String): Option[ReferenceType] = {
-    def matchKeyword(line: String, keyWord: String): Boolean = {
-      require(keyWord.nonEmpty)
-      line.startsWith(keyWord + " ")
-    }
-
-    val lowerCaseLine = removeKeyWords(line).toLowerCase(Locale.US).strip()
-    if matchKeyword(lowerCaseLine, keyWordsToReference.System) then
-      Some(ReferenceType.System)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.SubSystem) then
-      Some(ReferenceType.SubSystem)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Component) then
-      Some(ReferenceType.Component)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Scenario) then
-      Some(ReferenceType.Scenario)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Requirement) then
-      Some(ReferenceType.Requirement)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Event) then
-      Some(ReferenceType.Event)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Connection) then
-      Some(ReferenceType.Connection)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Import) then
-      Some(ReferenceType.Import)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.View) then
-      Some(ReferenceType.View)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.ViewPoint) then
-      Some(ReferenceType.ViewPoint)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Attribute) then
-      Some(ReferenceType.Attribute)
-    else if matchKeyword(lowerCaseLine, keyWordsToReference.Type) then
-      Some(ReferenceType.Type)
-    else
-      None
-  }
-
-  def highlightLinks(str: String): String = {
+  def highlightURLLinks(str: String): String = {
     val urlRegex = Regex("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")
     val urls = urlRegex findAllIn str
     if urls.isEmpty then str

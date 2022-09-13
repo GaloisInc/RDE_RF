@@ -58,9 +58,9 @@ class ReferenceFormatter(
           .toList
           .sortBy(_._1.length)
           .foldLeft(secondPart)((line, ref) => {
-          val label = latexInsideListing(LatexSyntax.addClickableLocalLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceType.ConnectionArtifact))
-          line.replace(ref._1, label)
-        })
+            val label = latexInsideListing(LatexSyntax.addClickableLocalLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceType.ConnectionArtifact))
+            line.replace(ref._1, label)
+          })
       val resultString = firstPart + " " + symbol + " " + enrichedSecondPart
       resultString
     }

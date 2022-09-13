@@ -1,7 +1,7 @@
 package Cli
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
-import Formatter.{LatexFormatter, InlineFormatter, MarginFomatter}
+import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
 import Report.{LatexGenerator, PaperLayout, RefinementReport}
 import Utils.FileUtil
 import org.legogroup.woof.*
@@ -10,9 +10,7 @@ import scopt.OParser
 import scala.io.StdIn
 import scala.util.matching.Regex
 
-
 object DocumentationEnhancerApp extends App {
-
   val builder = OParser.builder[CLIConfig]
 
   val parser = {
@@ -45,7 +43,7 @@ object DocumentationEnhancerApp extends App {
     )
   }
 
-  OParser.parse(parser, args, CLIConfig(), OParserSetup()) match {
+  OParser.parse(parser, args = Seq(), CLIConfig(), OParserSetup()) match {
     case Some(config) =>
       val sourceFolder = config.sourceFolder
       val targetFolder = config.targetFolder
@@ -86,5 +84,4 @@ object DocumentationEnhancerApp extends App {
       case _ => (PaperLayout.A4, InlineFormatter())
     }
   }
-
 }

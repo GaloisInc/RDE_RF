@@ -14,23 +14,6 @@ import scala.util.matching.Regex
 class LandoDocumentEnricher(override val formatterType: LatexFormatter,
                             override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
 
-  val keyWordsToRemove: Array[String] = Array("private", "requirements", "events", "scenarios")
-
-  //Lando
-  val keyWordsToReference: ReferenceKeyWords = ReferenceKeyWords(
-    System = "system",
-    // Lando SubSystem and SysML Part
-    SubSystem = "subsystem",
-    // Lando Component and SysML Item
-    Component = "component",
-    // SysML Use case and Lando Scenario
-    //Scenario = "",
-    // SysML and Lando Requirement and Cryptol Properties
-    //Requirement = "",
-    // Lando Event, SysML Action and Cryptol Functions
-    //Event = "",
-    Import = "import",
-  )
 
   val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
   //All components, systems and subsystems are referenced by their name which start with a capital letter

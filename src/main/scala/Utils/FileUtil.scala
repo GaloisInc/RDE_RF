@@ -12,7 +12,6 @@ object FileUtil {
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
-
     sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
   }
 

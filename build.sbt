@@ -7,7 +7,11 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "DER"
+    name := "DER",
+    version := "0.1",
+    maintainer := "STH",
+    scalaVersion := "3.1.3",
+    organization := "org.Galois"
   )
 
 //wartremoverErrors ++= Warts.unsafe
@@ -20,3 +24,21 @@ libraryDependencies ++= Seq(
   "org.legogroup" %% "woof-core" % "0.4.5",
   "org.legogroup" %% "woof-slf4j" % "0.4.5",
 )
+
+enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
+
+docker / dockerfile := {
+  val appDir: File = stage.value
+  val targetDir = "/app"
+
+  new Dockerfile {
+    from("openjdk:8-jre")
+    //Install Latex - takes a while to download
+    runRaw("apt-get update && apt-get install -y --no-install-recommends apt-utils")
+    runRaw("apt-get install texlive-full -y")
+    //Copy the application
+    copy(appDir, targetDir, chown = "daemon:daemon")
+    //Set the working directory
+    workDir(s"$targetDir/bin/")
+  }
+}

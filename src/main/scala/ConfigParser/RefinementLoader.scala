@@ -73,7 +73,10 @@ object RefinementLoader {
     RefinementParserSingleton.parse(RefinementParserSingleton.refinement, refinement) match {
       case RefinementParserSingleton.Success(result, _) =>
         RefinementModel(srcRef = result.srcRef, trgRef = result.trgRef)
-      case RefinementParserSingleton.NoSuccess(msg, _) => throw new IllegalArgumentException(msg)
+      case RefinementParserSingleton.NoSuccess(msg, _) => {
+
+        throw new IllegalArgumentException(msg)
+      }
     }
   }
 }

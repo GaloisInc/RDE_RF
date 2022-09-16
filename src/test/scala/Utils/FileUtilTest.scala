@@ -38,5 +38,4 @@ class FileUtilTest extends AnyFlatSpec with should.Matchers {
     FileUtil.findSourceFiles(directory, Set("lando", "cry")).length should be(13)
   }
 
-
 }

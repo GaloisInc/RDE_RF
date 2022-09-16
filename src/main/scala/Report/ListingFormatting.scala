@@ -52,7 +52,7 @@ object ListingFormatting {
     }""".stripMargin
   }
 
-  def lstFormattings(documentType: DocumentType): LanguageFormatting = {
+  def lstFormattings(documentType: DocumentType.Value): LanguageFormatting = {
     val languageFormatting = documentType match {
       case DocumentType.Lando =>
         ReportTypes.LanguageFormatting("Lando",

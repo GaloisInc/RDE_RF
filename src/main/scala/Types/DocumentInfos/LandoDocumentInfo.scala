@@ -1,7 +1,7 @@
 package Types.DocumentInfos
 
-import Types.*
 import Types.DocReference.DocReference
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
 class LandoDocumentInfo(
@@ -12,7 +12,7 @@ class LandoDocumentInfo(
                          events: Set[DocReference],
                          requirements: Set[DocReference],
                          scenarios: Set[DocReference],
-                         override val documentType: DocumentType = DocumentType.Lando,
+                         override val documentType: DocumentType.Value = DocumentType.Lando,
                        ) extends DocumentInfo {
   def copy(
             documentName: String = documentName,
@@ -22,7 +22,7 @@ class LandoDocumentInfo(
             events: Set[DocReference] = events,
             requirements: Set[DocReference] = requirements,
             scenarios: Set[DocReference] = scenarios,
-            documentType: DocumentType = documentType,
+            documentType: DocumentType.Value = documentType,
           ): LandoDocumentInfo = {
     new LandoDocumentInfo(
       documentName,
@@ -36,7 +36,7 @@ class LandoDocumentInfo(
     )
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
+  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
     && ref.getDocumentName == documentName
@@ -51,7 +51,7 @@ class LandoDocumentInfo(
 
   lazy val getRelations: Set[DocRelation] = relations
 
-  override def getFileType: FileType = {
+  override def getFileType: FileType.Value = {
     if (FileUtil.isOfFileType(filePath, "events")) FileType.EventFile
     else if (FileUtil.isOfFileType(filePath, "requirements")) FileType.RequirementFile
     else if (FileUtil.isOfFileType(filePath, "scenarios")) FileType.ScenarioFile

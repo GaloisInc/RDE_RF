@@ -3,20 +3,20 @@ import Formatter.InlineFormatter
 import TestUtils.TestUtility
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
 class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val landoDocumentEnricher = LandoDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val landoDocumentEnricher = new LandoDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.Lando
   private val resourceFolder = "../lando"
-  private val testUtility = TestUtility()
+  private val testUtility = new TestUtility()
 
   "LandoDocumentEnricher" should "be able to extract glossary" in {
     val fileName = "glossary"

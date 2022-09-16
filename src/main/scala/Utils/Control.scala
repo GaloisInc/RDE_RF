@@ -1,10 +1,8 @@
 package Utils
 
-import Types.*
+import Types.DocReference.DocReference
 
-import java.nio.file.{Files, Paths}
 import scala.language.reflectiveCalls
-import DocReference.DocReference
 
 object Control {
   def using[A <: {def close(): Unit}, B](resource: A)(f: A => B): B =

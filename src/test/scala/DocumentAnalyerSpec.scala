@@ -1,8 +1,8 @@
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import Utils.{Control, FileUtil}
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 import java.nio.file.Path
 import scala.collection.mutable
@@ -16,14 +16,14 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val landoDocuments = getClass.getResource("Lando").getPath
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray
-      ++ FileUtil.getListOfFiles(landoDocuments).toArray
-      ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
+      FileUtil.getListOfFiles(landoDocuments).toArray ++
+      FileUtil.getListOfFiles(cryptolDocuments).toArray
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
 
-    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, InlineFormatter())
+    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
     DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze, latexDocumentation)
   }
 
@@ -32,17 +32,17 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val landoDocuments = getClass.getResource("Lando").getPath
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray
-      ++ FileUtil.getListOfFiles(landoDocuments).toArray
-      ++ FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
+      FileUtil.getListOfFiles(landoDocuments).toArray ++
+      FileUtil.getListOfFiles(cryptolDocuments).toArray
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
 
-    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, InlineFormatter())
+    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.enrichAndSortFiles(filesToAnalyze, latexDocumentation)
 
-    val formatter = ReferenceFormatter(InlineFormatter())
+    val formatter = new ReferenceFormatter(new InlineFormatter())
 
     val documentInfo = report.sysmlDocuments.filter(_.documentName.equalsIgnoreCase("RTS_Glossary")).head
 

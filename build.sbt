@@ -1,6 +1,6 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.1.3"
+ThisBuild / scalaVersion := "2.13.8"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.13"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.13" % "test"
@@ -10,20 +10,21 @@ lazy val root = (project in file("."))
     name := "DER",
     version := "0.1",
     maintainer := "STH",
-    scalaVersion := "3.1.3",
+    scalaVersion := "2.13.8",
     organization := "org.Galois"
   )
 
-//wartremoverErrors ++= Warts.unsafe
 
+
+//wartremoverErrors ++= Warts.unsafe
 
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
 
-libraryDependencies ++= Seq(
-  "org.legogroup" %% "woof-core" % "0.4.5",
-  "org.legogroup" %% "woof-slf4j" % "0.4.5",
-)
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.14.0"
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1"
+
 
 enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 

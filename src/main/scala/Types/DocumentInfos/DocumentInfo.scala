@@ -3,7 +3,6 @@ package Types.DocumentInfos
 import Formatter.LatexSanitizer
 import Types.DocReference.DocReference
 import Types.{DocRelation, DocumentType, FileType}
-import Utils.FileUtil
 
 abstract class DocumentInfo {
   def documentName: String
@@ -11,9 +10,9 @@ abstract class DocumentInfo {
   def filePath: String
 
   //  def references: String
-  def documentType: DocumentType
+  def documentType: DocumentType.Value
 
-  def getFileType: FileType
+  def getFileType: FileType.Value
 
   def getAllReferences: Set[DocReference]
 
@@ -31,7 +30,7 @@ abstract class DocumentInfo {
   )
 
   def getLanguage: String = {
-    documentType match
+    documentType match {
       case DocumentType.Lando => "Lando"
       case DocumentType.Lobot => "Lobot"
       case DocumentType.SysML => "SysML"
@@ -39,6 +38,7 @@ abstract class DocumentInfo {
       case DocumentType.Saw => "Saw"
       case DocumentType.SV => "System Verilog"
       case DocumentType.BSV => "Bluespec System Verilog"
+    }
   }
 
   def getReferenceName: String = s"${documentType.toString}_${documentName}"

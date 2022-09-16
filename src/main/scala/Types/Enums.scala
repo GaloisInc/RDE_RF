@@ -3,9 +3,9 @@ package Types
 import org.scalactic.Equality
 import org.scalactic.TypeCheckedTripleEquals.convertToCheckingEqualizer
 
-enum ReferenceType {
-  case
-  Component,
+object ReferenceType extends Enumeration {
+  type referenceType = Value
+  val Component,
   SubSystem,
   System,
   Scenario,
@@ -17,31 +17,36 @@ enum ReferenceType {
   ViewPoint,
   Type,
   Attribute,
-  Relation
+  Relation = Value
 }
 
-enum RelationType {
-  case client, inherit, contains, Link
+object RelationTypes extends Enumeration {
+  type relationType = Value
+  val client, inherit, contains, Link = Value
 }
 
-enum LatexReferenceType {
-  case
+object LatexReferenceTypes  extends Enumeration {
+  type latexReferenceType = Value
+  val
   File,
   Abstraction,
   Refinement,
   Link,
   CryptolProperty,
-  ConnectionArtifact
+  ConnectionArtifact = Value
 }
 
-enum DocumentType {
-  case Lando, Lobot, SysML, Cryptol, Saw, SV, BSV
+object DocumentType  extends Enumeration {
+  type documentType = Value
+  val Lando, Lobot, SysML, Cryptol, Saw, SV, BSV = Value
 }
 
-enum LandoLineType {
-  case EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped
+object LandoLineType  extends Enumeration {
+  type landoLineType = Value
+  val EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped = Value
 }
 
-enum FileType {
-  case RequirementFile, ScenarioFile, EventFile, ComponentFile, ViewFile
+object FileType  extends Enumeration {
+  type fileType = Value
+  val RequirementFile, ScenarioFile, EventFile, ComponentFile, ViewFile = Value
 }

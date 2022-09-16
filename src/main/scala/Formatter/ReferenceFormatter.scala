@@ -1,10 +1,7 @@
 package Formatter
 
 import Types.DocReference.DocReference
-import Types.LatexReferenceType
-import Types.Reference.Ref
-
-import scala.util.matching.Regex
+import Types.LatexReferenceTypes
 
 class ReferenceFormatter(
                           styleFormatter: LatexFormatter,
@@ -22,19 +19,19 @@ class ReferenceFormatter(
     && formatted.contains(url)
     && formatted.length > url.length)
 
-  def addReference(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
+  def addReference(reference: DocReference, currentDocument: String, referenceType: LatexReferenceTypes.Value ): String = {
     val hyperref = LatexSyntax.addReferenceInLatex(reference, currentDocument, referenceType)
     latexInsideListing(hyperref)
   } ensuring ((l: String) => l.contains(reference.getLabelText))
 
   def addAbstractions(abstractions: Set[DocReference], currentDocument: String): String = {
-    val abstractionLinks = abstractions.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceType.Abstraction))
+    val abstractionLinks = abstractions.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceTypes.Abstraction))
     val abstractionText = abstractionLinks.mkString(s"($abstractionSymbolLatex", ", ", ")")
     formatLatexListing(abstractionText)
   }
 
   def addSpecializations(specializations: Set[DocReference], currentDocument: String): String = {
-    val specializationLinks = specializations.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceType.Refinement))
+    val specializationLinks = specializations.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceTypes.Refinement))
     val specializationText = specializationLinks.mkString(s"($refinementSymbolLatex", ", ", ")")
     formatLatexListing(specializationText)
   }
@@ -58,7 +55,7 @@ class ReferenceFormatter(
           .toList
           .sortBy(_._1.length)
           .foldLeft(secondPart)((line, ref) => {
-            val label = latexInsideListing(LatexSyntax.addClickableLocalLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceType.ConnectionArtifact))
+            val label = latexInsideListing(LatexSyntax.addClickableLocalLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceTypes.ConnectionArtifact))
             line.replace(ref._1, label)
           })
       val resultString = firstPart + " " + symbol + " " + enrichedSecondPart
@@ -85,8 +82,7 @@ class ReferenceFormatter(
 
   def referenceCrefs(references: Set[DocReference], documentName: String): String = {
     val referencesNames: String = references.map(_.getLabelText).mkString(",")
-    if references.forall(ref => ref.documentName.equals(documentName))
-    then LatexSyntax.addCref(referencesNames)
+    if (references.forall(ref => ref.documentName.equals(documentName))) LatexSyntax.addCref(referencesNames)
     else LatexSyntax.addVref(referencesNames)
   } ensuring ((l: String) => references.forall(ref => l.contains(ref.getLabelText)))
 

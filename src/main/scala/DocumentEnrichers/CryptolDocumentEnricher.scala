@@ -1,12 +1,11 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
-import Types.*
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo}
+import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 
-import java.util.Locale
 import scala.util.matching.Regex
 
 class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
@@ -28,26 +27,28 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     val functions: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.Event)
     val imports: Set[DocReference] = Set.empty[DocReference]
 
-    CryptolDocumentInfo(fileName, filePath, imports, types, functions, properties)
+    new CryptolDocumentInfo(fileName, filePath, imports, types, functions, properties)
   }
 
   def formatLine(line: String, documentInfo: DocumentInfo): String = {
     val references = documentInfo.getAllReferences
-    cleanString(line) match
+    cleanString(line) match {
       case typeRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Type))
       case propertyRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Requirement))
       case eventRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
       case importRegex(_, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Import))
       case _ => line
+    }
   }
 
   def transformReference(line: String, fileName: String): Option[DocReference] = {
-    cleanString(line) match
-      case typeRegex(name) => Some(DocReference(fileName, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line))
-      case propertyRegex(name) => Some(DocReference(fileName, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line))
-      case eventRegex(name) => Some(DocReference(fileName, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line))
-      case importRegex(name, _) => Some(DocReference(fileName, ReferenceName(name), ReferenceType.Import, DocumentType.Cryptol, line))
+    cleanString(line) match{
+      case typeRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line))
+      case propertyRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line))
+      case eventRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line))
+      case importRegex(name, _) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Import, DocumentType.Cryptol, line))
       case _ => None
+    }
   }
 
   def cleanString(str: String): String = {

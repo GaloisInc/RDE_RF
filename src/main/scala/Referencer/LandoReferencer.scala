@@ -22,7 +22,7 @@ class LandoReferencer extends Referencer {
     val updatedReferences = documentInfo.getAllReferences.map(landoRef => addRefinements(landoRef, sysmlReferences.toSet))
 
     val componentSet = Set(ReferenceType.Component, ReferenceType.SubSystem, ReferenceType.System)
-    LandoDocumentInfo(
+    new LandoDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
       updatedReferences.filter(ref => componentSet.contains(ref.getReferenceType)),

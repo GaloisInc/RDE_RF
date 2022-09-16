@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class BSVRegexTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentEnricher = BSVDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentEnricher = new BSVDocumentEnricher(formatterType)
 
   "RegexExperiment" should "match modules" in {
     val line1 = "module mkActuationGenerated(Actuation_IFC)"

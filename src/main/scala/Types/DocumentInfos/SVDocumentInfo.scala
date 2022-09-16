@@ -1,17 +1,16 @@
 package Types.DocumentInfos
 
-import Types.*
 import Types.DocReference.DocReference
-import Utils.FileUtil
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 
 class SVDocumentInfo(
                       override val documentName: String,
                       override val filePath: String,
                       modules: Set[DocReference],
-                      override val documentType: DocumentType = DocumentType.SV,
+                      override val documentType: DocumentType.Value = DocumentType.SV,
                     ) extends DocumentInfo {
 
-  private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.System)
+  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System)
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
     && ref.getDocumentName == documentName
     && ref.getDocumentType == DocumentType.SV))
@@ -22,7 +21,7 @@ class SVDocumentInfo(
 
   lazy val getRelations: Set[DocRelation] = Set.empty
 
-  override def getFileType: FileType = {
+  override def getFileType: FileType.Value = {
     FileType.ComponentFile
   }
 }

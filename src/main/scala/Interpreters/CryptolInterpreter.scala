@@ -46,10 +46,7 @@ object CryptolInterpreter {
 
     // We assume that the built-in Cryptol functions come first.
 
-
-
-
-    CryptolDocumentInfo(
+    new CryptolDocumentInfo(
       fileName,
       filePath,
       Set.empty,

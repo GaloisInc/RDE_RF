@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class SVRegexTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentEnricher = SVDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentEnricher = new SVDocumentEnricher(formatterType)
 
 
   "RegexExperiment" should "match modules" in {

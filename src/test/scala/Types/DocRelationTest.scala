@@ -6,8 +6,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 
+
 class DocRelationTest extends AnyFlatSpec with should.Matchers {
-  private val formatter: ReferenceFormatter = ReferenceFormatter(new InlineFormatter)
+  private val formatter: ReferenceFormatter = new ReferenceFormatter(new InlineFormatter)
 
   "DocRelation" should "be able to be created" in {
     val documentName = "documentName"
@@ -17,10 +18,10 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val sourceRef = DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
-    val targetRef = DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
-    val relationType = RelationType.client
-    val docRelation = DocRelation(
+    val sourceRef = new DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
+    val targetRef = new DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
+    val relationType = RelationTypes.client
+    val docRelation = new DocRelation(
       documentName,
       relationReference,
       relationType,
@@ -40,13 +41,13 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val sourceRef = DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
-    val targetRef = DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
+    val sourceRef = new DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
+    val targetRef =new  DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
 
-    val docRelation = DocRelation(
+    val docRelation = new DocRelation(
       documentName,
       RelationReference(sourceReferenceName.name, targetReferenceName.name),
-      RelationType.client,
+      RelationTypes.client,
       originalLine,
       Some(sourceRef),
       Some(targetRef),

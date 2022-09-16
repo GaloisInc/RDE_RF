@@ -5,33 +5,33 @@ import Formatter.InlineFormatter
 import Types.DocReference.DocReference
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 import java.nio.file.Path
 import scala.collection.mutable
 import scala.io.Source
 
 class ReferencerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val landoDocumentEnricher = LandoDocumentEnricher(formatterType)
-  private val sysMLDocumentEnricher = SysMLDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val landoDocumentEnricher = new LandoDocumentEnricher(formatterType)
+  private val sysMLDocumentEnricher = new SysMLDocumentEnricher(formatterType)
 
-  private val sysMLReferencer = SysMLReferencer()
+  private val sysMLReferencer = new SysMLReferencer()
 
   "Reference" should "match coq with Reference" in {
     val searchReferenceName = "Coq"
 
     val referenceBeingDiscovered =
-      DocReference("DocumentName",
+      new DocReference("DocumentName",
         ReferenceName("Coq"),
         ReferenceType.Component,
         DocumentType.Lando,
         "component Coq"
       )
     val refinementBeingDiscovered =
-      DocReference("DocumentName",
+      new DocReference("DocumentName",
         ReferenceName("Coq"),
         ReferenceType.Component,
         DocumentType.SysML,

@@ -6,8 +6,8 @@ import Types.{DocumentType, ReferenceType}
 case class Relation(name: String,
                     originalLine: String,
                     documentName: String,
-                    documentType: DocumentType,
-                    referenceType: ReferenceType,
+                    documentType: DocumentType.documentType,
+                    referenceType: ReferenceType.referenceType,
                     sourceName: String,
                     targetName: String,
-                    relationType: String) extends ParsedReference(name, originalLine, referenceType, documentName, documentType)
+                    relationType: String) extends ParsedReference

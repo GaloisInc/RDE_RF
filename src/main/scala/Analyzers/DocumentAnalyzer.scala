@@ -1,14 +1,13 @@
 package Analyzers
 
-import DocumentEnrichers.*
-import Formatter.{InlineFormatter, LatexFormatter}
-import Referencer.*
-import Report.PaperLayout
+import DocumentEnrichers.{CryptolDocumentEnricher, LandoDocumentEnricher, SysMLDocumentEnricher}
+import Formatter.LatexFormatter
+import Referencer.{CryptolReferencer, LandoReferencer, SysMLReferencer}
+import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
-import Types.ReferenceType
-import Utils.*
+import Utils.{FileUtil, Matcher}
 
 import java.nio.file.Path
 
@@ -24,17 +23,16 @@ final case class LatexDocumentData(
 
 object DocumentAnalyzer {
   //Referencers
-  private val landoReferencer = LandoReferencer()
-  private val sysMLReferencer = SysMLReferencer()
-  private val cryptolReferencer = CryptolReferencer()
-
+  private val landoReferencer = new LandoReferencer()
+  private val sysMLReferencer = new SysMLReferencer()
+  private val cryptolReferencer = new CryptolReferencer()
 
   def generateReport(filesToAnalyze: Array[String],
                      latexDocumentData: LatexDocumentData,
                      sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
 
-    if sortFiles then
+    if (sortFiles)
       enrichAndSortFiles(filesToAnalyze, latexDocumentData)
     else {
       val enrichedDocuments = enrichDocuments(filesToAnalyze, latexDocumentData.latexFormatter)
@@ -79,9 +77,9 @@ object DocumentAnalyzer {
   def enrichFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     val formatter: LatexFormatter = latexDocumentData.latexFormatter
-    val landoAnalyzer = LandoDocumentEnricher(formatter)
-    val sysMLAnalyzer = SysMLDocumentEnricher(formatter)
-    val cryptolAnalyzer = CryptolDocumentEnricher(formatter)
+    val landoAnalyzer = new LandoDocumentEnricher(formatter)
+    val sysMLAnalyzer = new SysMLDocumentEnricher(formatter)
+    val cryptolAnalyzer = new CryptolDocumentEnricher(formatter)
 
     val enrichedDocuments = enrichDocuments(filesToAnalyze, formatter)
 
@@ -111,9 +109,9 @@ object DocumentAnalyzer {
 
   def enrichDocuments(filesToAnalyze: Array[String], formatter: LatexFormatter): Array[DocumentInfo] = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
-    val landoAnalyzer = LandoDocumentEnricher(formatter)
-    val sysmlAnalyzer = SysMLDocumentEnricher(formatter)
-    val cryptolAnalyzer = CryptolDocumentEnricher(formatter)
+    val landoAnalyzer = new LandoDocumentEnricher(formatter)
+    val sysmlAnalyzer = new SysMLDocumentEnricher(formatter)
+    val cryptolAnalyzer = new CryptolDocumentEnricher(formatter)
 
     val landoFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("lando"))
     val sysmlFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("sysml"))

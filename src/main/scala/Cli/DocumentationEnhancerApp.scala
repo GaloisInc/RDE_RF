@@ -2,21 +2,19 @@ package Cli
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
+import Report.PaperLayout.PaperLayout
 import Report.{LatexGenerator, PaperLayout, RefinementReport}
 import Utils.FileUtil
-import org.legogroup.woof.*
 import scopt.OParser
 
-import scala.io.StdIn
-import scala.util.matching.Regex
 
 object DocumentationEnhancerApp extends App {
   val builder = OParser.builder[CLIConfig]
 
   val parser = {
-    import builder.*
+    import builder._
     OParser.sequence(
-      programName("DocumentationEnhancer"),
+      //programName("DocumentationEnhancer"),
       head("DocumentationEnhancer", "1.0"),
       opt[String]('s', "sourceFolder")
         .required()
@@ -43,14 +41,14 @@ object DocumentationEnhancerApp extends App {
     )
   }
 
-  OParser.parse(parser, args = Seq(), CLIConfig(), OParserSetup()) match {
+  OParser.parse(parser, args, CLIConfig(), OParserSetup()) match {
     case Some(config) =>
       val sourceFolder = config.sourceFolder
       val targetFolder = config.targetFolder
       val generateLatex = config.generateLatex
-      val latexTitle = if config.latexTitle.isEmpty then "Documentation" else config.latexTitle
+      val latexTitle = if (config.latexTitle.isEmpty) "Documentation" else config.latexTitle
       val showRefinements = config.showRefinement
-      val layout = if config.layout.equalsIgnoreCase("b4") || config.layout.equalsIgnoreCase("a4") then config.layout else "a4"
+      val layout = if (config.layout.equalsIgnoreCase("b4") || config.layout.equalsIgnoreCase("a4")) config.layout else "a4"
       val fileTypesOfTypesOfInterest = Set("lando", "sysml", "lobot", "cry", "c", "bsv", "sv")
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
@@ -79,9 +77,9 @@ object DocumentationEnhancerApp extends App {
 
   def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {
     layout.toLowerCase match {
-      case "a4" => (PaperLayout.A4, InlineFormatter())
-      case "b4" => (PaperLayout.B4, MarginFomatter())
-      case _ => (PaperLayout.A4, InlineFormatter())
+      case "a4" => (PaperLayout.A4, new InlineFormatter())
+      case "b4" => (PaperLayout.B4, new MarginFomatter())
+      case _ => (PaperLayout.A4, new InlineFormatter())
     }
   }
 }

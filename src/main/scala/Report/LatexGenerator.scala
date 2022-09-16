@@ -1,18 +1,15 @@
 package Report
 
-import Formatter.LatexSanitizer
 import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
+import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
-import Types.DocumentType
-import Utils.FileUtil
-import sun.font.Decoration.Label
+import Types.DocumentInfos.DocumentInfo
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.collection.mutable
-import scala.sys.process.*
+import scala.sys.process.Process
 
 object LatexGenerator {
   private val latexBuildCmd = "pdflatex"
@@ -153,24 +150,25 @@ object LatexGenerator {
        |\\usepackage{$p}""").stripMargin
 
 
-    documentClass
-      + layout
-      + packagesString
-      + emptyLine
+    documentClass ++
+      layout ++
+      packagesString ++
+      emptyLine ++
       //Needed for the margin notes to work
-      + "\\maxdeadcycles=500"
-      + emptyLine
+      "\\maxdeadcycles=500" ++
+      emptyLine
   }
 
 
   private def extractLatexLayout(paperLayout: PaperLayout): String = {
-    paperLayout match
+    paperLayout match {
       case PaperLayout.A4 =>
         s"""
            |\\usepackage[a4paper, margin=1in]{geometry}""".stripMargin
       case PaperLayout.B4 =>
         s"""
            |\\usepackage[b4paper, marginparwidth=8cm, marginparsep=3mm, includemp, heightrounded, outer=1cm]{geometry}""".stripMargin
+    }
   }
 
   val emptyLine: String =
@@ -179,8 +177,9 @@ object LatexGenerator {
 
 }
 
-enum PaperLayout {
-  case A4, B4
+object PaperLayout extends Enumeration {
+  type PaperLayout = Value
+  val A4, B4 = Value
 }
 
 

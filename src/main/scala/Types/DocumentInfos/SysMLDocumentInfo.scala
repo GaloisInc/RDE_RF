@@ -1,6 +1,6 @@
 package Types.DocumentInfos
 
-import Types.*
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Types.DocReference.DocReference
 import Utils.FileUtil
 
@@ -17,7 +17,7 @@ class SysMLDocumentInfo(
                          views: Set[DocReference],
                          items: Set[DocReference],
                          attributes: Set[DocReference],
-                         override val documentType: DocumentType = DocumentType.SysML
+                         override val documentType: DocumentType.Value = DocumentType.SysML
                        ) extends DocumentInfo {
 
   def copy(
@@ -33,7 +33,7 @@ class SysMLDocumentInfo(
             views: Set[DocReference] = views,
             items: Set[DocReference] = items,
             attributes: Set[DocReference] = attributes,
-            documentType: DocumentType = documentType
+            documentType: DocumentType.Value = documentType
           ): SysMLDocumentInfo = {
     new SysMLDocumentInfo(
       documentName,
@@ -52,7 +52,7 @@ class SysMLDocumentInfo(
     )
   }
 
-  private val validRefenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
+  private val validRefenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
 
   require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.SysML && ref.getDocumentName == documentName))
   require(parts.forall(_.getReferenceType == ReferenceType.SubSystem))
@@ -75,7 +75,7 @@ class SysMLDocumentInfo(
 
   override def getRelations: Set[DocRelation] = Set.empty
 
-  override def getFileType: FileType = {
+  override def getFileType: FileType.Value = {
     if (FileUtil.isOfFileType(filePath, "action")) FileType.EventFile
     else if (FileUtil.isOfFileType(filePath, "requirement")) FileType.RequirementFile
     else if (FileUtil.isOfFileType(filePath, "use case")) FileType.ScenarioFile

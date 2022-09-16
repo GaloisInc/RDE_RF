@@ -14,7 +14,7 @@ object Matcher {
 
   def getReferenceName(name: String, referenceName: ReferenceName): Option[String] = {
     val cleanName = name.stripPrefix("'").stripSuffix("'").strip()
-    if cleanName.equalsIgnoreCase(referenceName.name) then return Some(referenceName.name)
+    if (cleanName.equalsIgnoreCase(referenceName.name)) return Some(referenceName.name)
     if (referenceName.acronym.isDefined && cleanName.equalsIgnoreCase(referenceName.acronym.get)) return Some(referenceName.acronym.get)
     None
   }

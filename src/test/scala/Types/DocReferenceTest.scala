@@ -1,12 +1,12 @@
 package Types
 
 import Formatter.{InlineFormatter, ReferenceFormatter}
+import Types.DocReference.DocReference
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import DocReference.DocReference
 
 class DocReferenceTest extends AnyFlatSpec with should.Matchers {
-  private val formatter: ReferenceFormatter = ReferenceFormatter(new InlineFormatter)
+  private val formatter: ReferenceFormatter = new ReferenceFormatter(new InlineFormatter)
 
   "DocReference" should "be able to be created" in {
     val documentName = "documentName"
@@ -14,7 +14,7 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine)
+    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine)
     docReference should not be null
   }
 
@@ -24,7 +24,7 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine)
+    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine)
 
     docReference.getDocumentName should be(documentName)
     docReference.getReferenceName should be(referenceName)
@@ -48,8 +48,8 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val originalLine = "originalLine"
 
     val referenceNameOfAbstraction = ReferenceName("abstractName")
-    val abstraction = DocReference(documentName, referenceNameOfAbstraction, referenceType, documentType, originalLine)
-    val docReference = DocReference(documentName, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
+    val abstraction = new DocReference(documentName, referenceNameOfAbstraction, referenceType, documentType, originalLine)
+    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
     docReference.getDocumentName should be(documentName)
     docReference.getReferenceName should be(referenceName)
     docReference.getReferenceType should be(referenceType)

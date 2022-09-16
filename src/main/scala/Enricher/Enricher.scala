@@ -23,7 +23,7 @@ object LandoEnricher {
 
     assert(sourceReference.nonEmpty, s"Relation source reference not found: ${relation.getSourceName} in $docName")
     assert(targetReference.nonEmpty, s"Relation target reference not found: ${relation.getTargetName} in $docName")
-    DocRelation(relation.documentName, relation.relationReference, relation.relationType, relation.originalLine, sourceReference.headOption, targetReference.headOption)
+    new DocRelation(relation.documentName, relation.relationReference, relation.relationType, relation.originalLine, sourceReference.headOption, targetReference.headOption)
   } ensuring (res => res.documentName == relation.documentName && res.getRelationType == relation.relationType && res.originalLine == relation.originalLine)
 
 }

@@ -3,20 +3,20 @@ import Types.{DocumentType, ReferenceType}
 import Utils.{Control, FileUtil}
 import Formatter.InlineFormatter
 import TestUtils.TestUtility
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
 class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentAnalyser = CryptolDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentAnalyser = new CryptolDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.Cryptol
   private val resourceFolder = "../Cryptol"
-  private val testUtility = TestUtility()
+  private val testUtility = new TestUtility()
 
   "CryptolDocumentEnricher" should "be able to extract types from AcutationUnit" in {
     val fileName = "ActuationUnit"

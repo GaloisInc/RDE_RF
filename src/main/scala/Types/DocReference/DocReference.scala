@@ -1,7 +1,7 @@
 package Types.DocReference
 
 import Formatter.{LatexSanitizer, ReferenceFormatter}
-import Types.*
+import Types.{DocumentReference, DocumentType, EnrichableString, ReferenceName, ReferenceType}
 import Types.Reference.Ref
 
 import scala.collection.immutable.{AbstractSet, SortedSet}
@@ -9,8 +9,8 @@ import scala.collection.immutable.{AbstractSet, SortedSet}
 class DocReference(
                     override val documentName: String,
                     referenceName: ReferenceName,
-                    referenceType: ReferenceType,
-                    documentType: DocumentType,
+                    referenceType: ReferenceType.Value ,
+                    documentType: DocumentType.Value ,
                     override val originalLine: String,
                     refinementOf: Option[Set[DocReference]] = None,
                     abstractionOf: Option[Set[DocReference]] = None,
@@ -24,9 +24,9 @@ class DocReference(
 
   lazy val getLabelText: String = s"${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(getName)}"
 
-  lazy val getName: String = if referenceName.name.isEmpty then referenceName.acronym.get else referenceName.name
+  lazy val getName: String = if (referenceName.name.isEmpty) referenceName.acronym.get else referenceName.name
 
-  lazy val getShortName: String = if referenceName.acronym.isDefined && referenceName.acronym.get.nonEmpty then referenceName.acronym.get else referenceName.name
+  lazy val getShortName: String = if (referenceName.acronym.isDefined && referenceName.acronym.get.nonEmpty) referenceName.acronym.get else referenceName.name
 
   lazy val sanitizedName: String = LatexSanitizer.sanitizeName(getName)
 
@@ -53,9 +53,9 @@ class DocReference(
 
   def getDocumentName: String = documentName
 
-  def getReferenceType: ReferenceType = referenceType
+  def getReferenceType: ReferenceType.Value = referenceType
 
-  def getDocumentType: DocumentType = documentType
+  def getDocumentType: DocumentType.Value = documentType
 
   def getReferenceName: ReferenceName = referenceName
 
@@ -68,8 +68,8 @@ class DocReference(
   def copy(
             documentName: String = documentName,
             referenceName: ReferenceName = referenceName,
-            referenceType: ReferenceType = referenceType,
-            documentType: DocumentType = documentType,
+            referenceType: ReferenceType.Value = referenceType,
+            documentType: DocumentType.Value = documentType,
             originalLine: String = originalLine,
             refinementOf: Option[Set[DocReference]] = refinementOf,
             abstractionOf: Option[Set[DocReference]] = abstractionOf,
@@ -99,9 +99,10 @@ class DocReference(
 
     //If the original line contains a reference to another reference, we highlight it by making a clickable link
 
-    val highlightedLine = references match
+    val highlightedLine = references match {
       case Some(reference) => formatter.highlightLineWithReferences(originalLine, reference.head.symbol, getReferences)
       case None => originalLine
+    }
 
 
     val lineWithLabel = formatter.enrichLineWithLabel(highlightedLine, getLabelText)

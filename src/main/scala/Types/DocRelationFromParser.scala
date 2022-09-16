@@ -3,7 +3,7 @@ package Types
 final case class DocRelationFromParser(
                                         override val documentName: String,
                                         relationReference: RelationReference,
-                                        relationType: RelationType,
+                                        relationType: RelationTypes.Value,
                                         originalLine: String,
                                       ) extends DocumentReference {
   require(originalLine.nonEmpty, "originalLine must not be empty")

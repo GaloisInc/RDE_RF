@@ -47,6 +47,16 @@ class CryptolDocumentInfo(
     imports ++ types ++ properties ++ functions
   }
 
+  override def updateReference(ref: DocReference): DocumentInfo = {
+    ref.getReferenceType match {
+      case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
+      case ReferenceType.Type => copy(types = types.map(_.updateDocReference(ref)))
+      case ReferenceType.Requirement => copy(properties = properties.map(_.updateDocReference(ref)))
+      case ReferenceType.Event => copy(functions = functions.map(_.updateDocReference(ref)))
+      case _ => throw new IllegalArgumentException("Invalid reference type")
+    }
+  }
+
   lazy val getRelations: Set[DocRelation] = Set.empty
 
   override def getFileType: FileType.Value = {

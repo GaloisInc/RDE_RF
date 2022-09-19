@@ -2,7 +2,6 @@ package Utils
 
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType
-import Utils.Control
 
 import java.io.File
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
@@ -26,6 +25,15 @@ object FileUtil {
   def getCryptolDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Cryptol)
   } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Cryptol))
+
+  def getBlusSpecDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.BSV)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.BSV))
+
+  def getSystemVerilogDocumetns(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.SV)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SV))
+
 
   def getFileName(path: String): String = {
     require(path.nonEmpty)

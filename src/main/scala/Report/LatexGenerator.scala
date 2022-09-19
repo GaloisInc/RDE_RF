@@ -85,6 +85,10 @@ object LatexGenerator {
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.svFormatting)
+    latex.append(emptyLine)
+    latex.append(ListingFormatting.bsvFormatting)
+    latex.append(emptyLine)
 
     latex.toString()
   }
@@ -96,45 +100,35 @@ object LatexGenerator {
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
-
     latexContent.append(generateSection(report.title))
-
     latexContent.append(emptyLine)
 
-    latexContent.append(generateSection("Lando Models"))
-
-    report.landoDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
-
-    latexContent.append(generateSection("SysML Models"))
-    latexContent.append(emptyLine)
-
-    report.sysmlDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
-
-    latexContent.append(generateSection("Cryptol Specifications"))
-    latexContent.append(emptyLine)
-
-    report.cryptolDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
+    latexContent.append(includeListings("Lando Models", report.landoDocuments))
+    latexContent.append(includeListings("SysML Models", report.sysmlDocuments))
+    latexContent.append(includeListings("Cryptol Specifications", report.cryptolDocuments))
+    latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments))
+    latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments))
 
     val latexDocument = generateLatexDocument(latexContent.toString(), report.layout)
 
-    val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
+    val reportFileName = report.title.replaceAll(" ", "_")
+
+    val filePath = Files.write(Paths.get(report.folder, s"$reportFileName.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
     buildLatexFile(new File(filePath.toString), buildTwice = true)
+    latexContent.toString()
+  }
+
+
+  def includeListings[Doc <: DocumentInfo](sectionName: String, documents: Array[Doc]): String = {
+    val latexContent = new mutable.StringBuilder()
+    latexContent.append(generateSection(sectionName))
+    latexContent.append(emptyLine)
+    documents.foreach(m => {
+      latexContent.append(emptyLine)
+      latexContent.append(includeListing(m))
+      latexContent.append(emptyLine)
+    })
     latexContent.toString()
   }
 

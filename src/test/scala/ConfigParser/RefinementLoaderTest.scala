@@ -19,6 +19,13 @@ class RefinementLoaderTest extends AnyFlatSpec with should.Matchers {
     assert(refinement.refinements.size == 377)
   }
 
+  "RefinementLoader" should "load a generated refinement with lots of refinements" in {
+    val conf = getClass.getResource("../refinementExamples/Report_Refinements.conf")
+    val refinement = RefinementLoader.load(conf.getFile)
+    assert(refinement.name == "Report_Refinements")
+    assert(refinement.refinements.size == 311)
+  }
+
   "RefinementParser" should "parse parserRefinement" in {
     val results = RefinementParserSingleton.parse(RefinementParserSingleton.refinement, "file1.ref1 -> file2.ref2")
     results.successful should equal(true)

@@ -22,6 +22,13 @@ class BSVDocumentInfo(
     new BSVDocumentInfo(documentName, filePath, packages, modules, documentType)
   }
 
+  override def updateReference(ref: DocReference): DocumentInfo = {
+    require(ref.getDocumentType == documentType && ref.documentName == documentName, "Can only update references to the same document")
+    val newPackages = packages.map(_.updateDocReference(ref))
+    val newModules = modules.map(_.updateDocReference(ref))
+    copy(packages = newPackages, modules = newModules)
+  }
+
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
     && ref.getDocumentName == documentName

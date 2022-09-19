@@ -1,21 +1,34 @@
 package Types.DocReference
 
 import Formatter.{LatexSanitizer, ReferenceFormatter}
-import Types.{DocumentReference, DocumentType, EnrichableString, ReferenceName, ReferenceType}
 import Types.Reference.Ref
-
-import scala.collection.immutable.{AbstractSet, SortedSet}
+import Types._
 
 class DocReference(
                     override val documentName: String,
                     referenceName: ReferenceName,
-                    referenceType: ReferenceType.Value ,
-                    documentType: DocumentType.Value ,
+                    referenceType: ReferenceType.Value,
+                    documentType: DocumentType.Value,
                     override val originalLine: String,
                     refinementOf: Option[Set[DocReference]] = None,
                     abstractionOf: Option[Set[DocReference]] = None,
                     references: Option[Set[Ref]] = None,
                   ) extends EnrichableString with DocumentReference {
+
+
+  def addAbstraction(abstraction: DocReference): DocReference = {
+    getAbstractions match {
+      case Some(abstractions) => this.copy(refinementOf = Some(abstractions + abstraction))
+      case None => this.copy(refinementOf = Some(Set(abstraction)))
+    }
+  }
+
+  def addRefinement(refinement: DocReference): DocReference = {
+    getRefinements match {
+      case Some(refinements) => this.copy(abstractionOf = Some(refinements + refinement))
+      case None => this.copy(abstractionOf = Some(Set(refinement)))
+    }
+  }
 
   require(originalLine.nonEmpty, "originalLine must not be empty")
   require(documentName.nonEmpty, "documentName must not be empty")
@@ -30,6 +43,14 @@ class DocReference(
 
   lazy val sanitizedName: String = LatexSanitizer.sanitizeName(getName)
 
+  def updateDocReference(ref: DocReference): DocReference = {
+    if(ref.documentName == documentName && ref.getName == getName) {
+      ref
+    } else {
+      this
+    }
+  }
+
   //A reference can be a refinement or an abstraction of another reference
   var referencing: Map[String, DocReference] = Map.empty
 
@@ -43,11 +64,10 @@ class DocReference(
     require(!referencing.contains(ref._1), "ref must not be already referenced!")
     require(references.get.exists(r => r.getCleanName.equalsIgnoreCase(ref._1)), "ref must be in the references of this reference! But was: " + ref._1)
     referencing = referencing + ref
-  } ensuring (referencing.contains(ref._1) && referencing.nonEmpty
+  } ensuring(referencing.contains(ref._1) && referencing.nonEmpty
     && referencing.size <= references.get.size, "ref must be added to the referencing references for ref " + ref._1)
 
   def getReferences: Map[String, DocReference] = referencing
-
 
   def getAcronym: Option[String] = referenceName.acronym
 
@@ -84,6 +104,7 @@ class DocReference(
     abstractionOf,
     references,
   )
+
   def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
 
   override def enrichedLine(formatter: ReferenceFormatter): String = {

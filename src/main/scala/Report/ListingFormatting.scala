@@ -81,6 +81,22 @@ object ListingFormatting {
           BlockComment("/*", "*/"),
           literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case"))
         )
+      case DocumentType.SV =>
+        LanguageFormatting(
+          "SV",
+          Array("module", "private", "import", "method", "input", "output", "assign", "endmodule", "end", "if", "else", "begin", "endfunction", "function", "endtask", "task", "for", "while", "repeat", "case", "endcase", "default", "return", "break", "continue", "rand", "randc", "randcase", "randsequence", "forever", "wait", "disable", "fork", "join", "join_any", "join_none", "void", "null", "super", "this", "const", "local", "static", "protected", "virtual", "automatic", "randsequence", "randcase", "randc", "rand", "typedef", "enum", "struct", "union", "class", "interface", "package", "program", "property", "sequence"),
+          "//",
+          BlockComment("/*", "*/"),
+          literates = Array.empty[Literate]
+        )
+      case DocumentType.BSV =>
+        LanguageFormatting(
+          "BSV",
+          Array("module", "private", "import", "method", "input", "output", "assign", "endmodule", "end", "if", "else", "begin", "endfunction", "function", "endtask", "task", "for", "while", "repeat", "case", "endcase", "default", "return", "break", "continue", "rand", "randc", "randcase", "randsequence", "forever", "wait", "disable", "fork", "join", "join_any", "join_none", "void", "null", "super", "this", "const", "local", "static", "protected", "virtual", "automatic", "randsequence", "randcase", "randc", "rand", "typedef", "enum", "struct", "union", "class", "interface", "package", "program", "property", "sequence"),
+          "//",
+          BlockComment("/*", "*/"),
+          literates = Array.empty[Literate]
+        )
     }
     languageFormatting
   }
@@ -109,6 +125,16 @@ object ListingFormatting {
 
   lazy val sysmlFormatting: String = {
     val formatting = lstFormattings(DocumentType.SysML)
+    buildLanguageFormatting(formatting)
+  }
+
+  lazy val bsvFormatting: String = {
+    val formatting = lstFormattings(DocumentType.BSV)
+    buildLanguageFormatting(formatting)
+  }
+
+  lazy val svFormatting: String = {
+    val formatting = lstFormattings(DocumentType.SV)
     buildLanguageFormatting(formatting)
   }
 }

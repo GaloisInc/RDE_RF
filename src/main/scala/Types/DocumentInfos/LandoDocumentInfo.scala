@@ -36,6 +36,26 @@ class LandoDocumentInfo(
     )
   }
 
+  override def updateReference(ref: DocReference): DocumentInfo = {
+    ref.getReferenceType match {
+      case Types.ReferenceType.Component | Types.ReferenceType.System | Types.ReferenceType.SubSystem =>
+        val newReferences = references.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        copy(references = newReferences)
+      case Types.ReferenceType.Scenario =>
+        val newScenarios = scenarios.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        copy(scenarios = newScenarios)
+      case Types.ReferenceType.Requirement =>
+        val newRequirements = requirements.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        copy(requirements = newRequirements)
+      case Types.ReferenceType.Event =>
+        val newEvents = events.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        copy(events = newEvents)
+      case _ => throw new Exception("Unknown reference type")
+    }
+
+  }
+
+
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
 
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)

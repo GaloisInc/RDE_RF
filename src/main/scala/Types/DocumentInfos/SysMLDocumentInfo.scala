@@ -69,6 +69,22 @@ class SysMLDocumentInfo(
 
   require(requirements.forall(_.getReferenceType == ReferenceType.Requirement))
 
+  override def updateReference(ref: DocReference): DocumentInfo = {
+    ref.getReferenceType match {
+      case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
+      case ReferenceType.System => copy(packages = packages.map(_.updateDocReference(ref)))
+      case ReferenceType.SubSystem => copy(parts = parts.map(_.updateDocReference(ref)))
+      case ReferenceType.Connection => copy(connections = connections.map(_.updateDocReference(ref)))
+      case ReferenceType.Scenario => copy(usecases = usecases.map(_.updateDocReference(ref)))
+      case ReferenceType.Requirement => copy(requirements = requirements.map(_.updateDocReference(ref)))
+      case ReferenceType.Event => copy(actions = actions.map(_.updateDocReference(ref)))
+      case ReferenceType.View => copy(views = views.map(_.updateDocReference(ref)))
+      case ReferenceType.Component => copy(items = items.map(_.updateDocReference(ref)))
+      case ReferenceType.Attribute => copy(attributes = attributes.map(_.updateDocReference(ref)))
+      case _ => throw new IllegalArgumentException("Invalid reference type")
+    }
+  }
+
   override lazy val getAllReferences: Set[DocReference] = {
     packages ++ parts ++ connections ++ usecases ++ requirements ++ actions ++ imports ++ views ++ items ++ attributes
   }

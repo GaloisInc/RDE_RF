@@ -9,13 +9,13 @@
 
 module RTS where
 
-import RTS::Utils
-import RTS::InstrumentationUnit
-import RTS::InstrumentationUnit as I
-import RTS::ActuationUnit
-import RTS::ActuationUnit as AU
-import RTS::Actuator
-import RTS::Actuator as A
+import Utils
+import InstrumentationUnit
+import InstrumentationUnit as I
+import ActuationUnit
+import ActuationUnit as AU
+import Actuator
+import Actuator as A
 
 type Device = [1]
 type Division = [2]

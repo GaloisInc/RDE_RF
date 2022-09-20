@@ -1,8 +1,7 @@
 package Types.DocumentInfos
 
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Types.DocReference.DocReference
-import Utils.FileUtil
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 
 class CryptolDocumentInfo(
                            override val documentName: String,
@@ -22,7 +21,7 @@ class CryptolDocumentInfo(
             types: Set[DocReference] = types,
             functions: Set[DocReference] = functions,
             properties: Set[DocReference] = properties,
-            documentType: DocumentType.Value= documentType,
+            documentType: DocumentType.Value = documentType,
           ): CryptolDocumentInfo = {
     new CryptolDocumentInfo(
       documentName,
@@ -62,4 +61,12 @@ class CryptolDocumentInfo(
   override def getFileType: FileType.Value = {
     FileType.ComponentFile
   }
+
+  def getImports: Set[DocReference] = imports
+
+  def getTypes: Set[DocReference] = types
+
+  def getFunctions: Set[DocReference] = functions
+
+  def getProperties: Set[DocReference] = properties
 }

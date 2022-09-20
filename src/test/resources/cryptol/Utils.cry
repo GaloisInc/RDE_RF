@@ -5,7 +5,7 @@
 // @author Alex Bakst <abakst@galois.com>
 // @created November, 2021
 
-module RTS::Utils where
+module Utils where
 
 infixl 5 >>>>
 (>>>>) x f = f x

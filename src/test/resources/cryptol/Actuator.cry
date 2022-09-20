@@ -8,14 +8,14 @@
 // @refines RTS.lando
 // @refines RTS_Requirements.json
 
-module RTS::Actuator where
+module Actuator where
 
 type Actuation = Bit
 type Mode      = Bit
 
 /** @requirements
       ACTUATION_LOGIC_MANUAL_DEVICE_{0,1} satisfied by definition
-*/
+**/
 type Actuator =
   { input: Actuation
   , manualActuatorInput: Actuation

@@ -8,10 +8,10 @@
 // @refines RTS.lando
 // @refines RTS_Requirements.json
 
-module RTS::ActuationUnit where
+module ActuationUnit where
 
-import RTS::Utils
-import RTS::InstrumentationUnit
+import Utils
+import InstrumentationUnit
 
 type Input            = [3][4]TripPort
 type ActuationPort    = Bit

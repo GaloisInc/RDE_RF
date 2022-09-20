@@ -48,6 +48,6 @@ object LandoParser extends Parser {
   }
 
   def cleanLine(line: String): String = {
-    line.strip().stripSuffix("{").stripSuffix("}").stripSuffix(":;").stripSuffix(";")
+    line.trim().stripSuffix("{").stripSuffix("}").stripSuffix(":;").stripSuffix(";")
   }
 }

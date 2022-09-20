@@ -67,7 +67,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
 
 
   private def getLineType(line: String, documentPath: String): LandoLineType.Value = {
-    val lowerLine = line.strip()
+    val lowerLine = line.trim()
     if (lowerLine.isEmpty) return LandoLineType.EmptyLine
     if (lowerLine.startsWith("//")) return LandoLineType.Comment
     if (lowerLine.startsWith("relation")) return LandoLineType.Relation
@@ -116,19 +116,16 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   def extractReferenceName(line: String): ReferenceName = {
-    def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
+    def noneIfNull(s: String): Option[String] = Option(s)
 
-    val strippedLine = line.strip()
+    val strippedLine = line.trim()
     strippedLine match {
-      case componentRegex(name, acronym)
-      => ReferenceName(name.strip(), noneIfNull(acronym))
-      case systemRegex(name, acronym)
-      => ReferenceName(name.strip(), noneIfNull(acronym))
-      case subsystemRegex(name, acronym)
-      => ReferenceName(name.strip(), noneIfNull(acronym))
+      case componentRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
+      case systemRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
+      case subsystemRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
       case _ =>
         // Events, scenarios and requirements do have an acronym
-        ReferenceName(line.strip())
+        ReferenceName(strippedLine)
     }
   }
 
@@ -168,7 +165,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
       line match {
         case relationRegex(source, symbol, target) =>
           new DocRelation(
-            fileName, RelationReference(source.strip(), target.strip()),
+            fileName, RelationReference(source.trim(), target.trim()),
             getRelationType(symbol).get, line, None, None)
         case _ => throw new IllegalArgumentException(s"Could not extract relation name from line: $line")
 

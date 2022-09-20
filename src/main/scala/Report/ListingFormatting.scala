@@ -79,7 +79,7 @@ object ListingFormatting {
             "end", "view", "flow", "viewpoint", "inout", "stakeholder", "redefines", "connect", "actor", "objective"),
           "//",
           BlockComment("/*", "*/"),
-          literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case"))
+          literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case "))
         )
       case DocumentType.SV =>
         LanguageFormatting(

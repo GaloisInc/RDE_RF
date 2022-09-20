@@ -39,7 +39,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
   }
 
   private def cleanString(line: String): String = {
-    line.strip()
+    line.trim()
   } ensuring ((res: String) => res.length <= line.length)
 
 }

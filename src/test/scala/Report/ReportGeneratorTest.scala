@@ -1,6 +1,7 @@
 package Report
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
+import ConfigParser.RefinementModel
 import Formatter.InlineFormatter
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
@@ -22,7 +23,7 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, false)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],false)
 
     val reportFilePath = RefinementReport.generateRefinementReport(report)
 

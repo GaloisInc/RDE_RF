@@ -10,7 +10,6 @@ import java.io.{File, InputStream, InputStreamReader}
 import java.nio.file.{Files, Paths}
 
 object RefinementLoader {
-
   def load(file: String): MasterModel = {
     if (!Files.exists(Paths.get(file))) {
       val msg = f"File not found: ${file}. Current working directory is: ${System.getProperty("user.dir")}."
@@ -62,9 +61,10 @@ object RefinementLoader {
 
   def parse(config: RefinementConfig): MasterModel = {
     config match {
-      case RefinementConfig(name, refinements) =>
-        val refinementModels = refinements.map(parseRefinement)
-        MasterModel(name, refinementModels)
+      case RefinementConfig(name, implicit_refinements, explicit_refinements) =>
+        val implicit_refinementModels = implicit_refinements.map(parseRefinement)
+        val explicit_refinementModels = explicit_refinements.map(parseRefinement)
+        MasterModel(name, implicit_refinementModels, explicit_refinementModels)
       case _ => throw new IllegalArgumentException("Invalid config")
     }
   }
@@ -73,9 +73,9 @@ object RefinementLoader {
     RefinementParserSingleton.parse(RefinementParserSingleton.refinement, refinement) match {
       case RefinementParserSingleton.Success(result, _) =>
         RefinementModel(srcRef = result.srcRef, trgRef = result.trgRef)
-      case RefinementParserSingleton.NoSuccess(msg, _) => {
+      case RefinementParserSingleton.NoSuccess(msg, _) =>
         throw new IllegalArgumentException(msg)
-      }
+      case _ => throw new IllegalArgumentException("Invalid refinement")
     }
   }
 }

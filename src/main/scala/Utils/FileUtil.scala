@@ -11,7 +11,16 @@ object FileUtil {
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
-    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
+
+    var sourceFiles = List.empty[String]
+    Files.walk(Paths.get(sourcePath))
+      .filter(Files.isRegularFile(_))
+      .filter(p => fileTypesOfTypesOfInterest.exists(p.toFile.getName.endsWith))
+      .map(_.toFile.getAbsolutePath)
+      .forEach(sourceFiles ::= _)
+
+    sourceFiles.toArray
+    //    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
   }
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
@@ -96,7 +105,7 @@ object FileUtil {
 
     val path = Files.move(
       Paths.get(source),
-      Paths.get(Path.of(destinationDirectory, fileName).toString),
+      Paths.get(Paths.get(destinationDirectory, fileName).toString),
       StandardCopyOption.REPLACE_EXISTING
     )
     path.toString

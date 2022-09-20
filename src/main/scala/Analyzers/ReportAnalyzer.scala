@@ -10,5 +10,4 @@ object ReportAnalyzer {
     val topOfChain = references.filter(ref => ref.getAbstractions.isEmpty)
     topOfChain
   } ensuring((result: Set[DocReference]) => result.subsetOf(references), "Result must be a subset of the input")
-
 }

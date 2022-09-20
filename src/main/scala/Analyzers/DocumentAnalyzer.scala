@@ -10,7 +10,7 @@ import Types.DocReference.DocReference
 import Types.DocumentInfos._
 import Utils.{FileUtil, Matcher}
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 final case class LatexDocumentData(
                                     title: String,
@@ -30,60 +30,48 @@ object DocumentAnalyzer {
 
   def generateReport(filesToAnalyze: Array[String],
                      latexDocumentData: LatexDocumentData,
+                     explicitRefinements: Set[RefinementModel],
                      sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
 
-    if (sortFiles)
-      enrichAndMoveFiles(filesToAnalyze, latexDocumentData)
-    else {
-      val enrichedDocuments = enrichDocuments(filesToAnalyze, latexDocumentData.latexFormatter)
-      ReportReference(
-        latexDocumentData.title,
-        latexDocumentData.folder,
-        FileUtil.getLandoDocuments(enrichedDocuments).map(_.asInstanceOf[LandoDocumentInfo]),
-        FileUtil.getSysMLDocuments(enrichedDocuments).map(_.asInstanceOf[SysMLDocumentInfo]),
-        FileUtil.getCryptolDocuments(enrichedDocuments).map(_.asInstanceOf[CryptolDocumentInfo]),
-        FileUtil.getBlusSpecDocuments(enrichedDocuments).map(_.asInstanceOf[BSVDocumentInfo]),
-        FileUtil.getSystemVerilogDocumetns(enrichedDocuments).map(_.asInstanceOf[SVDocumentInfo]),
-        latexDocumentData.layout
-      )
-    }
+    if (sortFiles) enrichAndMoveFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
+    else enrichFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
   }
 
-  def enrichAndMoveFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData): ReportReference = {
+  def enrichAndMoveFiles(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData, explicitRefinements: Set[RefinementModel]): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
-    val references = enrichFiles(filesToAnalyze, latexDocumentData)
+    val references = enrichFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
     moveFiles(references)
   }
 
   def moveFiles(reportReference: ReportReference): ReportReference = {
     val targetFolder = reportReference.folder
     val newLandoFiles = reportReference.landoDocuments.map(doc => {
-      val destinationPath = Path.of(targetFolder, "decoratedLando").toString
+      val destinationPath = Paths.get(targetFolder, "decoratedLando").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newSysMLFiles = reportReference.sysmlDocuments.map(doc => {
-      val destinationPath = Path.of(targetFolder, "decoratedSysML").toString
+      val destinationPath = Paths.get(targetFolder, "decoratedSysML").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newCryptolFiles = reportReference.cryptolDocuments.map(doc => {
-      val destinationPath = Path.of(targetFolder, "decoratedCryptol").toString
+      val destinationPath = Paths.get(targetFolder, "decoratedCryptol").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newBSVFiles = reportReference.bsvDocuments.map(doc => {
-      val destinationPath = Path.of(targetFolder, "decoratedBSV").toString
+      val destinationPath = Paths.get(targetFolder, "decoratedBSV").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
 
     val newSVFiles = reportReference.svDocuments.map(doc => {
-      val destinationPath = Path.of(targetFolder, "decoratedSV").toString
+      val destinationPath = Paths.get(targetFolder, "decoratedSV").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
@@ -203,13 +191,14 @@ object DocumentAnalyzer {
     //enrichedBSVDocuments.foreach(doc => addReferences(doc, enrichedBSVDocuments.flatMap(_.getAllReferences).toSet))
     //enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences).toSet))
 
-    enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ bsvDocuments ++ svDocuments
-  } ensuring ((res: Array[DocumentInfo]) => res.length == filesToAnalyze.length)
+    val result = enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ bsvDocuments ++ svDocuments
 
-  def enrichAndAddExplicitReferences(filesToAnalyze: Array[String], latexDocumentData: LatexDocumentData, explicitRefinements: Set[RefinementModel]): ReportReference= {
-    enrichFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
-  } ensuring ((res: ReportReference) => res.cryptolDocuments.length + res.sysmlDocuments.length + res.landoDocuments.length == filesToAnalyze.length)
-
+    result.forall(file => {
+      assert(filesToAnalyze.exists(_.equals(file.filePath)), s"File ${file.documentName} was not found in the list of files to analyze")
+      true
+    })
+    result
+  } ensuring ((res: Array[DocumentInfo]) => res.length == filesToAnalyze.length, "Not all files were analyzed")
 
   def addReferences(document: DocumentInfo, references: Set[DocReference]): Unit = {
     val referencesToUpdate: Set[DocReference] = document.getAllReferences.filter(ref => ref.isReferencingAnything)

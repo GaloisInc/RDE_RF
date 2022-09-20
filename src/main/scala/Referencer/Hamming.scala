@@ -13,8 +13,8 @@ object Hamming {
     require(s1.nonEmpty, "s1 is empty")
     require(s2.nonEmpty, "s2 is empty")
 
-    val cleanedString1 = s1.toLowerCase(Locale.US).strip()
-    val cleanedString2 = s2.toLowerCase(Locale.US).strip()
+    val cleanedString1 = s1.toLowerCase(Locale.US).trim()
+    val cleanedString2 = s2.toLowerCase(Locale.US).trim()
 
     val paddedString1 = cleanedString1.padTo(cleanedString2.length, ' ')
     val paddedString2 = cleanedString2.padTo(paddedString1.length, ' ')

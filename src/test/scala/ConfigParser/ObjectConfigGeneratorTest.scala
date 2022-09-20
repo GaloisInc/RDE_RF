@@ -25,14 +25,14 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val documentInfo = documentAnalyzer.parseDocument(filePath)
     val report = ReportReference(title, folder, Array(documentInfo), Array.empty, Array.empty, Array.empty, Array.empty, PaperLayout.A4)
 
-    val reportFilePath = ObjectConfigGenerator.generateNoneRefinedFile(report)
+    val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test")
 
     reportFilePath should not be null
     val file = new File(reportFilePath)
     file.exists() should be(true)
     val loadedFile = RefinementLoader.load(reportFilePath)
     loadedFile.name should be(title)
-    loadedFile.refinements.length should be(1)
+    loadedFile.explicit_refinements.length should be(1)
     file.delete()
   }
 
@@ -54,8 +54,8 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, false)
-    val reportFilePath = ObjectConfigGenerator.generateRefinedFile(report)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel], false)
+    val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit")
 
     reportFilePath should not be null
     val file = new File(reportFilePath)
@@ -64,7 +64,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val loadedFile = RefinementLoader.load(reportFilePath)
     loadedFile.name should be(reportName)
-    loadedFile.refinements.length should be(1)
+    loadedFile.explicit_refinements.length should be(1)
 
     file.delete()
   }
@@ -87,8 +87,8 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, false)
-    val reportFilePath = ObjectConfigGenerator.generateNoneRefinedFile(report)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],false)
+    val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit_none")
 
     reportFilePath should not be null
     val file = new File(reportFilePath)

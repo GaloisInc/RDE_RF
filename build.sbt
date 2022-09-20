@@ -42,5 +42,6 @@ docker / dockerfile := {
     copy(appDir, targetDir, chown = "daemon:daemon")
     //Set the working directory
     workDir(s"$targetDir/bin/")
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
   }
 }

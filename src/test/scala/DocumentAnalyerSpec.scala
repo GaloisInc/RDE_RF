@@ -20,7 +20,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val title = "Test"
 
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation)
+    DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
   }
 
   "CryptolReader" should "to enrich SYSML references" in {
@@ -36,7 +36,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val title = "Test"
 
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation)
+    val report = DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
 
     val formatter = new ReferenceFormatter(new InlineFormatter())
 
@@ -76,7 +76,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.enrichAndAddExplicitReferences(filesToAnalyze, latexDocumentation, references)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
 
     val acronymLando = report.landoDocuments.find(_.documentName.equalsIgnoreCase("acronyms")).get
     val glossarySysML = report.sysmlDocuments.find(_.documentName.equalsIgnoreCase("RTS_Glossary")).get
@@ -107,7 +107,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
 
-    val references = RefinementLoader.load(conf.getPath).refinements.toSet
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
 
     val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
       FileUtil.getListOfFiles(landoDocuments).toArray ++
@@ -116,14 +116,34 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.enrichAndAddExplicitReferences(filesToAnalyze, latexDocumentation, references)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
 
     val testScenario = report.landoDocuments.find(_.documentName.equalsIgnoreCase("test_scenarios")).get
 
     val testScenarioRef = testScenario.getAllReferences.find(ref => ref.getName.equalsIgnoreCase("Exceptional Behavior 2a - Cause Temperature Sensor 1 to Fail")).get
     testScenarioRef.getRefinements.nonEmpty should be (true)
     testScenarioRef.getRefinements.get.exists(ref => ref.getName.equalsIgnoreCase("2a - Cause Temperature Sensor 1 to Fail")) should be (true)
+  }
 
+  "DocumentAnalyzer" should "be able to add explicit References from source directory" in {
+    val sourceFolder = getClass.getResource("Source").getPath
+
+    val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
+    val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv")
+
+    val filesToAnalyze = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
+
+    val targetFolder = getClass.getResource("").getPath
+    val title = "Test_From_Source_Directory"
+    val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
+
+    val testScenario = report.landoDocuments.find(_.documentName.equalsIgnoreCase("test_scenarios")).get
+
+    val testScenarioRef = testScenario.getAllReferences.find(ref => ref.getName.equalsIgnoreCase("Exceptional Behavior 2a - Cause Temperature Sensor 1 to Fail")).get
+    testScenarioRef.getRefinements.nonEmpty should be(true)
+    testScenarioRef.getRefinements.get.exists(ref => ref.getName.equalsIgnoreCase("2a - Cause Temperature Sensor 1 to Fail")) should be(true)
   }
 
 
@@ -133,7 +153,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
 
-    val references = RefinementLoader.load(conf.getPath).refinements.toSet
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
 
     val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
       FileUtil.getListOfFiles(landoDocuments).toArray ++
@@ -142,7 +162,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val targetFolder = getClass.getResource("").getPath
     val title = "Test Enriched with Explicit References"
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.enrichAndAddExplicitReferences(filesToAnalyze, latexDocumentation, references)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
 
     LatexGenerator.generateLatexReportOfSources(report)
   }

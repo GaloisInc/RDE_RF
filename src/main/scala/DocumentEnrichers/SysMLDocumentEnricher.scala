@@ -81,13 +81,13 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   private def cleanString(line: String): String = {
-    line.strip().stripSuffix(";;").stripSuffix(";").stripSuffix("}").stripSuffix("{").strip()
+    line.trim().stripSuffix(";;").stripSuffix(";").stripSuffix("}").stripSuffix("{").trim()
   }
 
   def transformReference(line: String, fileName: String): Option[DocReference] = {
     def emptyIfNull(s: String): String = if (s == null) "" else s
 
-    def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
+    def noneIfNull(s: String): Option[String] = Option(s)
 
     def createRef(symbol: String, name: String): Ref = {
       require(symbol.nonEmpty, "symbol cannot be empty")
@@ -100,7 +100,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     def refinementRefs(symbol: String, referenceString: String): Option[Set[Ref]] = {
       if (symbol == null || symbol.isEmpty || referenceString == null || referenceString.isEmpty) None
       else
-        Some(referenceString.split(",").map(_.trim).map(createRef(symbol.strip(), _)).toSet)
+        Some(referenceString.split(",").map(_.trim).map(createRef(symbol.trim(), _)).toSet)
     }
 
     val extractedReference = cleanString(line) match {

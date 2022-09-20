@@ -1,6 +1,7 @@
 package Generators
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
+import ConfigParser.RefinementModel
 import Formatter.{InlineFormatter, LatexSyntax, MarginFomatter}
 import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
@@ -162,7 +163,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       FileUtil.getListOfFiles(svDocuments).toArray ++
       FileUtil.getListOfFiles(bsvDocuments).toArray
 
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)
 
     //Ensure that the file was created

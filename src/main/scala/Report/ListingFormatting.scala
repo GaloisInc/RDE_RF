@@ -47,7 +47,7 @@ object ListingFormatting {
       |numbers = left,
       |numberstyle =\small\itshape,
       |stepnumber = 1,
-      |escapeinside = {(*}{*)},
+      |escapeinside = {(@}{@)},
       |postbreak =\mbox{\textcolor{red}{$\hookrightarrow$\space}}
     }""".stripMargin
   }
@@ -94,7 +94,7 @@ object ListingFormatting {
           "BSV",
           Array("module", "private", "import", "method", "input", "output", "assign", "endmodule", "end", "if", "else", "begin", "endfunction", "function", "endtask", "task", "for", "while", "repeat", "case", "endcase", "default", "return", "break", "continue", "rand", "randc", "randcase", "randsequence", "forever", "wait", "disable", "fork", "join", "join_any", "join_none", "void", "null", "super", "this", "const", "local", "static", "protected", "virtual", "automatic", "randsequence", "randcase", "randc", "rand", "typedef", "enum", "struct", "union", "class", "interface", "package", "program", "property", "sequence"),
           "//",
-          BlockComment("/*", "*/"),
+          BlockComment("(*", "*)"),
           literates = Array.empty[Literate]
         )
     }

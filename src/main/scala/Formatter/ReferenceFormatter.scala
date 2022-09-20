@@ -5,8 +5,8 @@ import Types.LatexReferenceTypes
 
 class ReferenceFormatter(
                           styleFormatter: LatexFormatter,
-                          private val escapeListingBeginning: String = "(*",
-                          private val escapeListingEnding: String = "*)",
+                          private val escapeListingBeginning: String = "(@",
+                          private val escapeListingEnding: String = "@)",
                           protected val abstractionSymbolLatex: String = "$\\sqsupseteq$",
                           protected val refinementSymbolLatex: String = "$\\sqsubseteq$") {
 

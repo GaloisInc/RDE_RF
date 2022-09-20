@@ -37,6 +37,7 @@ docker / dockerfile := {
     //Install Latex - takes a while to download
     runRaw("apt-get update && apt-get install -y --no-install-recommends apt-utils")
     runRaw("apt-get install texlive-full -y")
+    runRaw("apt-get install -y cryptol")
     //Copy the application
     copy(appDir, targetDir, chown = "daemon:daemon")
     //Set the working directory

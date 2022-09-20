@@ -37,9 +37,7 @@ class CryptolInterpreterTest extends AnyFlatSpec with should.Matchers {
     result.getTypes.size should be(3)
     result.getFunctions.size should be(3)
     result.getProperties.size should be(0)
-
   }
-
 
   it should "be able to load the ActuationUnit" in {
     val cryptolFilePath = getClass.getResource("../Cryptol/ActuationUnit.cry").getPath
@@ -60,5 +58,4 @@ class CryptolInterpreterTest extends AnyFlatSpec with should.Matchers {
     result.getProperties.size should be(9)
     result.getFunctions.size should be(30)
   }
-
 }

@@ -159,8 +159,8 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
     val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
       FileUtil.getListOfFiles(landoDocuments).toArray ++
       FileUtil.getListOfFiles(cryptolDocuments).toArray ++
-      FileUtil.getListOfFiles(svDocuments).toArray
-      //FileUtil.getListOfFiles(bsvDocuments).toArray
+      FileUtil.getListOfFiles(svDocuments).toArray ++
+      FileUtil.getListOfFiles(bsvDocuments).toArray
 
     val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)

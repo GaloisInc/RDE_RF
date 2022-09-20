@@ -108,10 +108,6 @@ object DocumentAnalyzer {
     val enrichedBSVDocuments = FileUtil.getBlusSpecDocuments(enrichedDocuments)
     val enrichedSVDocuments = FileUtil.getSystemVerilogDocumetns(enrichedDocuments)
 
-    assert(enrichedCryptolDocuments.intersect(enrichedSysMLDocuments).isEmpty)
-    assert(enrichedLandoDocuments.intersect(enrichedSysMLDocuments).isEmpty)
-    assert(enrichedCryptolDocuments.intersect(enrichedLandoDocuments).isEmpty)
-
     val report = ReportReference(
       latexDocumentData.title,
       latexDocumentData.folder,

@@ -15,7 +15,7 @@ case class ReportReference(title: String,
                           ) {
   require(title.nonEmpty, "title must not be empty")
   require(folder.nonEmpty, "folder must not be empty")
-  require(landoDocuments.nonEmpty || sysmlDocuments.nonEmpty || cryptolDocuments.nonEmpty, "At least one document must be provided")
+  require(allDocuments.nonEmpty, "At least one document must be provided")
 
   lazy val allDocuments: Array[DocumentInfo] = landoDocuments ++ sysmlDocuments ++ cryptolDocuments ++ bsvDocuments ++ svDocuments
 
@@ -36,7 +36,6 @@ case class ReportReference(title: String,
       case None => throw new IllegalArgumentException(s"Document $documentName not found")
     }
   }
-
 
     def allDocumentNamesToPaths: Map[String, String] = {
     val docMap = allDocuments.map(doc => doc.documentName -> doc.filePath).toMap

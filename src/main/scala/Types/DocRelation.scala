@@ -7,7 +7,7 @@ import Types.DocReference.DocReference
 class DocRelation(
                    override val documentName: String,
                    referenceRelation: RelationReference,
-                   relationType: RelationType,
+                   relationType: RelationTypes.Value,
                    override val originalLine: String,
                    sourceRef: Option[DocReference],
                    targetRef: Option[DocReference],
@@ -23,7 +23,7 @@ class DocRelation(
   def copy(
             documentName: String = documentName,
             referenceRelation: RelationReference = referenceRelation,
-            relationType: RelationType = relationType,
+            relationType: RelationTypes.relationType = relationType,
             originalLine: String = originalLine,
             sourceRef: Option[DocReference] = sourceRef,
             targetRef: Option[DocReference] = targetRef,
@@ -36,7 +36,7 @@ class DocRelation(
   def getOriginalLine: String = originalLine
 
 
-  def getRelationType: RelationType = relationType
+  def getRelationType: RelationTypes.relationType = relationType
 
 
   def getSourceRef: Option[DocReference] = sourceRef
@@ -44,8 +44,8 @@ class DocRelation(
   def getTargetRef: Option[DocReference] = targetRef
 
   override def enrichedLine(formatter: ReferenceFormatter): String = {
-    val linkToSource = if sourceRef.isDefined then formatter.addReference(sourceRef.get, documentName, LatexReferenceType.ConnectionArtifact) else getSourceName
-    val linkToTarget = if targetRef.isDefined then formatter.addReference(targetRef.get, documentName, LatexReferenceType.ConnectionArtifact) else getTargetName
+    val linkToSource = if (sourceRef.isDefined) formatter.addReference(sourceRef.get, documentName, LatexReferenceTypes.ConnectionArtifact) else getSourceName
+    val linkToTarget = if (targetRef.isDefined) formatter.addReference(targetRef.get, documentName, LatexReferenceTypes.ConnectionArtifact) else getTargetName
 
     s"relation $linkToSource ${relationType.toString} $linkToTarget"
   }

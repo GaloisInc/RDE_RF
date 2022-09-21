@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class SysMLRegexTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentEnricher = SysMLDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentEnricher = new SysMLDocumentEnricher(formatterType)
 
   "RegexExperiment" should "match Items" in {
     val itemLine1 = "abstract item id BISL 'Behavioral Interface Specification Language'"

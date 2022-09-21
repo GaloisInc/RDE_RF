@@ -1,11 +1,7 @@
 package Referencer
 
-import Formatter.InlineFormatter
-import Types.*
 import Types.DocReference.DocReference
 import Types.DocumentInfos.DocumentInfo
-
-import java.util.Locale
 
 abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
   def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo
@@ -48,12 +44,12 @@ abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
     val nameOfAbstractReference = AbstractReference.getName
     val acronymOfAbstractReference = AbstractReference.getAcronym.getOrElse("YYYYYYYYYY")
     val referenceNameToMatch = ref.getName
-    val referenceNameAcronym = ref.getAcronym.getOrElse("XXXXXXXXXXX")
-    referenceNameToMatch.equalsIgnoreCase(nameOfAbstractReference)
-      || referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equalsIgnoreCase(nameOfAbstractReference)
-      || referenceNameAcronym.equalsIgnoreCase(acronymOfAbstractReference)
-      || referenceNameToMatch.equalsIgnoreCase(acronymOfAbstractReference)
-      || Hamming.computeRelHamming(nameOfAbstractReference, referenceNameToMatch) <= hammingDistanceMeasure
+    val referenceNameAcronym : String = ref.getAcronym.getOrElse("XXXXXXXXXXX")
+    referenceNameToMatch.equalsIgnoreCase(nameOfAbstractReference) ||
+      referenceNameToMatch.takeWhile(!_.isDigit).replace(" ", "").equalsIgnoreCase(nameOfAbstractReference) ||
+        referenceNameAcronym.equalsIgnoreCase(acronymOfAbstractReference) ||
+        referenceNameToMatch.equalsIgnoreCase(acronymOfAbstractReference) ||
+        Hamming.computeRelHamming(nameOfAbstractReference, referenceNameToMatch) <= hammingDistanceMeasure
   }
 
   protected def addRefinementsOfToDocReference(reference: DocReference, refinements: Set[DocReference]): DocReference = {

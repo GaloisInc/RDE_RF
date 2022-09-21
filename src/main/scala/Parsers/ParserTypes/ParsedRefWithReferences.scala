@@ -5,8 +5,8 @@ import Types.{ReferenceType, DocumentType}
 case class ParsedRefWithReferences(name: String,
                                    originalLine: String,
                                    documentName: String,
-                                   documentType: DocumentType,
-                                   referenceType: ReferenceType,
+                                   documentType: DocumentType.Value,
+                                   referenceType: ReferenceType.Value,
                                    acronym: String,
                                    symbol: String,
-                                   references: String) extends ParsedReference(name, originalLine, referenceType, documentName, documentType)
+                                   references: String) extends ParsedReference

@@ -2,7 +2,6 @@ package Utils
 
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType
-import Utils.Control
 
 import java.io.File
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
@@ -12,7 +11,16 @@ object FileUtil {
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
-    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
+
+    var sourceFiles = List.empty[String]
+    Files.walk(Paths.get(sourcePath))
+      .filter(Files.isRegularFile(_))
+      .filter(p => fileTypesOfTypesOfInterest.exists(p.toFile.getName.endsWith))
+      .map(_.toFile.getAbsolutePath)
+      .forEach(sourceFiles ::= _)
+
+    sourceFiles.toArray
+    //    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
   }
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
@@ -26,6 +34,15 @@ object FileUtil {
   def getCryptolDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Cryptol)
   } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Cryptol))
+
+  def getBlusSpecDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.BSV)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.BSV))
+
+  def getSystemVerilogDocumetns(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.SV)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SV))
+
 
   def getFileName(path: String): String = {
     require(path.nonEmpty)
@@ -88,7 +105,7 @@ object FileUtil {
 
     val path = Files.move(
       Paths.get(source),
-      Paths.get(Path.of(destinationDirectory, fileName).toString),
+      Paths.get(Paths.get(destinationDirectory, fileName).toString),
       StandardCopyOption.REPLACE_EXISTING
     )
     path.toString

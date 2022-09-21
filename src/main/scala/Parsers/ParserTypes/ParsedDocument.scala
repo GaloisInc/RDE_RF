@@ -9,5 +9,5 @@ final case class ParsedDocument(
                                  documentName: String,
                                  filePath: String,
                                  references: Set[ParsedReference],
-                                 documentType: DocumentType,
+                                 documentType: DocumentType.Value,
                                )

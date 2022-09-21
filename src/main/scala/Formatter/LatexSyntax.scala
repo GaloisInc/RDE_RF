@@ -2,26 +2,27 @@ package Formatter
 
 import Formatter.LatexSanitizer.{sanitizeName, sanitizeWebLink}
 import Types.DocReference.DocReference
-import Types.{DocumentType, LatexReferenceType}
+import Types.{DocumentType, LatexReferenceTypes}
 
 object LatexSyntax {
   def addLabel(reference: String): String = s"\\label{$reference}" // \\hypertarget{$reference}{}"
 
-  def addClickableLocalLink(reference: String, nameOfReference: String, referenceType: LatexReferenceType): String = {
+  def addClickableLocalLink(reference: String, nameOfReference: String, referenceType: LatexReferenceTypes.latexReferenceType): String = {
     val sanitizedReference = sanitizeName(nameOfReference)
-    referenceType match
-      case LatexReferenceType.File => s"\\href{run./$reference}{$sanitizedReference}"
-      case LatexReferenceType.Abstraction => s"\\abstractionLink{$reference}{$sanitizedReference}"
-      case LatexReferenceType.Refinement => s"\\refinementLink{$reference}{$sanitizedReference}"
-      case LatexReferenceType.Link => s"\\link{$reference}{$sanitizedReference}"
-      case LatexReferenceType.CryptolProperty => s"\\script{$reference}{$sanitizedReference}"
-      case LatexReferenceType.ConnectionArtifact => s"\\hyperref[$reference]{$sanitizedReference}"
+    referenceType match {
+      case LatexReferenceTypes.File => s"\\href{run./$reference}{$sanitizedReference}"
+      case LatexReferenceTypes.Abstraction => s"\\abstractionLink{$reference}{$sanitizedReference}"
+      case LatexReferenceTypes.Refinement => s"\\refinementLink{$reference}{$sanitizedReference}"
+      case LatexReferenceTypes.Link => s"\\link{$reference}{$sanitizedReference}"
+      case LatexReferenceTypes.CryptolProperty => s"\\script{$reference}{$sanitizedReference}"
+      case LatexReferenceTypes.ConnectionArtifact => s"\\hyperref[$reference]{$sanitizedReference}"
+    }
   }
 
 
-  def colorText(text: String, documentType: DocumentType): String = {
+  def colorText(text: String, documentType: DocumentType.documentType): String = {
     require(text.nonEmpty, "Text must not be empty")
-    val color = documentType match
+    val color = documentType match {
       case DocumentType.Lando => "blue"
       case DocumentType.Lobot => "red"
       case DocumentType.SysML => "green"
@@ -29,6 +30,7 @@ object LatexSyntax {
       case DocumentType.Saw => "orange"
       case DocumentType.SV => "brown"
       case DocumentType.BSV => "pink"
+    }
     s"\\textcolor{$color}{$text}"
   } ensuring(coloredString => coloredString.contains(text), "Text must be contained in colored string")
 
@@ -42,13 +44,12 @@ object LatexSyntax {
     s"\\vref{$reference}"
   } ensuring (_.contains(reference))
 
-  def addReferenceInLatex(reference: DocReference, currentDocument: String, referenceType: LatexReferenceType): String = {
+  def addReferenceInLatex(reference: DocReference, currentDocument: String, referenceType: LatexReferenceTypes.latexReferenceType): String = {
     s"${addClickableLocalLink(reference.getLabelText, reference.getShortName, referenceType)} (${explicitReference(reference, currentDocument)})"
   }
 
   private def explicitReference(ref: DocReference, documentName: String): String = {
-    if ref.documentName.equals(documentName)
-    then addCref(ref.getLabelText)
+    if (ref.documentName.equalsIgnoreCase(documentName)) addCref(ref.getLabelText)
     else addVref(ref.getLabelText)
   } ensuring ((l: String) => l.contains(ref.getLabelText))
 

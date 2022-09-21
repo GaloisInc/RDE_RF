@@ -1,16 +1,7 @@
 package Referencer
 
-import Types.DocReference.DocReference
-import Types.{DocumentType, ReferenceName, ReferenceType}
-import Utils.Control
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest.flatspec._
 import org.scalatest.matchers.should.Matchers
-
-import java.nio.file.Path
-import scala.collection.mutable
-import scala.io.Source
 
 class HammingSpecs extends AnyFlatSpec with Matchers {
   it should "detect no difference between empty strands" in {

@@ -8,9 +8,9 @@
 // @refines RTS.lando
 // @refines RTS_Requirements.json
 
-module RTS::InstrumentationUnit where
+module InstrumentationUnit where
 
-import RTS::Utils
+import Utils
 
 type Input     = [2][32]
 type NChannels = 3

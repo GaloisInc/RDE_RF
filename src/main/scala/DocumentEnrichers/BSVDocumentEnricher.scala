@@ -1,12 +1,11 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
-import Types.*
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{BSVDocumentInfo, DocumentInfo}
+import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 
-import java.util.Locale
 import scala.util.matching.Regex
 
 class BSVDocumentEnricher(override val formatterType: LatexFormatter,
@@ -24,22 +23,24 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     val packages = references.filter(_.getReferenceType == ReferenceType.System)
     val modules = references.filter(_.getReferenceType == ReferenceType.SubSystem)
 
-    BSVDocumentInfo(fileName, filePath, packages, modules)
+    new BSVDocumentInfo(fileName, filePath, packages, modules)
   }
 
   def formatLine(line: String, documentInfo: DocumentInfo): String = {
     val references = documentInfo.getAllReferences
-    cleanLine(line) match
+    cleanLine(line) match {
       case systemRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
       case subsystemRegex(_, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.SubSystem))
       case _ => line
+    }
   }
 
   def transformReference(line: String, fileName: String): Option[DocReference] = {
-    cleanLine(line) match
-      case systemRegex(systemName) => Some(DocReference(fileName, ReferenceName(systemName), ReferenceType.System, DocumentType.BSV, line))
-      case subsystemRegex(subsystemName, arguments) => Some(DocReference(fileName, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
+    cleanLine(line) match {
+      case systemRegex(systemName) => Some(new DocReference(fileName, ReferenceName(systemName), ReferenceType.System, DocumentType.BSV, line))
+      case subsystemRegex(subsystemName, arguments) => Some(new DocReference(fileName, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
       case _ => None
+    }
   }
 
 

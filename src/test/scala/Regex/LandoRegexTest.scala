@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class LandoRegexTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentEnricher = LandoDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentEnricher = new LandoDocumentEnricher(formatterType)
 
   "RegexExperiment" should "match attributes" in {
     val line1 = "component Digital Instrumentation \\& Control (diandc)"

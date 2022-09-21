@@ -1,18 +1,15 @@
 package Report
 
-import Formatter.LatexSanitizer
 import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
+import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, SysMLDocumentInfo}
-import Types.DocumentType
-import Utils.FileUtil
-import sun.font.Decoration.Label
+import Types.DocumentInfos.DocumentInfo
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.collection.mutable
-import scala.sys.process.*
+import scala.sys.process.Process
 
 object LatexGenerator {
   private val latexBuildCmd = "pdflatex"
@@ -51,11 +48,12 @@ object LatexGenerator {
 
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
-    val cmd = s"""$latexBuildCmd $fPath"""
-    val exitCode = Process(cmd).!
+    val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
+    val pLog = new LatexProcessLogger()
+    val exitCode = Process(cmd).!(pLog)
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
-      val exitCode = Process(cmd).!
+      val exitCode = Process(cmd).!(pLog)
       assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     }
 
@@ -88,6 +86,10 @@ object LatexGenerator {
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.svFormatting)
+    latex.append(emptyLine)
+    latex.append(ListingFormatting.bsvFormatting)
+    latex.append(emptyLine)
 
     latex.toString()
   }
@@ -99,45 +101,35 @@ object LatexGenerator {
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
-
     latexContent.append(generateSection(report.title))
-
     latexContent.append(emptyLine)
 
-    latexContent.append(generateSection("Lando Models"))
-
-    report.landoDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
-
-    latexContent.append(generateSection("SysML Models"))
-    latexContent.append(emptyLine)
-
-    report.sysmlDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
-
-    latexContent.append(generateSection("Cryptol Specifications"))
-    latexContent.append(emptyLine)
-
-    report.cryptolDocuments.foreach(m => {
-      //latexContent.append(generateSubSection(m.getCaption))
-      latexContent.append(emptyLine)
-      latexContent.append(includeListing(m))
-      latexContent.append(emptyLine)
-    })
+    latexContent.append(includeListings("Lando Models", report.landoDocuments))
+    latexContent.append(includeListings("SysML Models", report.sysmlDocuments))
+    latexContent.append(includeListings("Cryptol Specifications", report.cryptolDocuments))
+    latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments))
+    latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments))
 
     val latexDocument = generateLatexDocument(latexContent.toString(), report.layout)
 
-    val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
+    val reportFileName = report.title.replaceAll(" ", "_")
+
+    val filePath = Files.write(Paths.get(report.folder, s"$reportFileName.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 
     buildLatexFile(new File(filePath.toString), buildTwice = true)
+    latexContent.toString()
+  }
+
+
+  def includeListings[Doc <: DocumentInfo](sectionName: String, documents: Array[Doc]): String = {
+    val latexContent = new mutable.StringBuilder()
+    latexContent.append(generateSection(sectionName))
+    latexContent.append(emptyLine)
+    documents.foreach(m => {
+      latexContent.append(emptyLine)
+      latexContent.append(includeListing(m))
+      latexContent.append(emptyLine)
+    })
     latexContent.toString()
   }
 
@@ -153,24 +145,25 @@ object LatexGenerator {
        |\\usepackage{$p}""").stripMargin
 
 
-    documentClass
-      + layout
-      + packagesString
-      + emptyLine
+    documentClass ++
+      layout ++
+      packagesString ++
+      emptyLine ++
       //Needed for the margin notes to work
-      + "\\maxdeadcycles=500"
-      + emptyLine
+      "\\maxdeadcycles=500" ++
+      emptyLine
   }
 
 
   private def extractLatexLayout(paperLayout: PaperLayout): String = {
-    paperLayout match
+    paperLayout match {
       case PaperLayout.A4 =>
         s"""
            |\\usepackage[a4paper, margin=1in]{geometry}""".stripMargin
       case PaperLayout.B4 =>
         s"""
            |\\usepackage[b4paper, marginparwidth=8cm, marginparsep=3mm, includemp, heightrounded, outer=1cm]{geometry}""".stripMargin
+    }
   }
 
   val emptyLine: String =
@@ -179,8 +172,9 @@ object LatexGenerator {
 
 }
 
-enum PaperLayout {
-  case A4, B4
+object PaperLayout extends Enumeration {
+  type PaperLayout = Value
+  val A4, B4 = Value
 }
 
 

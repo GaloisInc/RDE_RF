@@ -1,6 +1,6 @@
 package Referencer
 
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.DocumentInfos.{DocumentInfo, DocumentInfoCompare, SysMLDocumentInfo}
 import Types.{DocumentType, ReferenceType}
 
 class SysMLReferencer extends Referencer {
@@ -20,7 +20,7 @@ class SysMLReferencer extends Referencer {
     val landoReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
     val updatedReferences = documentInfo.getAllReferences.map(sysmlReference => findRefinementRelation(sysmlReference, landoReferences.toSet))
 
-    SysMLDocumentInfo(
+    new SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
       updatedReferences.filter(_.getReferenceType == ReferenceType.System),
@@ -43,7 +43,7 @@ class SysMLReferencer extends Referencer {
     val cryptolReferences = refinedDocuments.flatMap(doc => doc.getAllReferences.filter(ref => ref.getAbstractions.nonEmpty))
     val updatedReferences = documentInfo.getAllReferences.map(sysmlRef => addRefinements(sysmlRef, cryptolReferences.toSet))
 
-    SysMLDocumentInfo(
+    new SysMLDocumentInfo(
       documentInfo.documentName,
       documentInfo.filePath,
       updatedReferences.filter(_.getReferenceType == ReferenceType.System),

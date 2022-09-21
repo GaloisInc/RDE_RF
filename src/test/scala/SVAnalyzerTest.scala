@@ -1,19 +1,13 @@
 import DocumentEnrichers.SVDocumentEnricher
-import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil}
 import Formatter.InlineFormatter
 import TestUtils.TestUtility
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
-
-import java.io.File
-import scala.collection.mutable
-import scala.io.Source
+import Types.DocumentType
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 class SVAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentAnalyser = SVDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentAnalyser = new SVDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.SV
   private val resourceFolder = "../SystemVerilog"
   private val testUtility = new TestUtility()

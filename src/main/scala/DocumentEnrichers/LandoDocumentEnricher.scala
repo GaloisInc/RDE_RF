@@ -1,14 +1,12 @@
 package DocumentEnrichers
 
-import Utils.Matcher.referenceNameMatches
-import Formatter.{LatexFormatter, LatexSanitizer}
-import Types.*
+import Formatter.LatexFormatter
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
-import Types.FileType.*
+import Types._
+import Utils.Matcher.referenceNameMatches
 import Utils.{Control, FileUtil}
 
-import java.util.Locale
 import scala.util.matching.Regex
 
 class LandoDocumentEnricher(override val formatterType: LatexFormatter,
@@ -33,7 +31,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     val fileName = FileUtil.getFileName(filePath)
     val enrichedRelations = enrichRelations(relations, references, fileName)
 
-    LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
+    new LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
   } ensuring ((landoDoc: DocumentInfo) =>
     landoDoc.documentType == DocumentType.Lando
       && landoDoc.filePath == filePath)
@@ -41,7 +39,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   override def formatLine(line: String, documentInfo: DocumentInfo): String = {
     val references = documentInfo.getAllReferences
     val referenceTypesOfComponent = Set(ReferenceType.Component, ReferenceType.System, ReferenceType.SubSystem)
-    getLineType(line, documentInfo.filePath) match
+    getLineType(line, documentInfo.filePath) match {
       case LandoLineType.EmptyLine => line
       case LandoLineType.Comment => line
       case LandoLineType.LineToBeSkipped => ""
@@ -50,6 +48,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
       case LandoLineType.Event => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
       case LandoLineType.Scenario => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
       case LandoLineType.Reference => extractEnrichedText(line, references.filter(ref => referenceTypesOfComponent.contains(ref.getReferenceType)))
+    }
   }
 
   private def enrichRelation(relation: DocRelation, references: Set[DocReference], docName: String): DocRelation = {
@@ -67,30 +66,31 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
 
-  private def getLineType(line: String, documentPath: String): LandoLineType = {
-    val lowerLine = line.strip()
+  private def getLineType(line: String, documentPath: String): LandoLineType.Value = {
+    val lowerLine = line.trim()
     if (lowerLine.isEmpty) return LandoLineType.EmptyLine
     if (lowerLine.startsWith("//")) return LandoLineType.Comment
     if (lowerLine.startsWith("relation")) return LandoLineType.Relation
     if (lowerLine.startsWith("component") || lowerLine.startsWith("subsystem") || lowerLine.startsWith("system")) return LandoLineType.Reference
     if (line.startsWith("@todo")) return LandoLineType.LineToBeSkipped
-    getFileType(documentPath) match
+    getFileType(documentPath) match {
       case FileType.RequirementFile => LandoLineType.Requirement
       case FileType.ScenarioFile => LandoLineType.Scenario
       case FileType.EventFile => LandoLineType.Event
       case FileType.ComponentFile => LandoLineType.Reference
+    }
   }
 
-  private def transformReference(line: String, fileName: String, fileType: FileType): DocReference = {
+  private def transformReference(line: String, fileName: String, fileType: FileType.Value): DocReference = {
     val referenceOption = getReferenceTypeBasedOnFileType(line, fileType)
     val getReferenceType = referenceOption.get
     val referenceName = extractReferenceName(line)
-    DocReference(
+    new DocReference(
       fileName, referenceName, getReferenceType, DocumentType.Lando, line
     )
   }
 
-  private def extractReferences(filePath: String, fileType: FileType): Set[DocReference] = {
+  private def extractReferences(filePath: String, fileType: FileType.fileType): Set[DocReference] = {
     if (getFileType(filePath) != fileType) return Set.empty
     val fileChecker = (l: String, p: String) => isOfType(fileType, l, p)
     extract(filePath, fileChecker, transformReference)
@@ -102,72 +102,87 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   private def isRelation(line: String, prev: String): Boolean = {
-    line match
+    line match {
       case relationRegex(_, _, _) => true
       case _ => false
+    }
   }
 
-  private def isOfType(fileType: FileType, line: String, previousLine: String): Boolean = {
-    line.nonEmpty && !line.startsWith("//")
-      && (fileType == FileType.ComponentFile
-      || (fileType != FileType.ComponentFile && (previousLine.isEmpty || previousLine.startsWith("//"))))
-      && getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
+  private def isOfType(fileType: FileType.fileType, line: String, previousLine: String): Boolean = {
+    line.nonEmpty && !line.startsWith("//") &&
+      (fileType == FileType.ComponentFile ||
+        (fileType != FileType.ComponentFile && (previousLine.isEmpty || previousLine.startsWith("//")))) &&
+      getReferenceTypeBasedOnFileType(line, fileType).nonEmpty
   }
 
   def extractReferenceName(line: String): ReferenceName = {
-    def noneIfNull(s: String): Option[String] = if (s == null) None else Some(s)
+    def noneIfNull(s: String): Option[String] = Option(s)
 
-    val strippedLine = line.strip()
-    strippedLine match
-      case componentRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
-      case systemRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
-      case subsystemRegex(name, acronym) => ReferenceName(name.strip(), noneIfNull(acronym))
+    val strippedLine = line.trim()
+    strippedLine match {
+      case componentRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
+      case systemRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
+      case subsystemRegex(name, acronym) => ReferenceName(name.trim(), noneIfNull(acronym))
       case _ =>
         // Events, scenarios and requirements do have an acronym
-        ReferenceName(line.strip())
+        ReferenceName(strippedLine)
+    }
   }
 
-  private def getReferenceTypeBasedOnFileType(line: String, fileType: FileType): Option[ReferenceType] = {
-    fileType match
-      case FileType.RequirementFile => if !line.startsWith("requirements") then Some(ReferenceType.Requirement) else None
-      case FileType.ScenarioFile => if !line.startsWith("scenarios") then Some(ReferenceType.Scenario) else None
-      case FileType.EventFile => if !line.startsWith("events") then Some(ReferenceType.Event) else None
+  private def getReferenceTypeBasedOnFileType(line: String, fileType: FileType.Value): Option[ReferenceType.Value] = {
+    fileType match {
+      case FileType.RequirementFile
+      => if (!line.startsWith("requirements")) Some(ReferenceType.Requirement) else None
+      case FileType.ScenarioFile
+      => if (!line.startsWith("scenarios")) Some(ReferenceType.Scenario) else None
+      case FileType.EventFile
+      => if (!line.startsWith("events")) Some(ReferenceType.Event) else None
       case FileType.ComponentFile =>
-        line match
-          case componentRegex(_, _) => Some(ReferenceType.Component)
-          case systemRegex(_, _) => Some(ReferenceType.System)
-          case subsystemRegex(_, _) => Some(ReferenceType.SubSystem)
+        line match {
+          case componentRegex(_, _)
+          => Some(ReferenceType.Component)
+          case systemRegex(_, _)
+          => Some(ReferenceType.System)
+          case subsystemRegex(_, _)
+          => Some(ReferenceType.SubSystem)
           case _ => None
+        }
+    }
   }
 
   // Enhance this
-  private def getRelationType(symbol: String): Option[RelationType] = {
-    symbol match
-      case "client" => Some(RelationType.client)
-      case "contains" => Some(RelationType.contains)
-      case "inherit" => Some(RelationType.inherit)
+  private def getRelationType(symbol: String): Option[RelationTypes.Value] = {
+    symbol match {
+      case "client" => Some(RelationTypes.client)
+      case "contains" => Some(RelationTypes.contains)
+      case "inherit" => Some(RelationTypes.inherit)
       case _ => None
+    }
   }
 
   def extractRelations(filePath: String): Set[DocRelation] = {
-    def transformRelation(line: String, fileName: String, fileType: FileType): DocRelation = {
-      line match
+    def transformRelation(line: String, fileName: String, fileType: FileType.Value): DocRelation = {
+      line match {
         case relationRegex(source, symbol, target) =>
-          DocRelation(fileName, RelationReference(source, target), getRelationType(symbol).get, line, None, None)
+          new DocRelation(
+            fileName, RelationReference(source.trim(), target.trim()),
+            getRelationType(symbol).get, line, None, None)
         case _ => throw new IllegalArgumentException(s"Could not extract relation name from line: $line")
+
+      }
     }
 
     extract(filePath, isRelation, transformRelation)
   }
 
-  def getFileType(path: String): FileType = {
+  def getFileType(path: String): FileType.Value = {
     if (FileUtil.isOfFileType(path, "events")) return FileType.EventFile
     if (FileUtil.isOfFileType(path, "requirements")) return FileType.RequirementFile
     if (FileUtil.isOfFileType(path, "scenarios")) return FileType.ScenarioFile
     FileType.ComponentFile
   }
 
-  def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType) => A): Set[A] = {
+  def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType.Value) => A): Set[A] = {
     require(filePath.nonEmpty, "The file path should not be empty")
     val fileName = FileUtil.getFileName(filePath)
     val fileType = getFileType(filePath)
@@ -176,7 +191,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
       lines
         .indices.filter(idx => {
         val line = lines(idx)
-        val prevInd = if idx > 0 then idx - 1 else idx
+        val prevInd = if (idx > 0) idx - 1 else idx
         val previousLine = lines(prevInd)
         filter(line, previousLine)
       }).map(idx => {

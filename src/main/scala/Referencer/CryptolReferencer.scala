@@ -1,7 +1,7 @@
 package Referencer
 
-import Types.*
 import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare}
+import Types.{DocumentType, ReferenceType}
 
 class CryptolReferencer extends Referencer {
   override def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
@@ -17,7 +17,7 @@ class CryptolReferencer extends Referencer {
     val sysmlReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
     val updatedReferences = refinedDocument.getAllReferences.map(reference => findRefinementRelation(reference, sysmlReferences.toSet))
 
-    CryptolDocumentInfo(
+    new CryptolDocumentInfo(
       refinedDocument.documentName,
       refinedDocument.filePath,
       updatedReferences.filter(_.getReferenceType == ReferenceType.Import),

@@ -1,10 +1,8 @@
 package Parsers
 
-import Parsers.ParserTypes.*
+import Parsers.ParserTypes.{ParsedDocument, ParsedRef}
 import Types.{DocumentType, ReferenceType}
-import Utils.FileUtil
 
-import scala.io.Source
 import scala.util.matching.Regex
 
 trait Parser {

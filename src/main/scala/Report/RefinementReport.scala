@@ -1,10 +1,10 @@
 package Report
 
-import Analyzers.{DocumentAnalyzer, ReportAnalyzer}
+import Analyzers.ReportAnalyzer
 import Formatter.{LatexSanitizer, LatexSyntax}
 import Report.ReportTypes.ReportReference
 import Types.DocReference.DocReference
-import Types.LatexReferenceType
+import Types.LatexReferenceTypes
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -25,7 +25,7 @@ object RefinementReport {
 
     val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref))
 
-    val reportString = mutable.StringBuilder()
+    val reportString = new mutable.StringBuilder
 
     reportString.append(LatexSyntax.generateSection("Refinement"))
 
@@ -42,7 +42,7 @@ object RefinementReport {
     mapOfReferencesPerDocumentType.foreach(docTypeRef => {
       reportString.append(LatexSyntax.generateSubSection(docTypeRef._1.toString))
       docTypeRef._2.foreach(docRef => {
-        val subsecHref = LatexSyntax.addClickableLocalLink(documentNameToFilePath(docRef._1), docRef._1, LatexReferenceType.File)
+        val subsecHref = LatexSyntax.addClickableLocalLink(documentNameToFilePath(docRef._1), docRef._1, LatexReferenceTypes.File)
         val subsecLabel = LatexSanitizer.sanitizeReferenceName(docRef._1)
         reportString.append(LatexSyntax.generateSubSubSection(subsecHref, subsecLabel))
         val listsOfReferences = docRef._2.map(formatReference).toList.sorted
@@ -67,7 +67,7 @@ object RefinementReport {
   def formatReferenceChain(reference: DocReference): String = {
     @tailrec
     def formatReferenceChainRec(docReference: DocReference, acc: String): String = {
-      docReference.getRefinements match
+      docReference.getRefinements match {
         case Some(refinements) =>
           val arbitraryRefinement = refinements.head
           val refinementText = refinements.map(ref => {
@@ -77,6 +77,7 @@ object RefinementReport {
           val newAcc = acc + refinementSymbol + refinementText
           formatReferenceChainRec(arbitraryRefinement, newAcc)
         case None => acc
+      }
     }
 
     val startString = s"${reference.documentName}.${reference.sanitizedName}"

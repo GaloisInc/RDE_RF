@@ -3,20 +3,20 @@ import Types.{DocumentType, ReferenceType}
 import Utils.{Control, FileUtil}
 import TestUtils.TestUtility
 import Formatter.InlineFormatter
-import org.scalatest.*
-import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import org.scalatest._
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
 class BSVAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentAnalyser = BSVDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentAnalyser = new BSVDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.BSV
   private val resourceFolder = "../BSV"
-  private val testUtility = TestUtility()
+  private val testUtility = new TestUtility()
 
   "BSVDocumentEnricher" should "be able to extract modules from Actuation" in {
     val fileName = "Actuation"

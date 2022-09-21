@@ -7,7 +7,7 @@ import Utils.FileUtil
 class TestUtility {
   def checkExtractReferences(fileName: String,
                              documentEnricher: DocumentEnricher,
-                             expectedDocumentType: DocumentType,
+                             expectedDocumentType: DocumentType.Value,
                              resourceFolderName: String,
                              numberExprectedSystem: Int = 0,
                              numberOfSubSystem: Int = 0,

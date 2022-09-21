@@ -10,7 +10,7 @@ final case class ReferenceName(name: String, acronym: Option[String] = None) {
     }
   }
 
-  def getName: String = if name.isEmpty then acronym.get else name
+  def getName: String = if (name.isEmpty) acronym.get else name
 
 
 

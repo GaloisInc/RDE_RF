@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class CryptolRegexTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = InlineFormatter()
-  private val documentEnricher = CryptolDocumentEnricher(formatterType)
+  private val formatterType = new InlineFormatter()
+  private val documentEnricher = new CryptolDocumentEnricher(formatterType)
 
   "RegexExperiment" should "match types" in {
     val line1 = "type Actuation = Bit"

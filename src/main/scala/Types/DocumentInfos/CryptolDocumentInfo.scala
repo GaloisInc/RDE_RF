@@ -1,8 +1,7 @@
 package Types.DocumentInfos
 
-import Types.*
 import Types.DocReference.DocReference
-import Utils.FileUtil
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 
 class CryptolDocumentInfo(
                            override val documentName: String,
@@ -11,7 +10,7 @@ class CryptolDocumentInfo(
                            types: Set[DocReference],
                            functions: Set[DocReference],
                            properties: Set[DocReference],
-                           override val documentType: DocumentType = DocumentType.Cryptol,
+                           override val documentType: DocumentType.Value = DocumentType.Cryptol,
                          ) extends DocumentInfo {
 
 
@@ -22,7 +21,7 @@ class CryptolDocumentInfo(
             types: Set[DocReference] = types,
             functions: Set[DocReference] = functions,
             properties: Set[DocReference] = properties,
-            documentType: DocumentType = documentType,
+            documentType: DocumentType.Value = documentType,
           ): CryptolDocumentInfo = {
     new CryptolDocumentInfo(
       documentName,
@@ -35,7 +34,7 @@ class CryptolDocumentInfo(
     )
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
+  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
 
   require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.Cryptol && ref.getDocumentName == documentName))
   require(functions.forall(ref => ref.getReferenceType == ReferenceType.Event && ref.getDocumentType == DocumentType.Cryptol), "All functions must be of type Event")
@@ -47,9 +46,27 @@ class CryptolDocumentInfo(
     imports ++ types ++ properties ++ functions
   }
 
+  override def updateReference(ref: DocReference): DocumentInfo = {
+    ref.getReferenceType match {
+      case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
+      case ReferenceType.Type => copy(types = types.map(_.updateDocReference(ref)))
+      case ReferenceType.Requirement => copy(properties = properties.map(_.updateDocReference(ref)))
+      case ReferenceType.Event => copy(functions = functions.map(_.updateDocReference(ref)))
+      case _ => throw new IllegalArgumentException("Invalid reference type")
+    }
+  }
+
   lazy val getRelations: Set[DocRelation] = Set.empty
 
-  override def getFileType: FileType = {
+  override def getFileType: FileType.Value = {
     FileType.ComponentFile
   }
+
+  def getImports: Set[DocReference] = imports
+
+  def getTypes: Set[DocReference] = types
+
+  def getFunctions: Set[DocReference] = functions
+
+  def getProperties: Set[DocReference] = properties
 }

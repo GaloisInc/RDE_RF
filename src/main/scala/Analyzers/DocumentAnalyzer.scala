@@ -3,14 +3,14 @@ package Analyzers
 import ConfigParser.RefinementModel
 import DocumentEnrichers._
 import Formatter.LatexFormatter
-import Referencer.{CryptolReferencer, LandoReferencer, SysMLReferencer}
+import Referencer._
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
 import Utils.{FileUtil, Matcher}
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
 final case class LatexDocumentData(
                                     title: String,
@@ -27,6 +27,8 @@ object DocumentAnalyzer {
   private val landoReferencer = new LandoReferencer()
   private val sysMLReferencer = new SysMLReferencer()
   private val cryptolReferencer = new CryptolReferencer()
+  private val bsvReferencer = new BlueSpecReferencer()
+  private val svReferencer = new SystemVerilogReferencer()
 
   def generateReport(filesToAnalyze: Array[String],
                      latexDocumentData: LatexDocumentData,
@@ -182,14 +184,14 @@ object DocumentAnalyzer {
     val enrichedCryptolDocuments = cryptolDocuments.map(doc => cryptolReferencer.addRefinementRelations(doc, sysMLDocuments.map(_.asInstanceOf[DocumentInfo]), Array.empty[DocumentInfo]))
     val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addRefinementRelations(doc, landoDocuments.map(_.asInstanceOf[DocumentInfo]), enrichedCryptolDocuments))
     val enrichedLandoDocuments = landoDocuments.map(doc => landoReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], enrichedSysMLDocuments))
-    //val enrichedBSVDocuments = bsvDocuments.map(doc => bsvReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
-    //val enrichedSVDocuments = svDocuments.map(doc => svReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
+    val enrichedBSVDocuments = bsvDocuments.map(doc => bsvReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
+    val enrichedSVDocuments = svDocuments.map(doc => svReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
 
     enrichedLandoDocuments.foreach(doc => addReferences(doc, enrichedLandoDocuments.flatMap(_.getAllReferences).toSet))
     enrichedSysMLDocuments.foreach(doc => addReferences(doc, enrichedSysMLDocuments.flatMap(_.getAllReferences).toSet))
     enrichedCryptolDocuments.foreach(doc => addReferences(doc, enrichedCryptolDocuments.flatMap(_.getAllReferences).toSet))
-    //enrichedBSVDocuments.foreach(doc => addReferences(doc, enrichedBSVDocuments.flatMap(_.getAllReferences).toSet))
-    //enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences).toSet))
+    enrichedBSVDocuments.foreach(doc => addReferences(doc, enrichedBSVDocuments.flatMap(_.getAllReferences).toSet))
+    enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences).toSet))
 
     val result = enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ bsvDocuments ++ svDocuments
 

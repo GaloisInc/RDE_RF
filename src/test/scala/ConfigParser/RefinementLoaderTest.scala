@@ -16,7 +16,7 @@ class RefinementLoaderTest extends AnyFlatSpec with should.Matchers {
     val conf = getClass.getResource("../refinementExamples/Report.conf")
     val refinement = RefinementLoader.load(conf.getFile)
     assert(refinement.name == "Report")
-    assert(refinement.implicit_refinements.size == 377)
+    assert(refinement.implicit_refinements.size == 375)
     assert(refinement.explicit_refinements.isEmpty)
 
   }

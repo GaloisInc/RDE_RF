@@ -31,7 +31,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val file = new File(reportFilePath)
     file.exists() should be(true)
     val loadedFile = RefinementLoader.load(reportFilePath)
-    loadedFile.name should be(title)
+    loadedFile.name should be("test")
     loadedFile.explicit_refinements.length should be(1)
     file.delete()
   }

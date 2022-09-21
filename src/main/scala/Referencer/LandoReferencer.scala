@@ -1,6 +1,6 @@
 package Referencer
 
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo, DocumentInfoCompare, LandoDocumentInfo, SysMLDocumentInfo}
+import Types.DocumentInfos.{DocumentInfo, DocumentInfoCompare, LandoDocumentInfo}
 import Types.{DocumentType, ReferenceType}
 
 class LandoReferencer extends Referencer {

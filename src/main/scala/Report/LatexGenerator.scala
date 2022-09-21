@@ -49,10 +49,11 @@ object LatexGenerator {
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
-    val exitCode = Process(cmd).!
+    val pLog = new LatexProcessLogger()
+    val exitCode = Process(cmd).!(pLog)
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
-      val exitCode = Process(cmd).!
+      val exitCode = Process(cmd).!(pLog)
       assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     }
 

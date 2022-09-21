@@ -7,6 +7,8 @@ import Types.DocumentInfos.CryptolDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.FileUtil
 
+import scala.sys.process._
+
 object CryptolInterpreter {
   private val cmd: String = "cryptol"
 
@@ -21,7 +23,8 @@ object CryptolInterpreter {
   }
 
   def ensureCryptolIsInPath: Boolean = {
-    s"$cmd -v".! == 0
+    val status = s"$cmd -v".! (ProcessLogger(_ => ())) // ignore output
+    status == 0
   }
 
   def interpret(fileToCryptolModule: String): CryptolDocumentInfo = {

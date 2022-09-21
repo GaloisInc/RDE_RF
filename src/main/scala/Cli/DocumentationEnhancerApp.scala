@@ -40,14 +40,14 @@ object DocumentationEnhancerApp extends App {
       opt[String]('d', "layoutOfDocumentation")
         .action((x, c) => c.copy(layout = x))
         .text("dimensions is an optional boolean property that specifies the dimensions of the paper, allowed values (a4,b4)."),
-      opt[String]('n', "latexTitle")
+      opt[String]('t', "latexTitle")
         .action((x, c) => c.copy(latexTitle = x))
-        .text("latexTitle is an optional boolean property that specifies whether to generate LaTeX documentation files. " +
+        .text("latexTitle is an optional string property that specifies whether to generate LaTeX documentation files. " +
           "If not specified the title of the LaTeX document will be Documentation."),
       opt[Unit]('r', "Generate Refinement Overview")
         .action((_, c) => c.copy(generateRefinementOverview = true))
         .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview."),
-      opt[Unit]('v', "Verify Cryptol Specifications")
+      opt[Unit]('v', "verifyCryptolSpecifications")
         .action((_, c) => c.copy(verifyCryptol = true))
         .text("verifyCryptolSpecifications is an optional boolean property that specifies whether to verify the Cryptol specifications." +
           "This requires the Cryptol executable to be in the PATH."),

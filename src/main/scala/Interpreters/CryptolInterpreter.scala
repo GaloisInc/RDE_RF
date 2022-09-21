@@ -15,6 +15,11 @@ object CryptolInterpreter {
     s"-c :b $nameOfModule"
   }
 
+  private def verifyCmd(nameOfModule: String): String = {
+    require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
+    s"-c :prove $nameOfModule"
+  }
+
   def ensureCryptolIsInPath: Boolean = {
     s"$cmd -v".! == 0
   }
@@ -28,6 +33,18 @@ object CryptolInterpreter {
     val extractDocument: CryptolDocumentInfo = extractDocumentFromString(result, fileToCryptolModule)
 
     extractDocument
+  }
+
+  def verifyProperties(fileToCryptolModule: String): Boolean = {
+    require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
+    require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
+    
+    val proveCmd = s"$cmd ${verifyCmd(fileToCryptolModule)}"
+    val result = proveCmd.! match {
+      case 0 => true
+      case _ => false
+    }
+    result
   }
 
 

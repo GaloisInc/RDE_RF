@@ -1,7 +1,7 @@
 package ConfigParser
 
-case class RefinementConfig(
+case class RefinementFileConfig(
                          name: String = "",
-                         implicitRefinements: List[String] = Nil,
-                         explicitRefinements: List[String] = Nil,
+                         implicitRefinements: Map[String, List[String]] = Map.empty,
+                         explicitRefinements: Map[String, List[String]] = Map.empty,
                        )

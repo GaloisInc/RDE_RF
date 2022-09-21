@@ -9,14 +9,14 @@ class RefinementLoaderTest extends AnyFlatSpec with should.Matchers {
     val conf = getClass.getResource("../refinementExamples/refinement1.conf")
     val refinement = RefinementLoader.load(conf.getFile)
     assert(refinement.name == "Refinement 1")
-    assert(refinement.explicit_refinements.size == 3)
+    assert(refinement.explicit_refinements.values.flatten.size == 3)
   }
 
   "RefinementLoader" should "load a refinement with lots of refinements" in {
     val conf = getClass.getResource("../refinementExamples/Report.conf")
     val refinement = RefinementLoader.load(conf.getFile)
     assert(refinement.name == "Report")
-    assert(refinement.implicit_refinements.size == 375)
+    assert(refinement.implicit_refinements.values.flatten.size == 375)
     assert(refinement.explicit_refinements.isEmpty)
 
   }
@@ -25,7 +25,7 @@ class RefinementLoaderTest extends AnyFlatSpec with should.Matchers {
     val conf = getClass.getResource("../refinementExamples/Report_Refinements.conf")
     val refinement = RefinementLoader.load(conf.getFile)
     assert(refinement.name == "Report_Refinements")
-    assert(refinement.implicit_refinements.size == 311)
+    assert(refinement.implicit_refinements.values.flatten.size == 311)
     assert(refinement.explicit_refinements.isEmpty)
   }
 

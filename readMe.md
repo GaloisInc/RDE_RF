@@ -52,3 +52,18 @@ The following arguments are supported:
     * -r, --Generate Refinement Overview  Whether to generate the refinement overview
     * -h, --help               prints this usage text
 
+
+## Backlog
+
+* Add support for more languages (e.g. C, Lobot, Saw)
+* Add support for verification of SAW specifications
+* Improve parsing of Cryptol specifications
+* Improve parsing of SystemVerilog specifications
+* Improve documentation
+* Improve refinement overview
+* Your wish here!
+
+## Backlog in the Future
+
+* Add support for automatic refinement - of lando into Cryptol.
+* Add support for automatic refinement - of Cryptol into SystemVerilog.

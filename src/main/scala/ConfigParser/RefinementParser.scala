@@ -43,6 +43,6 @@ final case class RefinementModel(
 
 final case class MasterModel(
                               name: String,
-                              implicit_refinements: List[RefinementModel],
-                              explicit_refinements: List[RefinementModel],
+                              implicit_refinements: Map[String, List[RefinementModel]],
+                              explicit_refinements: Map[String, List[RefinementModel]],
                             )

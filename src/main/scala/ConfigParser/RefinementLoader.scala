@@ -16,7 +16,7 @@ object RefinementLoader {
       throw new IllegalArgumentException(msg)
     }
     val conf = ConfigFactory.parseFile(new File(file))
-    val parsingResults = ConfigSource.fromConfig(conf).load[RefinementConfig]
+    val parsingResults = ConfigSource.fromConfig(conf).load[RefinementFileConfig]
     val masterConfig = extractMasterConfig(parsingResults)
     parse(masterConfig)
   }
@@ -33,7 +33,7 @@ object RefinementLoader {
       // From https://pureconfig.github.io/docs/overriding-behavior-for-case-classes.html
       //implicit val hintMasterConfig = ProductHint[RefinementConfig](allowUnknownKeys = false)
 
-      val parsingResults = ConfigSource.fromConfig(conf).load[RefinementConfig]
+      val parsingResults = ConfigSource.fromConfig(conf).load[RefinementFileConfig]
       val masterConfig = extractMasterConfig(parsingResults)
       parse(masterConfig)
     } finally {
@@ -42,7 +42,7 @@ object RefinementLoader {
   }
 
 
-  def extractMasterConfig(parsingResults: Result[RefinementConfig]): RefinementConfig = {
+  def extractMasterConfig(parsingResults: Result[RefinementFileConfig]): RefinementFileConfig = {
     parsingResults match {
       case Left(errors) => {
         //logger.error("Errors during parsing.")
@@ -59,11 +59,11 @@ object RefinementLoader {
     }
   }
 
-  def parse(config: RefinementConfig): MasterModel = {
+  def parse(config: RefinementFileConfig): MasterModel = {
     config match {
-      case RefinementConfig(name, implicit_refinements, explicit_refinements) =>
-        val implicit_refinementModels = implicit_refinements.map(parseRefinement)
-        val explicit_refinementModels = explicit_refinements.map(parseRefinement)
+      case RefinementFileConfig(name, implicit_refinements, explicit_refinements) =>
+        val implicit_refinementModels = implicit_refinements.map(i => (i._1 -> i._2.map(parseRefinement)))
+        val explicit_refinementModels = explicit_refinements.map(e => (e._1 -> e._2.map(parseRefinement)))
         MasterModel(name, implicit_refinementModels, explicit_refinementModels)
       case _ => throw new IllegalArgumentException("Invalid config")
     }

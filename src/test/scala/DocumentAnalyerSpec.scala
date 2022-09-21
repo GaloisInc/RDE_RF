@@ -107,7 +107,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
 
-    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
 
     val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
       FileUtil.getListOfFiles(landoDocuments).toArray ++
@@ -129,7 +129,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val sourceFolder = getClass.getResource("Source").getPath
 
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
-    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
     val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv")
 
     val filesToAnalyze = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
@@ -153,7 +153,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
 
-    val references = RefinementLoader.load(conf.getPath).explicit_refinements.toSet
+    val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
 
     val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
       FileUtil.getListOfFiles(landoDocuments).toArray ++

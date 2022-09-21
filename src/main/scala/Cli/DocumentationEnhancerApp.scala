@@ -113,7 +113,7 @@ object DocumentationEnhancerApp extends App {
       files.foreach(file => println("Processing file: " + file))
       println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)
       val explicitRefinements = RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements
-      DocumentAnalyzer.generateReport(files, latexGenerationData, explicitRefinements.toSet)
+      DocumentAnalyzer.generateReport(files, latexGenerationData, explicitRefinements.values.flatten.toSet)
     } else {
       DocumentAnalyzer.generateReport(files, latexGenerationData, Set.empty[RefinementModel])
     }

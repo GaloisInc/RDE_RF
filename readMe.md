@@ -1,7 +1,15 @@
 # Documentation Enricher (DER)
 
 This is a tool to enrich documentation generated from the source code.
-The tool parses the documentation and adds additional information to it and generates a new documentation in LaTeX format.
+The tool parses the source code and adds additional information to it and generates a new documentation in LaTeX format.
+
+## Supported Languages
+
+* Lando
+* SystemVerilog
+* Bluespec SystemVerilog
+* Cryptol
+* SysML
 
 ## Dependencies
 The tool requires the following dependencies to be installed:
@@ -10,12 +18,13 @@ The tool requires the following dependencies to be installed:
 * Sbt
 * Latex
 * Java
+* Scala
 
 Alternatively, you can use the docker image (simonthrane/document_enricher:latest) to run the tool.
 
 ## Usage
 
-The tool is written in Scala. To run it, you need to have Java 8 installed on your machine.
+The tool is written in Scala. To run it, you need to have Java 8, Scala and SBT installed on your machine.
 
 ## Usage Docker
 
@@ -40,6 +49,6 @@ The following arguments are supported:
     * -v, --verifyCryptolSpecifications  Whether to verify the Cryptol specifications
     * -t --title <value>      The title of the documentation
     * -c, --refinementConfig <value>  The path to the explicit refinement configuration file.
-    -r, --Generate Refinement Overview  Whether to generate the refinement overview
+    * -r, --Generate Refinement Overview  Whether to generate the refinement overview
     * -h, --help               prints this usage text
 

@@ -15,9 +15,9 @@ object ObjectConfigGenerator {
       val documentReferences = document._2
       val documentReferencesString = documentReferences.map(reference => {
         s"""\t\t\t$documentName.${reference.getName} -> File.Ref"""
-      }).mkString(",\n")
+      }).mkString("\n","\n","\n")
       s"""\t$documentName = [$documentReferencesString]"""
-    }).mkString(",\n")
+    }).mkString("\n","\n", "\n")
   }
 
   private def generateRefinementStrings(refinedReferences: Set[DocReference]): String = {
@@ -29,9 +29,9 @@ object ObjectConfigGenerator {
         srcRef.getRefinements.get.map(refinement => {
           s"""\t\t\t$documentName.${srcRef.getName} -> ${refinement.documentName}.${refinement.getName}"""
         })
-      }).mkString(",\n")
+      }).mkString("\n","\n","\n")
       s"""\t$documentName = [$documentReferencesString]"""
-    }).mkString(",\n")
+    }).mkString("\n","\n", "\n")
   }
 
   def generateRefinementConfigFile(report: ReportReference, reportName: String): String = {

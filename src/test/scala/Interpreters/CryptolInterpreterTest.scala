@@ -80,4 +80,10 @@ class CryptolInterpreterTest extends AnyFlatSpec with should.Matchers {
     val result5 = CryptolInterpreter.verifyProperties(rtsFilePath)
     result5 should be(true)
   }
+
+  it should "be able to see that not all properties can be verified" in {
+    val instrumentationUnitFilePath = getClass.getResource("../Changed_Cryptol/Utils.cry").getPath
+    val result = CryptolInterpreter.verifyProperties(instrumentationUnitFilePath)
+    result should be(false)
+  }
 }

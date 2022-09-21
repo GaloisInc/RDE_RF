@@ -40,11 +40,12 @@ object CryptolInterpreter {
     require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
     
     val proveCmd = s"$cmd ${verifyCmd(fileToCryptolModule)}"
-    val result = proveCmd.! match {
-      case 0 => true
-      case _ => false
-    }
-    result
+    val result = proveCmd.!!
+    val lines = result.split("""\n""").map(_.trim)
+    val numberOfProved = lines.count(_.startsWith("Q.E.D."))
+    val numberOfProperties = lines.count(_.startsWith(":prove"))
+
+    numberOfProved == numberOfProperties
   }
 
 

@@ -3,7 +3,9 @@ package Cli
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import ConfigParser.{ObjectConfigGenerator, RefinementLoader, RefinementModel}
 import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
+import Interpreters.CryptolInterpreter
 import Report.PaperLayout.PaperLayout
+import Report.ReportTypes.ReportReference
 import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
 import scopt.OParser
@@ -45,6 +47,10 @@ object DocumentationEnhancerApp extends App {
       opt[Unit]('r', "Generate Refinement Overview")
         .action((_, c) => c.copy(generateRefinementOverview = true))
         .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview."),
+      opt[Unit]('v', "Verify Cryptol Specifications")
+        .action((_, c) => c.copy(verifyCryptol = true))
+        .text("verifyCryptolSpecifications is an optional boolean property that specifies whether to verify the Cryptol specifications." +
+          "This requires the Cryptol executable to be in the PATH."),
       help("help").text("prints this usage text")
     )
   }
@@ -54,34 +60,31 @@ object DocumentationEnhancerApp extends App {
       val sourceFolder = new File(config.sourceFolder).getAbsolutePath
       val targetFolder = new File(config.targetFolder).getAbsolutePath
       val latexTitle = if (config.latexTitle.isEmpty) "Documentation" else config.latexTitle
-      val generateRefinementOverview = config.generateRefinementOverview
       val explicitRefinements = config.explicitReferences
       val refinementFile = new File(explicitRefinements)
       val layout = if (config.layout.equalsIgnoreCase("b4") || config.layout.equalsIgnoreCase("a4")) config.layout else "a4"
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
-      require(files.nonEmpty, "No files found in source folder: " + sourceFolder)
+      if(files.isEmpty) {
+        println("No files found in source folder: " + sourceFolder)
+        System.exit(1)
+      }
+
+      verifyCryptolDocuments(config, sourceFolder)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
       val latexGenerationData = LatexDocumentData(latexTitle, targetFolder, latexDimensions._1, latexDimensions._2)
 
-      val documentReport = if (refinementFile.exists()) {
-        files.foreach(file => println("Processing file: " + file))
-        println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)
-        val explicitRefinements = RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements
-        DocumentAnalyzer.generateReport(files, latexGenerationData, explicitRefinements.toSet)
-      } else {
-        DocumentAnalyzer.generateReport(files, latexGenerationData, Set.empty[RefinementModel])
-      }
+      val documentReport: ReportReference = generateReport(refinementFile, files, latexGenerationData)
 
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (config.generateLatex) {
         LatexGenerator.generateLatexReportOfSources(documentReport)
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
       }
-      if (generateRefinementOverview) {
+      if (config.generateRefinementOverview) {
         ObjectConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")
         println("The refinement overview has been generated in the folder " + targetFolder + ".")
       }
@@ -90,6 +93,31 @@ object DocumentationEnhancerApp extends App {
     case _ =>
       println("Invalid arguments!")
       System.exit(1)
+  }
+
+  private def verifyCryptolDocuments(config: CLIConfig, sourceFolder: String): Unit = {
+    if (config.verifyCryptol) {
+      val cryptolFiles = FileUtil.findSourceFiles(sourceFolder, Set("cry"))
+      assert(CryptolInterpreter.ensureCryptolIsInPath, "Cryptol executable not found in PATH. Please install Cryptol and add it to the PATH.")
+      if (cryptolFiles.forall(CryptolInterpreter.verifyProperties)) {
+        println("All Cryptol specifications verified successfully.")
+      } else {
+        println("Cryptol specifications could not be verified.")
+        System.exit(1)
+      }
+    }
+  }
+
+  private def generateReport(refinementFile: File, files: Array[String], latexGenerationData: LatexDocumentData): ReportReference = {
+    val documentReport = if (refinementFile.exists()) {
+      files.foreach(file => println("Processing file: " + file))
+      println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)
+      val explicitRefinements = RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements
+      DocumentAnalyzer.generateReport(files, latexGenerationData, explicitRefinements.toSet)
+    } else {
+      DocumentAnalyzer.generateReport(files, latexGenerationData, Set.empty[RefinementModel])
+    }
+    documentReport
   }
 
   def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {

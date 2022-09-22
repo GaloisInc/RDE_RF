@@ -15,9 +15,9 @@ object ObjectConfigGenerator {
       val documentReferences = document._2
       val documentReferencesString = documentReferences.map(reference => {
         s"""\t\t\t$documentName.${reference.getName} -> File.Ref"""
-      }).mkString("\n","\n","\n")
+      }).mkString("\n", "\n", "\n")
       s"""\t$documentName = [$documentReferencesString],"""
-    }).mkString("\n","\n", "\n")
+    }).mkString("\n", "\n", "\n")
   }
 
   private def generateRefinementStrings(refinedReferences: Set[DocReference]): String = {
@@ -29,19 +29,24 @@ object ObjectConfigGenerator {
         srcRef.getRefinements.get.map(refinement => {
           s"""\t\t\t$documentName.${srcRef.getName} -> ${refinement.documentName}.${refinement.getName}"""
         })
-      }).mkString("\n","\n","\n")
+      }).mkString("\n", "\n", "\n")
       s"""\t$documentName = [$documentReferencesString],"""
-    }).mkString("\n","\n", "\n")
+    }).mkString("\n", "\n", "\n")
   }
 
   def generateRefinementConfigFile(report: ReportReference, reportName: String): String = {
-    val refineReferences = report.getRefinedReferences.filter(_.getRefinements.nonEmpty)
+    val refinedReferences = report.getRefinedReferences.filter(_.getRefinements.nonEmpty)
     val nonRefineReferences = report.getNonRefinedReferences.filter(ref => Set(DocumentType.Lando, DocumentType.Cryptol, DocumentType.SysML).contains(ref.getDocumentType))
     val builder = new StringBuilder()
     builder.addAll(f"name = $reportName\n")
-    builder.addAll(s"implicit-refinements = {${generateRefinementStrings(refineReferences)}}\n")
+    builder.addAll(s"implicit-refinements = {${generateRefinementStrings(refinedReferences)}}\n")
     builder.addAll(s"explicit-refinements = {${generateNoneRefinements(nonRefineReferences)}}\n")
     val file = Files.write(Paths.get(report.folder, s"refinements_${reportName}.conf"), builder.toString().getBytes(StandardCharsets.UTF_8))
     file.toString
-  }
+  } ensuring ((fileString: String) => {
+    val file = Paths.get(fileString)
+    assert(Files.exists(file), s"Refinement config file: $fileString does not exist")
+    val fileContent = Files.readAllLines(file).toArray().mkString("\n")
+    fileContent.contains("implicit-refinements") && fileContent.contains("explicit-refinements")
+  })
 }

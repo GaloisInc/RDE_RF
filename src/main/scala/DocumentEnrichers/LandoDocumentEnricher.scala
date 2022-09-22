@@ -35,7 +35,8 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     new LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
   } ensuring ((landoDoc: DocumentInfo) =>
     landoDoc.documentType == DocumentType.Lando
-      && landoDoc.filePath == filePath)
+      && landoDoc.filePath == filePath
+      && landoDoc.documentName == FileUtil.getFileName(filePath))
 
   override def formatLine(line: String, documentInfo: DocumentInfo): String = {
     val references = documentInfo.getAllReferences

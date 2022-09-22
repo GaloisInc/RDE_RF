@@ -44,8 +44,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-
   def cleanLine(line: String): String = {
     line.trim.stripSuffix(";").stripSuffix(",").stripSuffix("]").stripSuffix("}").stripSuffix("{")
-  }
+  } ensuring((cleanedLine: String) => line.contains(cleanedLine), "cleanLine must not change the line")
 }

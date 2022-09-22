@@ -50,7 +50,7 @@ object RefinementReport {
       })
     })
 
-    val latexDocument = LatexGenerator.generateLatexDocument(reportString.toString(), report.layout)
+    val latexDocument = LatexGenerator.generateLatexDocument(reportString.toString(), report.title, report.layout)
 
     val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
 

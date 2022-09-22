@@ -77,7 +77,13 @@ object LatexSyntax {
        |\\label{subsubsec:${LatexSanitizer.sanitizeReferenceName(labelText)}}""".stripMargin
   }
 
-  val beginDocument: String = "\\begin{document}"
+  def beginDocument(title: String): String = {
+    require(title.nonEmpty, "Title must not be empty")
+    """|\begin{document}
+       |\maketitle
+       |\tableofcontents
+       |""".stripMargin
+  }
 
   val endDocument: String = "\\end{document}"
 }

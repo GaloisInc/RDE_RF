@@ -105,7 +105,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to build A4 Latex Document" in {
-    val latexDocument = LatexGenerator.generateLatexDocument("", PaperLayout.A4)
+    val latexDocument = LatexGenerator.generateLatexDocument("", "title", PaperLayout.A4)
     val tempFile = Files.createTempFile("test", ".tex")
     val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
@@ -115,7 +115,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to build B4 Latex Document" in {
-    val latexDocument = LatexGenerator.generateLatexDocument("", PaperLayout.B4)
+    val latexDocument = LatexGenerator.generateLatexDocument("", "title", PaperLayout.B4)
     val tempFile = Files.createTempFile("test", ".tex")
     val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
@@ -163,7 +163,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       FileUtil.getFilesInDirectory(svDocuments).toSet ++
       FileUtil.getFilesInDirectory(bsvDocuments).toSet
 
-    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],true)
+    val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel], true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)
 
     //Ensure that the file was created

@@ -15,6 +15,11 @@ class BSVDocumentInfo(
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")
   require(FileUtil.getFileType(filePath) == "bsv", "File path must be a BSV file")
+  require(FileUtil.fileExists(filePath), "File path must exist")
+  require(packages.intersect(modules).isEmpty, "Packages and modules cannot intersect")
+
+  require(packages.forall(_.getReferenceType == ReferenceType.System))
+  require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
 
   def copy(
             documentName: String = documentName,
@@ -34,16 +39,14 @@ class BSVDocumentInfo(
   }
 
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
-    && ref.getDocumentName == documentName
-    && ref.getDocumentType == DocumentType.BSV))
-
-  require(packages.forall(_.getReferenceType == ReferenceType.System))
-  require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
 
   override lazy val getAllReferences: Set[DocReference] = {
     modules ++ packages
   }
+
+  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
+    && ref.getDocumentName == documentName
+    && ref.getDocumentType == DocumentType.BSV))
 
   lazy val getRelations: Set[DocRelation] = Set.empty
 

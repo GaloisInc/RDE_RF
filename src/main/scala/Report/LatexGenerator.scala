@@ -3,7 +3,6 @@ package Report
 import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
-import Specs.FileSpecs
 import Types.DocumentInfos.DocumentInfo
 import Utils.FileUtil
 
@@ -11,7 +10,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.collection.mutable
-import scala.reflect.io.Directory
 import scala.sys.process.Process
 
 object LatexGenerator {
@@ -53,7 +51,7 @@ object LatexGenerator {
     val fPath = latexFile.getAbsolutePath
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
     val pLog = new LatexProcessLogger()
-    val exitCode = Process(cmd).!(pLog)
+    val exitCode = Process(cmd).!//.!(pLog)
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
       val exitCode = Process(cmd).!(pLog)
@@ -102,15 +100,14 @@ object LatexGenerator {
     latex.toString()
   }
 
-  def generateLatexDocument(content: String, paperLayout: PaperLayout): String = {
-    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + endDocument
+  def generateLatexDocument(content: String, title: String, paperLayout: PaperLayout): String = {
+    require(title.nonEmpty, "Title must not be empty")
+    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument(title) + emptyLine + content + emptyLine + endDocument
   }
 
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
-    latexContent.append(generateSection(report.title))
-    latexContent.append(emptyLine)
 
     latexContent.append(includeListings("Lando Models", report.landoDocuments))
     latexContent.append(includeListings("SysML Models", report.sysmlDocuments))
@@ -118,7 +115,7 @@ object LatexGenerator {
     latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments))
     latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments))
 
-    val latexDocument = generateLatexDocument(latexContent.toString(), report.layout)
+    val latexDocument = generateLatexDocument(latexContent.toString(), report.title, report.layout)
 
     val reportFileName = report.title.replaceAll(" ", "_")
 
@@ -159,6 +156,9 @@ object LatexGenerator {
       emptyLine ++
       //Needed for the margin notes to work
       "\\maxdeadcycles=500" ++
+      "\\title{}" ++
+      "\\author{Documentation Enricher}" ++
+      "\\date{\\today}" ++
       emptyLine
   }
 

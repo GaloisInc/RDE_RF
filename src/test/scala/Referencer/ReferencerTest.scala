@@ -45,8 +45,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val sysmlDocuments = getClass.getResource("../SysML").getPath
     val landoDocuments = getClass.getResource("../lando").getPath
 
-    val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
-    val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
+    val landoFilesToAnalyse = FileUtil.getFilesInDirectory(landoDocuments).filter(_.contains("glossary"))
+    val sysMLFilesToAnalyse = FileUtil.getFilesInDirectory(sysmlDocuments).filter(_.contains("Glossary"))
 
     val analysedLandoDocument = landoDocumentEnricher.parseDocument(landoFilesToAnalyse.head)
     val analysedSysMLDocument = sysMLDocumentEnricher.parseDocument(sysMLFilesToAnalyse.head)
@@ -60,8 +60,8 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
     val sysmlDocuments = getClass.getResource("../SysML_changed").getPath
     val landoDocuments = getClass.getResource("../lando_changed").getPath
 
-    val landoFilesToAnalyse = FileUtil.getListOfFiles(landoDocuments).filter(_.contains("glossary"))
-    val sysMLFilesToAnalyse = FileUtil.getListOfFiles(sysmlDocuments).filter(_.contains("Glossary"))
+    val landoFilesToAnalyse = FileUtil.getFilesInDirectory(landoDocuments).filter(_.contains("glossary"))
+    val sysMLFilesToAnalyse = FileUtil.getFilesInDirectory(sysmlDocuments).filter(_.contains("Glossary"))
 
     val analysedLandoDocument = landoDocumentEnricher.parseDocument(landoFilesToAnalyse.head)
     val analysedSysMLDocument = sysMLDocumentEnricher.parseDocument(sysMLFilesToAnalyse.head)

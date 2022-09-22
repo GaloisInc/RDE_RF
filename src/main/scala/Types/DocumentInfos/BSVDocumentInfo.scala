@@ -12,6 +12,10 @@ class BSVDocumentInfo(
                       override val documentType: DocumentType.Value = DocumentType.BSV,
                     ) extends DocumentInfo {
 
+  require(documentName.nonEmpty, "Document name cannot be empty")
+  require(filePath.nonEmpty, "File path cannot be empty")
+  require(FileUtil.getFileType(filePath) == "bsv", "File path must be a BSV file")
+
   def copy(
             documentName: String = documentName,
             filePath: String = filePath,

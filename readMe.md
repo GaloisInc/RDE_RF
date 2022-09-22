@@ -37,6 +37,13 @@ docker pull simonthrane/document_enricher:latest
 docker run -v <path to the directory containing the documentation>:/data simonthrane/document_enricher:latest -s /data -t /data  <OptionalArguments>
 ```
 
+Example of a command that compiles the latex document into an a4 pdf document and generate an overview of the refinements in the project:
+
+```bash
+
+docker run -v /home/user/Documents/Documentation:/data simonthrane/document_enricher:latest -s /data -t /data -l -r -d=a4
+```
+
 Note that the docker image generates the documentation from the source code. 
 Therefore, you need to have the source code available in the local directory/volume that the docker image has access to.
 

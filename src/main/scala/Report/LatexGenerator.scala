@@ -3,12 +3,15 @@ package Report
 import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
+import Specs.FileSpecs
 import Types.DocumentInfos.DocumentInfo
+import Utils.FileUtil
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.collection.mutable
+import scala.reflect.io.Directory
 import scala.sys.process.Process
 
 object LatexGenerator {
@@ -58,12 +61,17 @@ object LatexGenerator {
     }
 
     if (removeAuxFiles) {
-      val currentDirectory = new java.io.File(".")
+      val currentDirectory = new File(".")
       val auxFileTypes = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
-      val auxFiles = currentDirectory.listFiles().filter(f => auxFileTypes.exists(f.getName.endsWith))
-      auxFiles.foreach(_.delete())
+      deleteAuxLatexFiles(currentDirectory, auxFileTypes)
     }
   }
+
+  private def deleteAuxLatexFiles(directory :File, fileTypesToDelete : Array[String]): Unit = {
+    require(directory.isDirectory, "Not a directory")
+    val auxFiles = directory.listFiles().filter(f => fileTypesToDelete.exists(f.getName.endsWith))
+    auxFiles.foreach(_.delete())
+  } ensuring(_ => directory.listFiles().map(f => FileUtil.getFileType(f.getName)).toSet.intersect(fileTypesToDelete.toSet).isEmpty, "Auxiliary files not deleted")
 
   def includeListing(documentInfo: DocumentInfo): String = {
     s"""

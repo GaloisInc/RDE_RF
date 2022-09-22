@@ -21,7 +21,7 @@ class TestUtility {
                             ): Boolean = {
 
     val documents = getClass.getResource(resourceFolderName).getPath
-    val filesToAnalyze = FileUtil.getListOfFiles(documents).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(documents).toArray
     val documentOfInterest = filesToAnalyze.filter(path => FileUtil.getFileName(path) == fileName)
 
     assert(documentOfInterest.length == 1)

@@ -7,6 +7,11 @@ import java.io.File
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 object FileUtil {
+  def fileExists(file: String): Boolean = {
+    val path = Paths.get(file)
+    Files.exists(path)
+  }
+
   def findSourceFiles(sourcePath: String, fileTypesOfTypesOfInterest: Set[String]): Array[String] = {
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
@@ -80,14 +85,14 @@ object FileUtil {
     }
   }
 
-  def getListOfFiles(dir: String): List[String] = {
+  def getFilesInDirectory(dir: String): Set[String] = {
     val d = new File(dir)
     if (d.exists && d.isDirectory) {
       val filesToDelete = d.listFiles.filter(file => file.getName.contains("decorated") || file.getName.contains("DS_Store"))
       filesToDelete.foreach(file => file.delete())
-      d.listFiles.filter(file => file.isFile).map(_.toString).toList
+      d.listFiles.filter(file => file.isFile).map(_.toString).toSet
     } else {
-      List[String]()
+      Set.empty[String]
     }
   }
 

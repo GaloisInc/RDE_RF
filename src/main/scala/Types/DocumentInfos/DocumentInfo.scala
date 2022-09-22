@@ -1,8 +1,10 @@
 package Types.DocumentInfos
 
 import Formatter.LatexSanitizer
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.{DocRelation, DocumentType, FileType}
+import Utils.FileUtil
 
 abstract class DocumentInfo {
   def documentName: String
@@ -20,6 +22,7 @@ abstract class DocumentInfo {
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.contains(documentName), "File path must contain document name")
+  require(FileUtil.fileExists(filePath), s"File $filePath does not exist")
   //All reference names must be unique
   require(
     {

@@ -14,9 +14,9 @@ case class DOT()
 case class ARROW()
 
 trait IdentifierParser extends RegexParsers {
-  def fileIdentifier: Parser[IdRef] = """[a-zA-Z][\w\-]*\w""".r ^^ { str => IdRef(str) }
+  def fileIdentifier: Parser[IdRef] = """[a-zA-Z]*[\w\-]*\w+""".r ^^ { str => IdRef(str) }
 
-  def refIdentifier: Parser[IdRef] = """[a-zA-Z0-9][\w\s\[\-/\\\&]*[\w\]]""".r ^^ { str => IdRef(str) }
+  def refIdentifier: Parser[IdRef] = """[a-zA-Z0-9]*[\w\s\[\-/\\&\]]*[a-zA-Z0-9\]]+""".r ^^ { str => IdRef(str) }
 }
 
 class FileRefParser extends IdentifierParser {

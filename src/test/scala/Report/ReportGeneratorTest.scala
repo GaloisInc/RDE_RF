@@ -15,9 +15,9 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
     val landoDocuments = getClass.getResource("../Lando").getPath
     val cryptolDocuments = getClass.getResource("../Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
 
     val reportName = "Report"
     val reportPath = getClass.getResource(".").getPath

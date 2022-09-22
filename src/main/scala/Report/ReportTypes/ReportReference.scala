@@ -1,8 +1,10 @@
 package Report.ReportTypes
 
 import Report.PaperLayout.PaperLayout
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
+import Utils.FileUtil
 
 case class ReportReference(title: String,
                            folder: String,
@@ -16,6 +18,7 @@ case class ReportReference(title: String,
   require(title.nonEmpty, "title must not be empty")
   require(folder.nonEmpty, "folder must not be empty")
   require(allDocuments.nonEmpty, "At least one document must be provided")
+  require(FileSpecs.allFilesExist(allDocuments.map(_.filePath).toSet), "All documents must exist")
 
   lazy val allDocuments: Array[DocumentInfo] = landoDocuments ++ sysmlDocuments ++ cryptolDocuments ++ bsvDocuments ++ svDocuments
 

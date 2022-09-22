@@ -157,11 +157,11 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
     val svDocuments = getClass.getResource("../SystemVerilog").getPath
     val bsvDocuments = getClass.getResource("../BSV").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray ++
-      FileUtil.getListOfFiles(svDocuments).toArray ++
-      FileUtil.getListOfFiles(bsvDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet ++
+      FileUtil.getFilesInDirectory(svDocuments).toSet ++
+      FileUtil.getFilesInDirectory(bsvDocuments).toSet
 
     val referenceReport = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],true)
     LatexGenerator.generateLatexReportOfSources(referenceReport)

@@ -16,7 +16,7 @@ object ObjectConfigGenerator {
       val documentReferencesString = documentReferences.map(reference => {
         s"""\t\t\t$documentName.${reference.getName} -> File.Ref"""
       }).mkString("\n","\n","\n")
-      s"""\t$documentName = [$documentReferencesString]"""
+      s"""\t$documentName = [$documentReferencesString],"""
     }).mkString("\n","\n", "\n")
   }
 
@@ -30,7 +30,7 @@ object ObjectConfigGenerator {
           s"""\t\t\t$documentName.${srcRef.getName} -> ${refinement.documentName}.${refinement.getName}"""
         })
       }).mkString("\n","\n","\n")
-      s"""\t$documentName = [$documentReferencesString]"""
+      s"""\t$documentName = [$documentReferencesString],"""
     }).mkString("\n","\n", "\n")
   }
 
@@ -39,8 +39,8 @@ object ObjectConfigGenerator {
     val nonRefineReferences = report.getNonRefinedReferences.filter(ref => Set(DocumentType.Lando, DocumentType.Cryptol, DocumentType.SysML).contains(ref.getDocumentType))
     val builder = new StringBuilder()
     builder.addAll(f"name = $reportName\n")
-    builder.addAll(s"implicit_refinements = {${generateRefinementStrings(refineReferences)}}\n")
-    builder.addAll(s"explicit_refinements = {${generateNoneRefinements(nonRefineReferences)}}\n")
+    builder.addAll(s"implicit-refinements = {${generateRefinementStrings(refineReferences)}}\n")
+    builder.addAll(s"explicit-refinements = {${generateNoneRefinements(nonRefineReferences)}}\n")
     val file = Files.write(Paths.get(report.folder, s"refinements_${reportName}.conf"), builder.toString().getBytes(StandardCharsets.UTF_8))
     file.toString
   }

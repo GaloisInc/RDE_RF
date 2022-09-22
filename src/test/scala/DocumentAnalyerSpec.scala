@@ -12,9 +12,9 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val landoDocuments = getClass.getResource("Lando").getPath
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
@@ -28,9 +28,9 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val landoDocuments = getClass.getResource("Lando").getPath
     val cryptolDocuments = getClass.getResource("Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
@@ -69,9 +69,9 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
       RefinementModel(FileDocRef("acronyms", "Continuous Verification"), FileDocRef("RTS_Glossary", "Coq"))
     )
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
+      FileUtil.getFilesInDirectory(landoDocuments) ++
+      FileUtil.getFilesInDirectory(cryptolDocuments)
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
@@ -109,9 +109,9 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
 
     val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test"
@@ -137,7 +137,7 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val targetFolder = getClass.getResource("").getPath
     val title = "Test_From_Source_Directory"
     val latexDocumentation = LatexDocumentData(title, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentation, references)
 
     val testScenario = report.landoDocuments.find(_.documentName.equalsIgnoreCase("test_scenarios")).get
 
@@ -155,9 +155,9 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
 
     val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
+      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
 
     val targetFolder = getClass.getResource("").getPath
     val title = "Test Enriched with Explicit References"

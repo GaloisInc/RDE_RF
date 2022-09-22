@@ -16,7 +16,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
   "ObjectConfigGenerator" should "generate a config object" in {
     val documentAnalyzer = new LandoDocumentEnricher(new InlineFormatter())
     val landoDocuments = getClass.getResource("../lando_changed").getPath
-    val filesToAnalyze = FileUtil.getListOfFiles(landoDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(landoDocuments).toArray
 
     assert(filesToAnalyze.length == 1)
     val filePath = filesToAnalyze.head
@@ -44,17 +44,17 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val svDocuments = getClass.getResource("../SystemVerilog").getPath
 
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray ++
-      FileUtil.getListOfFiles(bsvDocuments).toArray ++
-      FileUtil.getListOfFiles(svDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toArray ++
+      FileUtil.getFilesInDirectory(landoDocuments).toArray ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toArray ++
+      FileUtil.getFilesInDirectory(bsvDocuments).toArray ++
+      FileUtil.getFilesInDirectory(svDocuments).toArray
 
     val reportName = "Report_Refinements"
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel], false)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentData, Set.empty[RefinementModel], false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit")
 
     reportFilePath should not be null
@@ -66,7 +66,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     loadedFile.name should be(reportName)
     loadedFile.explicit_refinements.values.size should be(1)
 
-    file.delete()
+    //file.delete()
   }
 
   "ObjectConfigGenerator" should "generate a config file woth none refined references from documents" in {
@@ -77,17 +77,17 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val svDocuments = getClass.getResource("../SystemVerilog").getPath
 
 
-    val filesToAnalyze = FileUtil.getListOfFiles(sysmlDocuments).toArray ++
-      FileUtil.getListOfFiles(landoDocuments).toArray ++
-      FileUtil.getListOfFiles(cryptolDocuments).toArray ++
-      FileUtil.getListOfFiles(bsvDocuments).toArray ++
-      FileUtil.getListOfFiles(svDocuments).toArray
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toArray ++
+      FileUtil.getFilesInDirectory(landoDocuments).toArray ++
+      FileUtil.getFilesInDirectory(cryptolDocuments).toArray ++
+      FileUtil.getFilesInDirectory(bsvDocuments).toArray ++
+      FileUtil.getFilesInDirectory(svDocuments).toArray
 
     val reportName = "Report_Refinements_None"
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],false)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentData, Set.empty[RefinementModel],false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit_none")
 
     reportFilePath should not be null

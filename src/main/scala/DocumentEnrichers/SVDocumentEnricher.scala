@@ -13,8 +13,10 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
   val subsystemRegex: Regex = """^module\s+(\w+)\s*""".r
 
   def parseDocument(filePath: String): SVDocumentInfo = {
-    require(filePath.nonEmpty)
-    require(FileUtil.getFileType(filePath) == "sv")
+    require(filePath.nonEmpty, "File path cannot be empty")
+    require(FileUtil.getFileType(filePath) == "sv", "File type must be SystemVerilog")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
+
     val fileName = FileUtil.getFileName(filePath)
     val modules: Set[DocReference] = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
 

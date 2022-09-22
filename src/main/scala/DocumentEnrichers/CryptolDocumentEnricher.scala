@@ -21,6 +21,8 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
   def parseDocument(filePath: String): CryptolDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(FileUtil.getFileType(filePath) == "cry", "filePath must be a Cryptol file")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
+
     if(CryptolInterpreter.ensureCryptolIsInPath){
       CryptolInterpreter.interpret(filePath)
     }else{

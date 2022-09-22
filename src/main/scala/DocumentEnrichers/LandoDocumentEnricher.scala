@@ -22,6 +22,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   def parseDocument(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(FileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
     val relations: Set[DocRelation] = extractRelations(filePath)
     val requirements: Set[DocReference] = extractReferences(filePath, FileType.RequirementFile)

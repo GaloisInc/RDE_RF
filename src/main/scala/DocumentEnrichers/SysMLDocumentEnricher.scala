@@ -25,8 +25,9 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   val connectionRegex: Regex = """^connect\s*(\.*)\s=to\s+(.*?)""".r
 
   def parseDocument(filePath: String): SysMLDocumentInfo = {
-    require(filePath.nonEmpty)
-    require(FileUtil.getFileType(filePath) == "sysml")
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(FileUtil.getFileType(filePath) == "sysml", "filePath must be a sysml file")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
 
     val fileName = FileUtil.getFileName(filePath)
     val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))

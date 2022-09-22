@@ -17,6 +17,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   def parseDocument(filePath: String): BSVDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(FileUtil.getFileType(filePath) == "bsv", "filePath must be a BSV file")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
 
     val fileName = FileUtil.getFileName(filePath)
     val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
@@ -47,5 +48,4 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   def cleanLine(line: String): String = {
     line.trim.stripSuffix(";").stripSuffix(",").stripSuffix("]").stripSuffix("}").stripSuffix("{")
   }
-
 }

@@ -13,6 +13,10 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
 
   val systemRegex: Regex = """^package\s+(\w+)\s*""".r
   val subsystemRegex: Regex = """^module\s+(\w+)\s*\((\w+)\)\s*""".r
+  val methodRegex: Regex = """^method\s+(\w+)\s*""".r
+  val ruleRegex: Regex = """^rule\s+(\w+)\s*;""".r
+  val actionRegex: Regex = """^action\s+(\w+)\s*""".r
+  val interfaceRegex = """^interface\s+(\w+)\s*""".r
 
   def parseDocument(filePath: String): BSVDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")

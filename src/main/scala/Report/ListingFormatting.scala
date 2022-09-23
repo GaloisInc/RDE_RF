@@ -184,6 +184,8 @@ object ListingFormatting {
       |  },
       |  morecomment = [l]{//},
       |  morecomment = [s]{/*}{*/},
+      |  morestring = [b]",
+      |  morestring = [b]'
       |}
       |""".stripMargin
 

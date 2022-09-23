@@ -25,6 +25,11 @@ libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.14.0"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1"
 
+// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
+
+// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api-scala
+libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
 
 enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 

@@ -49,6 +49,7 @@ final case class MasterModel(
                               implicit_refinements: Map[String, List[RefinementModel]],
                               explicit_refinements: Map[String, List[RefinementModel]],
                             ){
+  require(name.nonEmpty, "Master model name must not be empty")
   require(implicit_refinements.values.flatten.toSet.intersect(explicit_refinements.values.flatten.toSet).isEmpty, "Implicit and explicit refinements must be disjoint")
   require(implicit_refinements.forall(fileRefs => {
     fileRefs._2.forall(ref => {

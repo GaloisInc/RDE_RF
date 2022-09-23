@@ -118,6 +118,12 @@ object ListingFormatting {
     buildLanguageFormatting(formatting)
   }
 
+  lazy val lobotFormatting: String = {
+    val formatting = lstFormattings(DocumentType.Lobot)
+    buildLanguageFormatting(formatting)
+  }
+
+
   lazy val cryptolFormatting: String = {
     val formatting = lstFormattings(DocumentType.Cryptol)
     buildLanguageFormatting(formatting)

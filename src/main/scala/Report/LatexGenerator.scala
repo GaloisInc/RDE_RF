@@ -5,6 +5,7 @@ import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.DocumentInfo
 import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -12,7 +13,7 @@ import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 import scala.sys.process.Process
 
-object LatexGenerator {
+object LatexGenerator extends Logging {
   private val latexBuildCmd = "pdflatex"
   private val packages = Array[String]("listings", "url", "alltt", "amssymb", "amsthm", "xspace",
     "lstautogobble", "tcolorbox", "float", "xcolor", "graphicx", "todonotes", "varioref", "hyperref", "cleveref", "marginnote")
@@ -49,12 +50,14 @@ object LatexGenerator {
 
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
+    logger.info(s"Building LaTeX file $fPath")
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
     val pLog = new LatexProcessLogger()
-    val exitCode = Process(cmd).!//.!(pLog)
+    val exitCode = Process(cmd).! //.!(pLog)
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
       val exitCode = Process(cmd).!(pLog)
+      logger.info(s"LaTeX build finished with exit code $exitCode")
       assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     }
 
@@ -65,7 +68,7 @@ object LatexGenerator {
     }
   }
 
-  private def deleteAuxLatexFiles(directory :File, fileTypesToDelete : Array[String]): Unit = {
+  private def deleteAuxLatexFiles(directory: File, fileTypesToDelete: Array[String]): Unit = {
     require(directory.isDirectory, "Not a directory")
     val auxFiles = directory.listFiles().filter(f => fileTypesToDelete.exists(f.getName.endsWith))
     auxFiles.foreach(_.delete())
@@ -87,6 +90,8 @@ object LatexGenerator {
     latex.append(ListingFormatting.basicFormatListing)
     latex.append(emptyLine)
     latex.append(ListingFormatting.landoFormatting)
+    latex.append(emptyLine)
+    latex.append(ListingFormatting.lobotFormatListing)
     latex.append(emptyLine)
     latex.append(ListingFormatting.cryptolFormatting)
     latex.append(emptyLine)

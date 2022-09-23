@@ -12,6 +12,7 @@ class ReferenceFormatter(
 
   def createWebLink(url: String): String = {
     require(url.nonEmpty, "url must not be empty")
+    require(url.startsWith("http"), "url must start with http")
     val webLink = LatexSyntax.createWebLink(url)
     latexInsideListing(webLink)
   } ensuring ((formatted: String) => formatted.startsWith(escapeListingBeginning)
@@ -20,18 +21,21 @@ class ReferenceFormatter(
     && formatted.length > url.length)
 
   def addReference(reference: DocReference, currentDocument: String, referenceType: LatexReferenceTypes.Value ): String = {
+    require(currentDocument.nonEmpty, "nameOfDocument must not be empty")
     val hyperref = LatexSyntax.addReferenceInLatex(reference, currentDocument, referenceType)
     latexInsideListing(hyperref)
   } ensuring ((l: String) => l.contains(reference.getLabelText))
 
-  def addAbstractions(abstractions: Set[DocReference], currentDocument: String): String = {
-    val abstractionLinks = abstractions.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceTypes.Abstraction))
+  def addAbstractions(abstractions: Set[DocReference], nameOfDocument: String): String = {
+    require(nameOfDocument.nonEmpty, "nameOfDocument must not be empty")
+    val abstractionLinks = abstractions.map(ref => LatexSyntax.addReferenceInLatex(ref, nameOfDocument, LatexReferenceTypes.Abstraction))
     val abstractionText = abstractionLinks.mkString(s"($abstractionSymbolLatex", ", ", ")")
     formatLatexListing(abstractionText)
   }
 
-  def addSpecializations(specializations: Set[DocReference], currentDocument: String): String = {
-    val specializationLinks = specializations.map(ref => LatexSyntax.addReferenceInLatex(ref, currentDocument, LatexReferenceTypes.Refinement))
+  def addSpecializations(specializations: Set[DocReference], nameOfDocumet: String): String = {
+    require(nameOfDocumet.nonEmpty, "nameOfDocument must not be empty")
+    val specializationLinks = specializations.map(ref => LatexSyntax.addReferenceInLatex(ref, nameOfDocumet, LatexReferenceTypes.Refinement))
     val specializationText = specializationLinks.mkString(s"($refinementSymbolLatex", ", ", ")")
     formatLatexListing(specializationText)
   }
@@ -64,12 +68,13 @@ class ReferenceFormatter(
   }
 
 
-  protected def latexInsideListing(latexListing: String): String = {
-    escapeListingBeginning + latexListing + escapeListingEnding
+  protected def latexInsideListing(contant: String): String = {
+    require(contant.nonEmpty, "latexListing must not be empty")
+    escapeListingBeginning + contant + escapeListingEnding
   } ensuring ((formatted: String) => formatted.startsWith(escapeListingBeginning)
     && formatted.endsWith(escapeListingEnding)
-    && formatted.contains(latexListing)
-    && formatted.length > latexListing.length)
+    && formatted.contains(contant)
+    && formatted.length > contant.length)
 
   protected def formatLatexListing(text: String): String = {
     require(text.nonEmpty, "The string to format cannot be empty.")

@@ -6,7 +6,6 @@ import Formatter.LatexFormatter
 import Referencer._
 import Report.ReportTypes.ReportReference
 import Specs.FileSpecs
-import Specs.FileSpecs.{allFilesExist, allFilesOfCorrectType}
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
 import Utils.{FileUtil, Matcher}
@@ -21,7 +20,7 @@ object DocumentAnalyzer {
   private val bsvReferencer = new BlueSpecReferencer()
   private val svReferencer = new SystemVerilogReferencer()
 
-  val supportedTypes = Set[String]("lando", "sysml", "bsv", "sv", "cry")
+  val supportedTypes: Set[String] = Set[String]("lando", "sysml", "bsv", "sv", "cry")
 
 
   def generateReport(filesToAnalyze: Set[String],
@@ -188,11 +187,13 @@ object DocumentAnalyzer {
     val enrichedBSVDocuments = bsvDocuments.map(doc => bsvReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
     val enrichedSVDocuments = svDocuments.map(doc => svReferencer.addRefinementRelations(doc, Array.empty[DocumentInfo], Array.empty[DocumentInfo]))
 
-    enrichedLandoDocuments.foreach(doc => addReferences(doc, enrichedLandoDocuments.flatMap(_.getAllReferences).toSet))
-    enrichedSysMLDocuments.foreach(doc => addReferences(doc, enrichedSysMLDocuments.flatMap(_.getAllReferences).toSet))
-    enrichedCryptolDocuments.foreach(doc => addReferences(doc, enrichedCryptolDocuments.flatMap(_.getAllReferences).toSet))
-    enrichedBSVDocuments.foreach(doc => addReferences(doc, enrichedBSVDocuments.flatMap(_.getAllReferences).toSet))
-    enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences).toSet))
+    enrichedLandoDocuments.foreach(doc => addReferences(doc, enrichedLandoDocuments.flatMap(_.getAllReferences)))
+    enrichedSysMLDocuments.foreach(doc => addReferences(doc, enrichedSysMLDocuments.flatMap(_.getAllReferences)))
+    enrichedCryptolDocuments.foreach(doc => addReferences(doc, enrichedCryptolDocuments.flatMap(_.getAllReferences)))
+    enrichedBSVDocuments.foreach { doc =>
+      addReferences(doc, enrichedBSVDocuments.flatMap(_.getAllReferences))
+    }
+    enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences)))
 
     val result = enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ enrichedSVDocuments ++ enrichedBSVDocuments
 

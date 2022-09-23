@@ -97,6 +97,24 @@ object ListingFormatting {
           BlockComment("(*", "*)"),
           literates = Array.empty[Literate]
         )
+      case DocumentType.Lobot =>
+        LanguageFormatting(
+          "Lobot",
+          Array("system", "subsystem", "with", "inherit", "client", "events", "types", "where"),
+          "--",
+          BlockComment("/*", "*/"),
+          literates = Array.empty[Literate]
+        )
+      case DocumentType.Saw =>
+        val cryptolKeywords = lstFormattings(DocumentType.Cryptol).keywords
+        LanguageFormatting(
+          "SAW",
+          cryptolKeywords ++ Array("let", "in", "where", "import", "module", "type", "private", "property", "if", "then", "else", "as", "take", "drop", "zero", "sum", "elem"),
+          "//",
+          BlockComment("/*", "*/"),
+          literates = Array(Literate("/\\\\", "$\\land$ "), Literate("\\\\/", "$\\lor$ "))
+        )
+      case _ => throw new Exception("Unknown document type")
     }
     languageFormatting
   }
@@ -122,7 +140,6 @@ object ListingFormatting {
     val formatting = lstFormattings(DocumentType.Lobot)
     buildLanguageFormatting(formatting)
   }
-
 
   lazy val cryptolFormatting: String = {
     val formatting = lstFormattings(DocumentType.Cryptol)

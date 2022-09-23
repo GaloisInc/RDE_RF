@@ -48,9 +48,14 @@ object LatexGenerator extends Logging {
     sb.toString()
   }
 
+  private val latexAuxFiles = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
+
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
     logger.info(s"Building LaTeX file $fPath")
+    val currentDirectory = new File(latexFile.getParent)
+    deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
+
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
     val pLog = new LatexProcessLogger()
     val exitCode = Process(cmd).! //.!(pLog)
@@ -62,9 +67,7 @@ object LatexGenerator extends Logging {
     }
 
     if (removeAuxFiles) {
-      val currentDirectory = new File(".")
-      val auxFileTypes = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
-      deleteAuxLatexFiles(currentDirectory, auxFileTypes)
+      deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
     }
   }
 
@@ -75,11 +78,36 @@ object LatexGenerator extends Logging {
   } ensuring(_ => directory.listFiles().map(f => FileUtil.getFileType(f.getName)).toSet.intersect(fileTypesToDelete.toSet).isEmpty, "Auxiliary files not deleted")
 
   def includeListing(documentInfo: DocumentInfo): String = {
+    require(FileUtil.fileExists(documentInfo.filePath), s"File ${documentInfo.filePath} does not exist")
+    val style = listingStyle(documentInfo.documentType)
     s"""
-       |\\lstinputlisting[language=${documentInfo.getLanguage},
+       |\\lstinputlisting[$style=${documentInfo.getLanguage},
        |label={lst:${documentInfo.getReferenceName}},
-       |caption={Listing ${documentInfo.getCaption}}]
+       |caption={Listing ${documentInfo.getCaption}.}]
        |{${documentInfo.filePath}}""".stripMargin
+  }
+
+  def listingStyle(documentType: Types.DocumentType.Value): String = {
+    documentType match {
+      case Types.DocumentType.Lando => "language"
+      case Types.DocumentType.Lobot => "language"
+      case Types.DocumentType.SysML => "language"
+      case Types.DocumentType.Cryptol => "language"
+      case Types.DocumentType.Saw => "language"
+      case Types.DocumentType.SV => "language"
+      case Types.DocumentType.BSV => "language"
+    }
+  } ensuring((res: String) => res.equals("style") || res.equals("language"), "Listing style not correct")
+
+
+  def includeFigure(documentInfo: DocumentInfo): String = {
+    s"""
+       |\\begin{figure}[H]
+       |\\centering
+       |\\includegraphics[width=\\textwidth]{${documentInfo.filePath}}
+       |\\caption{${documentInfo.getCaption}}
+       |\\label{fig:${documentInfo.getReferenceName}}
+       |\\end{figure}""".stripMargin
   }
 
 
@@ -91,15 +119,13 @@ object LatexGenerator extends Logging {
     latex.append(emptyLine)
     latex.append(ListingFormatting.landoFormatting)
     latex.append(emptyLine)
-    latex.append(ListingFormatting.lobotFormatListing)
-    latex.append(emptyLine)
     latex.append(ListingFormatting.cryptolFormatting)
+    latex.append(emptyLine)
+    latex.append(ListingFormatting.lobotFormatting)
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
-    latex.append(ListingFormatting.svFormatting)
-    latex.append(emptyLine)
-    latex.append(ListingFormatting.bsvFormatting)
+    latex.append(ListingFormatting.Verilog)
     latex.append(emptyLine)
 
     latex.toString()
@@ -131,7 +157,8 @@ object LatexGenerator extends Logging {
   }
 
 
-  def includeListings[Doc <: DocumentInfo](sectionName: String, documents: Array[Doc]): String = {
+  def includeListings[Doc <: DocumentInfo](sectionName: String,
+                                           documents: Array[Doc]): String = {
     val latexContent = new mutable.StringBuilder()
     latexContent.append(generateSection(sectionName))
     latexContent.append(emptyLine)
@@ -185,10 +212,7 @@ object LatexGenerator extends Logging {
 
 }
 
-object PaperLayout extends Enumeration {
-  type PaperLayout = Value
-  val A4, B4 = Value
-}
+
 
 
 

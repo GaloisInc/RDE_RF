@@ -39,14 +39,14 @@ abstract class DocumentInfo {
       case DocumentType.SysML => "SysML"
       case DocumentType.Cryptol => "Cryptol"
       case DocumentType.Saw => "Saw"
-      case DocumentType.SV => "SV"
-      case DocumentType.BSV => "BSV"
+      case DocumentType.SV => "Verilog"
+      case DocumentType.BSV => "Verilog"
     }
   }
 
-  def getReferenceName: String = s"${documentType.toString}_${documentName}"
+  def getReferenceName: String = s"${documentType.toString}_$documentName"
 
-  def getCaption: String = s"${getLanguage} Model of ${LatexSanitizer.sanitizeName(documentName)}."
+  def getCaption: String = s"$getLanguage Model of ${LatexSanitizer.sanitizeName(documentName)}"
 
   def updateReference (ref: DocReference): DocumentInfo
 

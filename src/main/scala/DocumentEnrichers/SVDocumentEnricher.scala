@@ -24,7 +24,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     val modules: Set[DocReference] = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
 
     logger.info("Finished parsing file " + filePath)
-    ")
+
     new SVDocumentInfo(fileName, filePath, modules)
   }
 

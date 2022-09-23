@@ -18,6 +18,8 @@ class BSVDocumentInfo(
   require(FileUtil.fileExists(filePath), "File path must exist")
   require(packages.intersect(modules).isEmpty, "Packages and modules cannot intersect")
 
+  require(documentType == DocumentType.BSV, "Document type must be BSV")
+
   require(packages.forall(_.getReferenceType == ReferenceType.System))
   require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
 

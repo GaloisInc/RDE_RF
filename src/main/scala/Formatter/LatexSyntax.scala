@@ -7,7 +7,7 @@ import Types.{DocumentType, LatexReferenceTypes}
 object LatexSyntax {
   def addLabel(reference: String): String = {
     require(reference.nonEmpty, "Reference must not be empty")
-    require(reference.matches("^[a-zA-Z0-9_]*$"), "Reference must only contain alphanumeric characters and underscores")
+    //require(reference.matches("^[a-zA-Z0-9_/]*$"), "Reference must only contain alphanumeric characters and underscores but was " + reference)
     s"""\\label{$reference}"""
   } ensuring((result: String) => result.nonEmpty && result.contains(reference), "Result must contain reference")
   //\\hypertarget{$reference}{}"
@@ -42,13 +42,13 @@ object LatexSyntax {
 
   def addCref(reference: String): String = {
     require(reference.nonEmpty, "Reference must not be empty")
-    require(reference.matches("^[a-zA-Z0-9_]*$"), "Reference must only contain alphanumeric characters and underscores")
+    //require(reference.matches("^[a-zA-Z0-9_/]*$"), "Reference must only contain alphanumeric characters and underscores but was " + reference)
     s"\\cref{$reference}"
   } ensuring((line: String) => line.contains(reference) && line.contains("cref"), "Reference must be contained in cref")
 
   def addVref(reference: String): String = {
     require(reference.nonEmpty, "Reference must not be empty")
-    require(reference.matches("^[a-zA-Z0-9_]*$"), "Reference must only contain alphanumeric characters and underscores")
+    //require(reference.matches("^[a-zA-Z0-9_/]*$"), "Reference must only contain alphanumeric characters and underscores but was " + reference)
     s"\\vref{$reference}"
   } ensuring((line: String) => line.contains(reference) && line.contains("vref"), "Reference must be contained in vref")
 

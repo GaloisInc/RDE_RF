@@ -14,6 +14,9 @@ class LandoDocumentInfo(
                          scenarios: Set[DocReference],
                          override val documentType: DocumentType.Value = DocumentType.Lando,
                        ) extends DocumentInfo {
+
+  require(documentType == DocumentType.Lando, "Document type must be Lando")
+
   def copy(
             documentName: String = documentName,
             filePath: String = filePath,

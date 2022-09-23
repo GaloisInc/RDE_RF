@@ -31,6 +31,8 @@ class BlueSpecReferencer extends Referencer {
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, refinedDocument))
 
   override def addSpecializationsToDocument(documentInfo: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo = {
+    require(refinedDocuments.isEmpty, "No refined documents allowed")
+    require(documentInfo.documentType == DocumentType.BSV, "Document must be BlueSpec")
     documentInfo
   } ensuring ((resDoc: DocumentInfo) => resDoc == documentInfo, "No specializations allowed for BlueSpec")
 }

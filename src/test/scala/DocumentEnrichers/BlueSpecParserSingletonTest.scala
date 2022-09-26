@@ -3,6 +3,7 @@ package DocumentEnrichers
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
+/*
 class BlueSpecParserSingletonTest extends AnyFlatSpec with should.Matchers {
 
   it should "be able to parse import statements" in {
@@ -107,6 +108,7 @@ class BlueSpecParserSingletonTest extends AnyFlatSpec with should.Matchers {
     result.name should be("ruleName")
   }
 
+  /*
   it should "be able to parse method with no parameters" in {
     val input = "method method1;"
     val parsedResult = BlueSpecParserSingleton.parse(BlueSpecParserSingleton.methodParsing, input)
@@ -150,4 +152,24 @@ class BlueSpecParserSingletonTest extends AnyFlatSpec with should.Matchers {
     result.parameters should be(Some("Bool b"))
   }
 
+  it should "be able to parse type" in {
+    val input = "Bit #(32)"
+    val parsedResult = BlueSpecParserSingleton.parse(BlueSpecParserSingleton.typeParsing, input)
+
+    parsedResult.successful should be(true)
+    val result = parsedResult.get
+  }
+
+  it should "be able to parse type" in {
+    val input = "Vector #(32, Bit #(32))"
+    val parsedResult = BlueSpecParserSingleton.parse(BlueSpecParserSingleton.typeParsing, input)
+
+    parsedResult.successful should be(true)
+    val result = parsedResult.get
+  }
+
+   */
+
 }
+
+ */

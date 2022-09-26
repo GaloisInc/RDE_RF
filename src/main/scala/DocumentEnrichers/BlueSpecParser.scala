@@ -1,84 +1,9 @@
 package DocumentEnrichers
 
+
 import scala.util.parsing.combinator.RegexParsers
 
-abstract sealed class AnyArgument
-
-case class IdRef(str: String) extends AnyArgument
-
-case class NumberIdRef(int: Int) extends AnyArgument
-
-// Symbols
-case class DOT()
-
-case class COMMA()
-
-case class LPAREN()
-
-case class RPAREN()
-
-case class LBRACKET()
-
-case class RBRACKET()
-
-case class COLON()
-
-case class ASTRIX()
-
-case class LBRACE()
-
-case class RBRACE()
-
-case class SEMICOLON()
-
-case class HASHTAG()
-
-// Keywords
-
-case class RULE()
-
-case class MODULE()
-
-case class IMPORT()
-
-case class INTERFACE()
-
-case class METHOD()
-
-case class TYPEDEF()
-
-case class PACKAGE()
-
-case class FUNCTION()
-
-case class DIRECTION()
-
-case class STRUCT()
-
-case class ENUM()
-
-case class DERIVING()
-
-
-// Types
-case class BOOLEAN()
-
-case class BIT()
-
-case class VECTOR()
-
-case class ACTION()
-
-case class ACTIONVALUE()
-
-
-trait IdentifierParser extends RegexParsers {
-  def identifier: Parser[IdRef] = """\w+""".r ^^ { str => IdRef(str) }
-
-  def numberIdentifier: Parser[NumberIdRef] = """\d+""".r ^^ { int => NumberIdRef(int.toInt) }
-
-}
-
+/**
 trait TypeParser extends RegexParsers {
   def boolean: Parser[BOOLEAN] = "Bool" ^^ { _ => BOOLEAN() }
 
@@ -90,33 +15,10 @@ trait TypeParser extends RegexParsers {
 
   def actionValue: Parser[ACTIONVALUE] = "ActionValue" ^^ { _ => ACTIONVALUE() }
 
+  def unitType = (boolean | action)
 
-}
+  def composedType = vector | actionValue | bit
 
-trait SymbolParser extends RegexParsers {
-  def dot: Parser[DOT] = "." ^^ { _ => DOT() }
-
-  def comma: Parser[COMMA] = "," ^^ { _ => COMMA() }
-
-  def lparen: Parser[LPAREN] = "(" ^^ { _ => LPAREN() }
-
-  def rparen: Parser[RPAREN] = ")" ^^ { _ => RPAREN() }
-
-  def lbracket: Parser[LBRACKET] = "[" ^^ { _ => LBRACKET() }
-
-  def rbracket: Parser[RBRACKET] = "]" ^^ { _ => RBRACKET() }
-
-  def colon: Parser[COLON] = ":" ^^ { _ => COLON() }
-
-  def astrix: Parser[ASTRIX] = "*" ^^ { _ => ASTRIX() }
-
-  def lbrace: Parser[LBRACE] = "{" ^^ { _ => LBRACE() }
-
-  def rbrace: Parser[RBRACE] = "}" ^^ { _ => RBRACE() }
-
-  def semicolon: Parser[SEMICOLON] = ";" ^^ { _ => SEMICOLON() }
-
-  def hashtag: Parser[HASHTAG] = "#" ^^ { _ => HASHTAG() }
 }
 
 trait KeywordParser extends RegexParsers {
@@ -151,6 +53,7 @@ class BlueSpecParser extends IdentifierParser
   with SymbolParser
   with KeywordParser {
 
+  /*
   def methodParsing: Parser[BlueSpecMethod] = method ~ opt(typeParser) ~ identifier ~ opt(lparen ~ rep(argumentParser) ~ rparen) ^^ {
     case _ ~ _ ~ IdRef(methodName) ~ Some(_ ~ arguments ~ _) => BlueSpecMethod(methodName, None, arguments)
     case _ ~ None ~ IdRef(methodName) ~ Some(_ ~ arguments ~ _) => BlueSpecMethod(methodName, None, arguments)
@@ -158,9 +61,25 @@ class BlueSpecParser extends IdentifierParser
     case _ ~ None ~ IdRef(methodName) ~ None => BlueSpecMethod(methodName, None, List())
   }
 
+   */
+
   def packageParsing: Parser[BlueSpecPackage] = packageKeyword ~ identifier ~ semicolon ^^ {
     case _ ~ IdRef(packageName) ~ _ => BlueSpecPackage(packageName)
   }
+
+
+  /*
+    def typeParser: Parser[BlueSpecType] = unitType ^^ {
+      case BOOLEAN() => BlueSpecBoolType()
+      case ACTION() => BlueSpecActionType()
+    } |
+      (composedType ~ hashtag ~ lparen ~ opt(typeParser) ~ numberIdentifier ~ rparen) ^^ {
+        case bit ~ _ ~ _ ~ None ~ NumberIdRef(size) ~ _ => BlueSpecBitArrayType(size)
+        case vector ~ _ ~ Some(innerType) ~ NumberIdRef(size) ~ _ => BlueSpecVectorType(innerType, size)
+        case actionValue ~ _ ~ _ ~ NumberIdRef(size) ~ _ => BlueSpecActionValueType(size)
+      }
+
+   */
 
   def typeStructParsing: Parser[BlueSpecStructType] = typedef ~ stuctKeyword ~ lbrace ~ rep(argumentParser) ~ rbrace ~ identifier ~ semicolon ^^ {
     case _ ~ _ ~ _ ~ _ ~ _ ~ IdRef(typeName) ~ _ => BlueSpecStructType(typeName)
@@ -242,5 +161,25 @@ final case class BlueSpecEnumType(name: String) {
 final case class BlueSpecStructType(name: String) {
   require(name.nonEmpty, "Type name cannot be empty")
 }
+
+trait BlueSpecType {}
+
+final case class BlueSpecBoolType() extends BlueSpecType
+
+final case class BlueSpecActionType() extends BlueSpecType
+
+final case class BlueSpecVectorType(subType: BlueSpecType, size: Int) extends BlueSpecType {
+  require(size > 0, "Vector size must be greater than 0")
+}
+
+final case class BlueSpecBitArrayType(size: Int) extends BlueSpecType {
+  require(size > 0, "Bit size must be greater than 0")
+}
+
+final case class BlueSpecActionValueType(size: Int) extends BlueSpecType {
+  require(size > 0, "ActionValue size must be greater than 0")
+}
+*/
+
 
 

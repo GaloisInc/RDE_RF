@@ -25,15 +25,10 @@ object LatexGenerator extends Logging {
   }
 
   def generateList(list: List[String]): String = {
-    val sb = new mutable.StringBuilder()
-    sb.append("\\begin{itemize}")
-    sb.append(emptyLine)
-    for (item <- list) {
-      sb.append(s"\\item $item")
-      sb.append(emptyLine)
-    }
-    sb.append("\\end{itemize}")
-    sb.toString()
+    val entries = list.foldLeft("")((s, item) => {
+      s + (s"\\item $item") + emptyLine
+    })
+    "\\begin{itemize}" + emptyLine + entries + "\\end{itemize}"
   }
 
   def addContentInsideEnvironment(content: Array[String], environment: String): String = {
@@ -54,13 +49,14 @@ object LatexGenerator extends Logging {
     val fPath = latexFile.getAbsolutePath
     logger.info(s"Building LaTeX file $fPath")
     val currentDirectory = new File(latexFile.getParent)
+    // Delete aux files to avoid conflicts
     deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
 
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
-    val pLog = new LatexProcessLogger()
-    val exitCode = Process(cmd).! //.!(pLog)
+    val exitCode = Process(cmd).!
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
+      val pLog = new LatexProcessLogger()
       val exitCode = Process(cmd).!(pLog)
       logger.info(s"LaTeX build finished with exit code $exitCode")
       assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")

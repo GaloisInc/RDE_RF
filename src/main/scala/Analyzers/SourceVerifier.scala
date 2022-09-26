@@ -14,7 +14,6 @@ object SourceVerifier extends Logging {
     }), "One or more source files do not exist")
     require(EnvironmentChecker.dependenciesInstalled, "Environment is not set up correctly - please install dependencies.")
 
-
     val filesWithCompilationError = sourceFiles.filterNot(file => isWellFormed(file)).toList
 
     filesWithCompilationError

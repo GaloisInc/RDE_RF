@@ -4,7 +4,7 @@ import Interpreters.{BlueSpecInterpreter, CryptolInterpreter, LandoInterpreter, 
 import Report.LatexGenerator
 
 object AnalyzerSettings {
-  val supportedDocumentTypesString = Set("sv", "bsv", "lando", "lobot", "sysml", "cry", "saw")
+  val supportedDocumentTypesString: Set[String] = Set("sv", "bsv", "lando", "lobot", "sysml", "cry", "saw")
 
   val supportedDocumentTypes: Set[Types.DocumentType.Value] = Set(Types.DocumentType.SV, Types.DocumentType.BSV, Types.DocumentType.Lando, Types.DocumentType.Lobot, Types.DocumentType.SysML, Types.DocumentType.Cryptol, Types.DocumentType.Saw)
 

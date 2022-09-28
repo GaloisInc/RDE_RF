@@ -15,15 +15,15 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
     val landoDocuments = getClass.getResource("../Lando").getPath
     val cryptolDocuments = getClass.getResource("../Cryptol").getPath
 
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments).toSet ++
-      FileUtil.getFilesInDirectory(landoDocuments).toSet ++
-      FileUtil.getFilesInDirectory(cryptolDocuments).toSet
+    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
+      FileUtil.getFilesInDirectory(landoDocuments) ++
+      FileUtil.getFilesInDirectory(cryptolDocuments)
 
     val reportName = "Report"
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],false)
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],sortFiles = false)
 
     val reportFilePath = RefinementReport.generateRefinementReport(report)
 

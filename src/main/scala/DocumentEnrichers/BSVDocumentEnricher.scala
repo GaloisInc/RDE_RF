@@ -16,7 +16,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   val methodRegex: Regex = """^method\s+(\w+)\s*""".r
   val ruleRegex: Regex = """^rule\s+(\w+)\s*;""".r
   val actionRegex: Regex = """^action\s+(\w+)\s*""".r
-  val interfaceRegex = """^interface\s+(\w+)\s*""".r
+  val interfaceRegex: Regex = """^interface\s+(\w+)\s*""".r
 
   def parseDocument(filePath: String): BSVDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
@@ -43,7 +43,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   def transformReference(line: String, fileName: String): Option[DocReference] = {
     cleanLine(line) match {
       case systemRegex(systemName) => Some(new DocReference(fileName, ReferenceName(systemName), ReferenceType.System, DocumentType.BSV, line))
-      case subsystemRegex(subsystemName, arguments) => Some(new DocReference(fileName, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
+      case subsystemRegex(subsystemName, _) => Some(new DocReference(fileName, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
       case _ => None
     }
   }

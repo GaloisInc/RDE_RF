@@ -48,7 +48,7 @@ class CryptolRegexTest extends AnyFlatSpec with should.Matchers {
     val line3 = "ActuateActuator : [2]Actuation -> Actuation"
     val eventRegex = documentEnricher.eventRegex
 
-    line1 matches (eventRegex.toString) should be(true)
+    line1 matches eventRegex.toString should be(true)
     line1 match {
       case eventRegex(name) =>
         name should be("SetInput")

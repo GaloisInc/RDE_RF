@@ -15,7 +15,7 @@ class BSVRegexTest extends AnyFlatSpec with should.Matchers {
     val line3 = "module mkActuationGeneratedD1 (ActuationD1_IFC)"
     val moduleRegex = documentEnricher.subsystemRegex
 
-    line1 matches (moduleRegex.toString) should be(true)
+    line1 matches moduleRegex.toString should be(true)
     line1 match {
       case moduleRegex(name, argument) =>
         name should be("mkActuationGenerated")
@@ -46,21 +46,21 @@ class BSVRegexTest extends AnyFlatSpec with should.Matchers {
     val line3 = "package Actuation_Generated_BVI"
     val systemRegex = documentEnricher.systemRegex
 
-    line1 matches (systemRegex.toString) should be(true)
+    line1 matches systemRegex.toString should be(true)
     line1 match {
       case systemRegex(name) =>
         name should be("Nerv_BVI")
       case _ => fail("Regex did not match")
     }
 
-    line2 matches (systemRegex.toString) should be(true)
+    line2 matches systemRegex.toString should be(true)
     line2 match {
       case systemRegex(name) =>
         name should be("Nerv")
       case _ => fail("Regex did not match")
     }
 
-    line3 matches (systemRegex.toString) should be(true)
+    line3 matches systemRegex.toString should be(true)
     line3 match {
       case systemRegex(name) =>
         name should be("Actuation_Generated_BVI")

@@ -7,7 +7,6 @@ import Types.EnrichableString
 import Utils.{Control, FileUtil}
 
 import java.io.{File, PrintWriter}
-import scala.util.matching.Regex
 
 abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) {

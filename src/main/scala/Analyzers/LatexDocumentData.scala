@@ -11,4 +11,5 @@ final case class LatexDocumentData(
                                   ) {
   require(title.nonEmpty, "Title must not be empty")
   require(folder.nonEmpty, "Folder must not be empty")
+
 }

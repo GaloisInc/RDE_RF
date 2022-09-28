@@ -31,11 +31,15 @@ object BlueSpecInterpreter extends Logging {
     status == 0
   }
 
-  def generateVerilogFile(filePath: String): String = {
+  def bscCheck(filePath: String) : Unit = {
     require(filePath.nonEmpty, "Filename is not specified.")
     require(filePath.endsWith(".bsv"), "The file is not a cryptol file.")
     require(ensureBlueSpecInPath, "BlueSpec is not in the path.")
     require(FileUtil.fileExists(filePath), "The file does not exist.")
+  }
+
+  def generateVerilogFile(filePath: String): String = {
+    bscCheck(filePath)
 
     val result = s"$blueSpecCmd -verilog -u $filePath".!
     if (result == 0) {

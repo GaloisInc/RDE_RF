@@ -17,7 +17,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
   //All components, systems and subsystems are referenced by their name which start with a capital letter
   val componentRegex: Regex = """^component\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
-  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+(?:\((.*)\)))?""".r
+  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
 
   def parseDocument(filePath: String): LandoDocumentInfo = {

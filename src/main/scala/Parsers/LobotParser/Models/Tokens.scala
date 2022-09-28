@@ -37,3 +37,8 @@ case class CHECK() extends Token
 case class ABS() extends Token
 case class SELF() extends Token
 case class TYPE() extends Token
+case class SUBSET() extends Token
+case class ARROW() extends Token
+case class ABSTRACT() extends Token
+case class THAT() extends Token
+case class NEWLINE() extends Token

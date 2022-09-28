@@ -1,0 +1,14 @@
+nat : kind of int where self >= 0
+
+type virtualized_platform_runtime =
+  { Posix, RV32_bare_metal, None }
+
+type fpga =
+  { ECP5, ECP5_5G }
+
+virtualized_rts_configs : kind of rts
+  where all_devices_twins == true & cost == 0 & board == None & virtualized_platform_rt == true
+
+twin_build_configs : check
+   on c : virtualized_rts_configs
+   that board == None

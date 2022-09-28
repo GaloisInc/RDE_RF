@@ -1,7 +1,7 @@
 package Parser
 
-import Parsers.LobotParser.Compile.LobotLexer
-import Parsers.LobotParser.Models.{IDENTIFIER, INT_LITERAL, KIND, TYPE}
+import Parsers.LobotParser.Compile.{LobotLexer, ParserExpression, ParserTop}
+import Parsers.LobotParser.Models.{IDENTIFIER, TYPE}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
@@ -12,7 +12,7 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
     LobotLexer.parse(input) match {
       case Left(value) => assert(false)
-      case Right(value) => value.head shouldBe(IDENTIFIER("nat"))
+      case Right(value) => value.head shouldBe (IDENTIFIER("nat"))
     }
   }
 
@@ -21,7 +21,7 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
     LobotLexer.parse(input) match {
       case Left(value) => assert(false)
-      case Right(value) => value.head shouldBe(TYPE())
+      case Right(value) => value.head shouldBe (TYPE())
     }
   }
 
@@ -30,8 +30,8 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
     LobotLexer.parse(input) match {
       case Left(value) => assert(false)
-      case Right(value) => value.head shouldBe(IDENTIFIER("twin_build_configs"))
-      value.size shouldBe 13
+      case Right(value) => value.head shouldBe (IDENTIFIER("twin_build_configs"))
+        value.size shouldBe 15
     }
   }
 
@@ -40,8 +40,8 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
     LobotLexer.parse(input) match {
       case Left(value) => println(value)
-      case Right(value) => value.head shouldBe(IDENTIFIER("rts"))
-      value.size shouldBe 9
+      case Right(value) => value.head shouldBe (IDENTIFIER("rts"))
+        value.size shouldBe 10
     }
   }
 
@@ -50,10 +50,98 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
     LobotLexer.parse(input) match {
       case Left(value) => assert(false)
-      case Right(value) => value.head shouldBe(IDENTIFIER("virtualized_rts_configs"))
-        value.size shouldBe 21
+      case Right(value) => value.head shouldBe (IDENTIFIER("virtualized_rts_configs"))
+        value.size shouldBe 22
     }
   }
 
+  "LobotParser" should "be able to generate AST from simple type" in {
+    val input = "type dev_board =\n  { Virtual, LFE5UM5G_85F_EVN, RV32M1_VEGA, None }\n"
+    val parser = new ParserTop
+
+    val x = for {
+      tokens ← LobotLexer.parse(input).right
+      ast ← parser(tokens).right
+    } yield (tokens, ast)
+
+    x match {
+      case Left(value) => assert(false)
+      case Right(value) => println(value._2)
+    }
+  }
+
+  "LobotParser" should "be able to generate AST from simple typeDecl" in {
+    val input = "type virtualized_platform_runtime = {Posix, RV32_bare_metal, None}\n"
+    val parser = new ParserTop
+
+    println(LobotLexer.parse(input).right)
+    val x = for {
+      tokens ← LobotLexer.parse(input).right
+      ast ← parser(tokens).right
+    } yield (tokens, ast)
+
+    x match {
+      case Left(value) => assert(false)
+      case Right(value) => println(value._2)
+    }
+  }
+
+
+  "LobotParser" should "be able to generate AST from simple kindType" in {
+    val input = "virtualized_rts_configs : kind of rts\n  where cost >= 0 & all_devices_twins = true & board = None & virtualized_platform_rt = true"
+    val parser = new ParserTop
+
+
+    val x = for {
+      tokens ← LobotLexer.parse(input).right
+      ast ← parser(tokens).right
+    } yield (tokens, ast)
+
+    x match {
+      case Left(value) => println(value)
+      case Right(value) =>
+        println("AST:" + value._2)
+        println("Tokens:" + value._1)
+    }
+  }
+
+  "LobotParser" should "be able to generate AST from checkDecl" in {
+    val input = "twin_build_configs : check \n on c : virtualized_rts_configs  that c.board = None"
+    val parser = new ParserTop
+
+    val x = for {
+      tokens ← LobotLexer.parse(input).right
+      ast ← parser(tokens).right
+    } yield (tokens, ast)
+
+    x match {
+      case Left(value) => println(value)
+      case Right(value) =>
+        val ast = value._2
+        println("AST:" + ast)
+        println("Tokens:" + value._1)
+    }
+  }
+
+
+  "LobotParser" should "be able to parse file" in {
+    val filePath = getClass.getResource("../lobot/lobotSmall.lobot").getPath
+    val input = {
+      scala.io.Source.fromFile(filePath).mkString
+    }
+    val parser = new ParserTop
+
+    val x = for {
+      tokens ← LobotLexer.parse(input).right
+      ast ← parser(tokens).right
+    } yield (tokens, ast)
+
+    x match {
+      case Left(value) => println(value)
+      case Right(value) =>
+        println("AST:" + value._2)
+        println("Tokens:" + value._1)
+    }
+  }
 
 }

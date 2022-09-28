@@ -1,57 +1,68 @@
 package Parsers.LobotParser.Compile
 
 import Parsers.LobotParser.Models._
-import com.sun.org.slf4j.internal.LoggerFactory
 
-import scala.util.parsing.combinator.{PackratParsers, Parsers}
-import scala.util.parsing.input.{NoPosition, Position, Reader}
-class ParserTop extends ParserBase {
+class ParserTop extends ParserExpression {
 
   def apply(tokens: Seq[Token]): Either[ParserError, AST] = {
     val reader = new PackratReader(new TokenReader(tokens))
-    customFunction(reader) match {
-      case NoSuccess(msg,  next) ⇒ Left(ParserError(Location(next.pos.line, next.pos.column), msg))
-      case Success(result, _)    ⇒ Right(result)
+    lobotSpecParser(reader) match {
+      case NoSuccess(msg, next) ⇒ Left(ParserError(Location(next.pos.line, next.pos.column), msg))
+      case Success(result, _) ⇒ Right(result)
     }
   }
 
-  lazy val customFunction : PackratParser[FunctionDefinition] = positioned {
-    val fn =
-      DEF() ~ identifier ~ OPEN_PAREN() ~ rep(declaration ~ COMMA()) ~ rep(declaration)  ~ CLOSE_PAREN() ~
-        COLON() ~ INTEGER() ~ EQUAL() ~
-        OPEN_CURLY() ~ rep1(statement) ~ CLOSE_CURLY() ^^ {
-
-        case _ ~ IDENTIFIER(funcName) ~ _ ~ args ~ lastArg ~ _ ~
-          _ ~ _ ~ _ ~
-          _ ~ (statements: List[Statement]) ~ _ ⇒
-
-          if (debugMatch) logger.info(s"PARSE: Function: $funcName")
-          FunctionDefinition(
-            name = funcName,
-            args = args.map(_._1) ++ lastArg,
-            body = statements
-          )
-      }
-    dbg(fn)(name = "customFunction")
+  def lobotSpecParser: Parser[AST] = {
+    rep1sep(declarationParser, rep(NEWLINE())) <~ opt(rep(NEWLINE())) ^^ { case decls => Specification(decls) }
   }
 
-  lazy val statement: PackratParser[Statement] = positioned {
-    val assignStatement = {
-      LET() ~ variable ~ EQUAL() ~ expression4 ~ SEMI() ^^ {
-        case _ ~ (variable: VariableTerm) ~ _ ~ (expression: Expression) ~ _ ⇒
-          if (debugMatch) logger.info(s"PARSE: statement: Assign $variable = $expression")
-          AssignStatement(variable, expression)
+  lazy val declarationParser: PackratParser[Declaration] = positioned {
+    val whereDecl = {
+      opt(NEWLINE()) ~ WHERE() ~ opt(NEWLINE()) ~> expression4 ^^ {
+        case e => e
       }
     }
 
-    val returnStatement = {
-      RETURN() ~ expression4 ~ SEMI() ^^ {
-        case _ ~ (expression: Expression) ~ _ ⇒
-          if (debugMatch) logger.info(s"PARSE: statement: Return $expression")
-          ReturnStatement(expression)
+    val thatDecl = {
+      opt(NEWLINE()) ~ THAT() ~ opt(NEWLINE()) ~> expression4 ^^ {
+        case e ⇒ e
       }
     }
-    dbg(assignStatement)(name = "assignStatement") |
-      dbg(returnStatement)(name = "returnStatement")
+
+    val kindDecl = {
+      identifier ~ COLON() ~ KIND() ~ OF() ~ typeParser ~ opt(whereDecl) ^^ {
+        case IDENTIFIER(str) ~ _ ~ _ ~ _ ~ t ~ w ⇒ KindDecl(str, t, w)
+      }
+    }
+
+    val checkDecl = {
+      identifier ~ COLON() ~ CHECK() ~ NEWLINE() ~ ON() ~ rep(fieldTypeParser) ~ opt(whereDecl) ~ opt(thatDecl) ^^ {
+        case IDENTIFIER(str) ~ _ ~ _ ~ _ ~ _ ~ fields ~ w ~ t ⇒ CheckDecl(str, fields, w, t)
+      }
+    }
+
+    val typeDecl = {
+      TYPE() ~ identifier ~ EQUAL() ~ opt(NEWLINE()) ~ typeParser ^^ {
+        case _ ~ IDENTIFIER(str) ~ _ ~ _ ~ t ⇒ TypeDecl(str, t)
+      }
+    }
+
+    val abstTypeDecl = {
+      ABSTRACT() ~ TYPE() ~ identifier ^^ {
+        case _ ~ _ ~ IDENTIFIER(str) ⇒ AbstTypeDecl(str)
+      }
+    }
+
+    val abstFunctionDecl = {
+      ABSTRACT() ~ identifier ~ COLON() ~ functionLobotParser ^^ {
+        case _ ~ IDENTIFIER(str) ~ _ ~ lobotFunction ⇒ AbstFunctionDecl(str, lobotFunction)
+      }
+    }
+
+    dbg(kindDecl)(name = "kindDecl") |
+      dbg(checkDecl)(name = "checkDecl") |
+      dbg(typeDecl)(name = "typeDecl") |
+      dbg(abstTypeDecl)(name = "abstTypeDecl") |
+      dbg(abstFunctionDecl)(name = "abstFunctionDecl")
   }
 }

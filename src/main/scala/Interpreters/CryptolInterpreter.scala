@@ -4,10 +4,11 @@ import Types.DocReference.DocReference
 import Types.DocumentInfos.CryptolDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 
 import scala.sys.process._
 
-object CryptolInterpreter {
+object CryptolInterpreter extends Logging {
   private val cryptolCMD: String = "cryptol"
 
   private def typeCmd(nameOfModule: String): String = {
@@ -51,9 +52,6 @@ object CryptolInterpreter {
     val path = System.getenv("PATH")
     assert(path != null || path.contains(cryptolCMD), "Cryptol not found in PATH")
     true
-
-    //val status = s"$cryptolCMD -v".!(ProcessLogger(_ => ())) // ignore output
-    //status == 0
   }
 
   def interpret(fileToCryptolModule: String): CryptolDocumentInfo = {
@@ -72,6 +70,7 @@ object CryptolInterpreter {
   def verifyProperties(fileToCryptolModule: String): Boolean = {
     require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
     require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
 
     val proveCmd = s"$cryptolCMD ${verifyCmd(fileToCryptolModule)}"
     val result = proveCmd.!!
@@ -97,11 +96,12 @@ object CryptolInterpreter {
   def verifyWellformednessCmd(fileToCryptolModule: String): Boolean = {
     require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
     require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
 
+    logger.info(s"Verifying wellformedness of $fileToCryptolModule")
     val proveCmd = s"$cryptolCMD ${wellformednessCmd(fileToCryptolModule)}"
     val result = proveCmd.!!
 
-    // Todo: check if the result is wellformed
     true
   }
 

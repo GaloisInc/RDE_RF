@@ -1,9 +1,11 @@
 package DocumentEnrichers
 
 
+import DocumentEnrichers.Parser._
+
 import scala.util.parsing.combinator.RegexParsers
 
-/**
+
 trait TypeParser extends RegexParsers {
   def boolean: Parser[BOOLEAN] = "Bool" ^^ { _ => BOOLEAN() }
 
@@ -179,7 +181,7 @@ final case class BlueSpecBitArrayType(size: Int) extends BlueSpecType {
 final case class BlueSpecActionValueType(size: Int) extends BlueSpecType {
   require(size > 0, "ActionValue size must be greater than 0")
 }
-*/
+
 
 
 

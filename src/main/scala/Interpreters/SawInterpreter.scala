@@ -24,11 +24,12 @@ object SawInterpreter extends Logging {
     require(filePath.endsWith(".saw"), "filePath must end with .saw")
     require(verifySawInstalled, "saw must be installed")
 
+
+    logger.info("Saw checking file " + filePath)
     val cmd = sawCmd + " " + filePath
     val output = scala.sys.process.Process(cmd).!!
     logger.info(output)
     val result = scala.sys.process.Process(cmd).!
-
     if (result == 0) {
       logger.info("SAW verified file " + filePath)
       true

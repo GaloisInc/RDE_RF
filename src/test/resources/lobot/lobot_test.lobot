@@ -1,0 +1,8 @@
+type fpga =
+  { ECP5, ECP5_5G }
+
+type assurance_level =
+  { None, Low, Medium, High }
+
+type compiler =
+  { GCC, Clang, CompCert }

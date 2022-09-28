@@ -1,8 +1,8 @@
 package Analyzers
 
-import Interpreters.{BlueSpecInterpreter, CryptolInterpreter, LandoInterpreter, LobotInterpreter, SawInterpreter}
-import Utils.FileUtil
 import EnvironmentChecker.EnvironmentChecker
+import Interpreters.{BlueSpecInterpreter, CryptolInterpreter, LobotInterpreter, SawInterpreter}
+import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
 object SourceVerifier extends Logging {
@@ -22,8 +22,9 @@ object SourceVerifier extends Logging {
   def isWellFormed(filePath: String): Boolean = {
     FileUtil.getFileType(filePath) match {
       case "cry" => CryptolInterpreter.verifyProperties(filePath)
+      case ".icry" => CryptolInterpreter.runVerificationScript(filePath)
       case "saw" => SawInterpreter.verifySawFile(filePath)
-      case "lando" => true//LandoInterpreter.verifyLandoFile(filePath)
+      case "lando" => true //LandoInterpreter.verifyLandoFile(filePath)
       case "lobot" => LobotInterpreter.verifyLobotFile(filePath)
       case "sysml" => true //We don't have a sysml interpreter yet
       case "bsv" => BlueSpecInterpreter.isWellFormed(filePath)

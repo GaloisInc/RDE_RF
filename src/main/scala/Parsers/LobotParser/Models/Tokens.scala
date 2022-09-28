@@ -1,7 +1,5 @@
 package Parsers.LobotParser.Models
 
-package parser_combinator.model
-
 import scala.util.parsing.input.Positional
 
 //
@@ -28,6 +26,7 @@ case class COMMENT() extends Token
 case class COLON() extends Token
 case class SEMI() extends Token
 case class COMMA() extends Token
+case class DOT() extends Token
 case class WITH() extends Token
 case class OF() extends Token
 case class KIND() extends Token
@@ -37,3 +36,4 @@ case class WHERE() extends Token
 case class CHECK() extends Token
 case class ABS() extends Token
 case class SELF() extends Token
+case class TYPE() extends Token

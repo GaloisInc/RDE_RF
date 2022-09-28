@@ -1,8 +1,7 @@
 package Parsers.LobotParser.Compile
 
 
-import Parsers.LobotParser.Models.parser_combinator.model._
-import Parsers.LobotParser.Models.{LexerError, Location}
+import Parsers.LobotParser.Models._
 
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.RegexParsers
@@ -11,8 +10,8 @@ import scala.util.parsing.combinator.RegexParsers
 // LEXER
 //
 object LobotLexer extends RegexParsers {
-  override def skipWhitespace = true
-  override val whiteSpace: Regex = "[\t\r\f\n]+".r
+  override def skipWhitespace: Boolean = true
+  override val whiteSpace: Regex = "[ \t\r\f\n]+".r
 
 
   def parse(code: String): Either[LexerError, List[Token]] = {
@@ -24,10 +23,9 @@ object LobotLexer extends RegexParsers {
 
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(withToken | ofToken | kindToken | onToken | structToken | kindToken
-      | equal | colon | comma | semi | integer | whereToken | checkToken | absToken | selfToken
-      | oParen | cParen | oCurly | cCurly | booleanToken | operator2 | operator3 | operator4
-      | literal | identifier
+      rep1(withToken | ofToken  | onToken | structToken | kindToken | whereToken | checkToken | absToken | selfToken
+      | equal | colon | comma | semi | integer  | booleanToken | operator1 | operator2 | operator3 | operator4 | typeToken
+      | oParen | cParen | oCurly | cCurly | literal | identifier | dot
     )) ^^ { rawTokens => rawTokens.filter(_ != COMMENT()) }
   }
 
@@ -35,10 +33,10 @@ object LobotLexer extends RegexParsers {
   def literal   : Parser[LITERAL]    = positioned { """[0-9]+""".r             ^^ { dub ⇒ INT_LITERAL(dub.toInt) } |
     ("true" | "false") ^^ {dub => BOOL_LITERAL(dub.toBoolean) }}
 
-  //def operator1: Parser[BIN_OP1]     = positioned { """([*%/])""".r           ^^ { x ⇒ BIN_OP1(x) } }
-  def operator2: Parser[BIN_OP2]     = positioned { """(\+|>>|<<)""".r         ^^ { x ⇒ BIN_OP2(x) } }
-  def operator3: Parser[BIN_OP3]     = positioned { """(>=|<=|<|>|!=|==)""".r  ^^ { x ⇒ BIN_OP3(x) } }
-  def operator4: Parser[BIN_OP4]     = positioned { """(\||&|^)""".r           ^^ { x ⇒ BIN_OP4(x) } }
+  def operator1: Parser[BIN_OP1]     = positioned { ("*" | "%" | "/" | "+")           ^^ { x ⇒ BIN_OP1(x) } }
+  def operator2: Parser[BIN_OP2]     = positioned { ("+")         ^^ { x ⇒ BIN_OP2(x) } }
+  def operator3: Parser[BIN_OP3]     = positioned { (">=" | "<=" | ">" | "<" | "=")  ^^ { x ⇒ BIN_OP3(x) } }
+  def operator4: Parser[BIN_OP4]     = positioned { ("&" | "|" | "^" | "=>" | "<=>")      ^^ { x ⇒ BIN_OP4(x) } }
   def integer:   Parser[INTEGER]       = positioned { "int"                    ^^ (_ ⇒ INTEGER()) }
   def booleanToken:   Parser[BOOLEAN]  = positioned { "bool"              ^^ (_ ⇒ BOOLEAN()) }
   def oCurly:    Parser[OPEN_CURLY]    = positioned { "{"                 ^^ (_ ⇒ OPEN_CURLY()) }
@@ -48,6 +46,7 @@ object LobotLexer extends RegexParsers {
   def equal:     Parser[EQUAL]         = positioned { "="                 ^^ (_ ⇒ EQUAL()) }
   def colon:     Parser[COLON]         = positioned { ":"                 ^^ (_ ⇒ COLON()) }
   def semi:      Parser[SEMI]          = positioned { ";"                 ^^ (_ ⇒ SEMI()) }
+  def dot:      Parser[DOT]          = positioned { "."                 ^^ (_ ⇒ DOT()) }
   def comma:     Parser[COMMA]         = positioned { ","                 ^^ (_ ⇒ COMMA()) }
   def minus:     Parser[MINUS]         = positioned { "-"                 ^^ (_ ⇒ MINUS()) }
   def withToken:     Parser[WITH]      = positioned { "with"              ^^ (_ ⇒ WITH()) }
@@ -59,6 +58,8 @@ object LobotLexer extends RegexParsers {
   def checkToken:     Parser[CHECK]    = positioned { "check"             ^^ (_ ⇒ CHECK()) }
   def selfToken:      Parser[SELF]     = positioned { "self"              ^^ (_ ⇒ SELF()) }
   def absToken:      Parser[ABS]       = positioned { "abs"               ^^ (_ ⇒ ABS()) }
+  def typeToken:      Parser[TYPE]       = positioned { "type"               ^^ (_ ⇒ TYPE()) }
+
 
   def singleLineComment: Parser[COMMENT] = "--" ~ rep(not("\n") ~ ".".r) ^^^ COMMENT()
   def multiLineComment:  Parser[COMMENT] = "/*" ~ rep(not("*/") ~ "(?s).".r) ~ "*/" ^^^ COMMENT()

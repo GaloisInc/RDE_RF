@@ -50,11 +50,13 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
       FileUtil.getFilesInDirectory(bsvDocuments).toArray ++
       FileUtil.getFilesInDirectory(svDocuments).toArray
 
+    val filesOfSupportTypes = filesToAnalyze.filter(file => Analyzers.AnalyzerSettings.supportedDocumentTypesString.contains(file.split('.').last))
+
     val reportName = "Report_Refinements"
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentData, Set.empty[RefinementModel], false)
+    val report = DocumentAnalyzer.generateReport(filesOfSupportTypes.toSet, latexDocumentData, Set.empty[RefinementModel], false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit")
 
     reportFilePath should not be null
@@ -83,11 +85,13 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
       FileUtil.getFilesInDirectory(bsvDocuments).toArray ++
       FileUtil.getFilesInDirectory(svDocuments).toArray
 
+    val supportedTypes = filesToAnalyze.filter(f => Analyzers.AnalyzerSettings.supportedDocumentTypesString.contains(FileUtil.getFileType(f)))
+
     val reportName = "Report_Refinements_None"
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentData, Set.empty[RefinementModel],false)
+    val report = DocumentAnalyzer.generateReport(supportedTypes.toSet, latexDocumentData, Set.empty[RefinementModel],false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit_none")
 
     reportFilePath should not be null

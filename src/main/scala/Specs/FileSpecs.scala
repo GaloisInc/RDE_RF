@@ -32,6 +32,7 @@ object FileSpecs {
     filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.Lando)
     filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.SV)
     filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.SysML)
+
   }
 
   def allFilesAnalyzed(filesToAnalyze: Set[String], documents: Array[DocumentInfo]): Boolean = {

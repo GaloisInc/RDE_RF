@@ -20,7 +20,7 @@ object DocumentAnalyzer {
   private val bsvReferencer = new BlueSpecReferencer()
   private val svReferencer = new SystemVerilogReferencer()
 
-  val supportedTypes: Set[String] = Set[String]("lando", "sysml", "bsv", "sv", "cry")
+  val supportedTypes: Set[String] = AnalyzerSettings.supportedDocumentTypesString
 
 
   def generateReport(filesToAnalyze: Set[String],
@@ -29,7 +29,6 @@ object DocumentAnalyzer {
                      sortFiles: Boolean = true): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     require(FileSpecs.fileChecks(filesToAnalyze, supportedTypes), "Not all files exist or are of one of the supported types")
-
 
     if (sortFiles) enrichAndMoveFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
     else enrichFiles(filesToAnalyze, latexDocumentData, explicitRefinements)

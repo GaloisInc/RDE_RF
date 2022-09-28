@@ -11,7 +11,6 @@ class SawInterpreterTest extends AnyFlatSpec with should.Matchers {
 
   it should "be able to run and validate a simple file" in {
     val sawFile = getClass.getResource("../saw/SHA512_easy.saw").getPath
-
     val result = SawInterpreter.verifySawFile(sawFile)
     result shouldBe true
   }

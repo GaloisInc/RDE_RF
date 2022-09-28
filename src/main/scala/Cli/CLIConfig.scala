@@ -8,5 +8,5 @@ case class CLIConfig(
                       latexLayout: String = "a4",
                       latexTitle: String = "Latex Document",
                       generateRefinementFile: Boolean = false,
-                      verifyCryptol : Boolean = false,
+                      verifySourceFiles : Boolean = false,
                     )

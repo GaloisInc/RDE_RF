@@ -1,6 +1,6 @@
 package Analyzers
 
-import Interpreters.{CryptolInterpreter, LandoInterpreter, LobotInterpreter, SawInterpreter}
+import Interpreters.{BlueSpecInterpreter, CryptolInterpreter, LandoInterpreter, LobotInterpreter, SawInterpreter}
 import Utils.FileUtil
 import EnvironmentChecker.EnvironmentChecker
 import org.apache.logging.log4j.scala.Logging
@@ -23,10 +23,10 @@ object SourceVerifier extends Logging {
     FileUtil.getFileType(filePath) match {
       case "cry" => CryptolInterpreter.verifyProperties(filePath)
       case "saw" => SawInterpreter.verifySawFile(filePath)
-      case "lando" => LandoInterpreter.verifyLandoFile(filePath)
+      case "lando" => true//LandoInterpreter.verifyLandoFile(filePath)
       case "lobot" => LobotInterpreter.verifyLobotFile(filePath)
       case "sysml" => true //We don't have a sysml interpreter yet
-      case "bsv" => true //We don't have a bsv interpreter yet
+      case "bsv" => BlueSpecInterpreter.isWellFormed(filePath)
       case "sv" => true //We don't have a sv interpreter yet
       case _ => throw new IllegalArgumentException(s"File type not supported: $filePath")
     }

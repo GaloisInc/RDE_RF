@@ -48,8 +48,12 @@ object CryptolInterpreter {
   }
 
   def ensureCryptolIsInPath: Boolean = {
-    val status = s"$cryptolCMD -v".!(ProcessLogger(_ => ())) // ignore output
-    status == 0
+    val path = System.getenv("PATH")
+    assert(path != null || path.contains(cryptolCMD), "Cryptol not found in PATH")
+    true
+
+    //val status = s"$cryptolCMD -v".!(ProcessLogger(_ => ())) // ignore output
+    //status == 0
   }
 
   def interpret(fileToCryptolModule: String): CryptolDocumentInfo = {

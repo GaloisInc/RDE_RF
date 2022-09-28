@@ -55,18 +55,38 @@ docker / dockerfile := {
     runRaw("apt-get install -y zlib1g-dev")
     //Install git
     runRaw("apt-get install -y git")
+    // install -y libtinfo5
+    runRaw("apt-get install -y libtinfo5")
 
-    //Install
+    // CMAKE
+    runRaw("apt-get install -y cmake make")
 
-    //Clone the SAW repository
-    runRaw("git clone https://github.com/GaloisInc/saw-script.git /tmp/saw")
-    //Build SAW
-    workDir("/tmp/saw")
-    runRaw("git checkout e2fef66d7cf4c67ecb86b0fe096977cd7e925183")
-    runRaw("./build.sh")
-    //Copy the SAW into path
-    runRaw("cp /tmp/saw/bin/saw /usr/local/bin/saw")
+    runRaw("mkdir /tools")
 
+
+    //Install Bluespec Compiler
+    workDir("/tmp")
+    runRaw("wget https://github.com/B-Lang-org/bsc/releases/download/2021.07/bsc-2021.07-ubuntu-20.04.tar.gz")
+    runRaw("tar -xvf bsc-2021.07-ubuntu-20.04.tar.gz")
+    runRaw("mv bsc-2021.07-ubuntu-20.04 /tools/bsc-2021.07-ubuntu-20.04")
+    runRaw("rm bsc-2021.07-ubuntu-20.04.tar.gz")
+    env("PATH", "/tools/bsc-2021.07-ubuntu-20.04/bin:$PATH")
+
+    //Clone the Lando repo
+    runRaw("git clone https://github.com/B-Lang-org/bsc-contrib.git /tools/bsc-contrib")
+    workDir("/tools/bsc-contrib")
+    runRaw("git checkout aa205330885f6955e24fd99a0319e2733b5353f1")
+    runRaw("make PREFIX=/tools/bsc-2021.07-ubuntu-20.04")
+
+    //Install Yosys
+    //runRaw("apt-get install -y yosys")
+
+    //Install SAW Script
+    runRaw("wget https://github.com/GaloisInc/saw-script/releases/download/v0.9/saw-0.9-Linux-x86_64-with-solvers.tar.gz")
+    runRaw("tar -xvf saw-0.9-Linux-x86_64-with-solvers.tar.gz")
+    runRaw("mv saw-0.9-Linux-x86_64-with-solvers /tools/saw-0.9-Linux-x86_64-with-solvers")
+    runRaw("rm saw-0.9-Linux-x86_64-with-solvers.tar.gz")
+    env("PATH", "/tools/saw-0.9-Linux-x86_64-with-solvers/bin:$PATH")
 
     //Clone the Lando repo
     runRaw("git clone https://github.com/GaloisInc/BESSPIN-Lando.git /tools/lando")
@@ -87,8 +107,7 @@ docker / dockerfile := {
     copy(appDir, targetDir, chown = "daemon:daemon")
     //Set the working directory
     workDir(s"$targetDir/bin/")
-    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-
+    //entryPoint(s"$targetDir/bin/${executableScriptName.value}")
   }
 
   //Alternative Dockerfile

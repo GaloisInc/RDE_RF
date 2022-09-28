@@ -1,20 +1,21 @@
 package Cli
 
-import Analyzers.{DocumentAnalyzer, LatexDocumentData}
+import Analyzers.{DocumentAnalyzer, LatexDocumentData, SourceVerifier}
 import ConfigParser.{ObjectConfigGenerator, RefinementLoader, RefinementModel}
+import EnvironmentChecker.EnvironmentChecker
 import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
-import Interpreters.CryptolInterpreter
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
 import java.io.File
 
 
-object DocumentationEnhancerApp extends App {
-  val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv")
+object DocumentationEnhancerApp extends App with Logging {
+  val fileTypesOfTypesOfInterest = Analyzers.AnalyzerSettings.supportedDocumentTypesString
 
   val builder = OParser.builder[CLIConfig]
 
@@ -63,10 +64,9 @@ object DocumentationEnhancerApp extends App {
         .action((_, c) => c.copy(generateRefinementFile = true))
         .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview.")
       ,
-      opt[Unit]('A', "verifyCryptolSpecifications")
-        .action((_, c) => c.copy(verifyCryptol = true))
-        .text("verifyCryptolSpecifications is an optional boolean property that specifies whether to verify the Cryptol specifications." +
-          "This requires the Cryptol executable to be in the PATH.")
+      opt[Unit]('A', "verifyAll")
+        .action((_, c) => c.copy(verifySourceFiles = true))
+        .text("verifyAll is an optional boolean property that specifies whether to verify all source files.")
       ,
       version('v', "version").text("Prints the version of the tool."),
       help('h', "help").text("prints this usage text")
@@ -84,12 +84,22 @@ object DocumentationEnhancerApp extends App {
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
+
+      logger.info("Starting Documentation Enhancer")
+
+      logger.info("Checking environment")
+      if (!EnvironmentChecker.dependenciesInstalled)
+        logger.error("Not all dependencies are installed, please install them before using the tool.")
+      else
+        logger.info("All Dependencies are installed")
+
+
       if (files.isEmpty) {
         println("No files found in source folder: " + sourceFolder)
         System.exit(1)
       }
 
-      verifyCryptolDocuments(config, sourceFolder)
+      verifySourceFiles(config, sourceFolder)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
@@ -113,14 +123,14 @@ object DocumentationEnhancerApp extends App {
       System.exit(1)
   }
 
-  private def verifyCryptolDocuments(config: CLIConfig, sourceFolder: String): Unit = {
-    if (config.verifyCryptol) {
-      val cryptolFiles = FileUtil.findSourceFiles(sourceFolder, Set("cry"))
-      assert(CryptolInterpreter.ensureCryptolIsInPath, "Cryptol executable not found in PATH. Please install Cryptol and add it to the PATH.")
-      if (cryptolFiles.forall(CryptolInterpreter.verifyProperties)) {
-        println("All Cryptol specifications verified successfully.")
-      } else {
-        println("Cryptol specifications could not be verified.")
+  private def verifySourceFiles(config: CLIConfig, sourceFolder: String): Unit = {
+    if (config.verifySourceFiles) {
+      logger.info("Verifying source files")
+      val sourceFiles = FileUtil.findSourceFiles(sourceFolder, Analyzers.AnalyzerSettings.supportedDocumentTypesString)
+      val nonVerifiedSourceFiles = SourceVerifier.verifySourceFiles(sourceFiles)
+      if (nonVerifiedSourceFiles.nonEmpty) {
+        logger.info("The following source files could not be verified: ")
+        nonVerifiedSourceFiles.foreach(f => logger.info(f))
         System.exit(1)
       }
     }

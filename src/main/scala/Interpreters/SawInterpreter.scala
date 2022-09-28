@@ -12,6 +12,7 @@ object SawInterpreter extends Logging {
   // Check if the Lando executable is available
   def verifySawInstalled: Boolean = {
     val cmd = sawCmd + " -V"
+    println("Checking if SAW is installed")
     val result = scala.sys.process.Process(cmd).!(ProcessLogger(_ => ())) // ignore output
     result == 0
   }
@@ -28,7 +29,7 @@ object SawInterpreter extends Logging {
     logger.info(output)
     val result = scala.sys.process.Process(cmd).!
 
-    if(result == 0) {
+    if (result == 0) {
       logger.info("SAW verified file " + filePath)
       true
     } else {

@@ -105,9 +105,22 @@ object FileUtil {
   def isOfFileType(path: String, filetype: String): Boolean = {
     require(path.nonEmpty, "Path is empty")
     require(FileUtil.fileExists(path), "File does not exist at path" + path)
-    Control.using(io.Source.fromFile(path)) { source =>
+    require(new File(path).isFile, "Path is not a file")
+    require(new File(path).canRead, "File is not readable")
+
+    Control.using(io.Source.fromFile(path)(io.Codec.UTF8)) { source =>
       source.getLines().exists(_.startsWith(filetype))
     }
+  }
+
+  def allFilesReadable(files: Array[String]): Boolean = {
+    require(files.nonEmpty, "Files is empty")
+    files.forall(file => new File(file).canRead)
+  }
+
+  def getNonReadableFiles(files: Array[String]): Array[String] = {
+    require(files.nonEmpty, "Files is empty")
+    files.filter(file => !new File(file).canRead)
   }
 
   def getFilesInDirectory(dir: String): Set[String] = {

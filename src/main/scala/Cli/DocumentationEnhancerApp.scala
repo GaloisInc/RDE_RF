@@ -96,6 +96,14 @@ object DocumentationEnhancerApp extends App with Logging {
         System.exit(1)
       }
 
+      if(FileUtil.allFilesReadable(files)) {
+        println("All files are readable")
+      } else {
+        println("Not all files are readable")
+        println("The following files are not readable:" + FileUtil.getNonReadableFiles(files).mkString(","))
+        files.foreach(f => new File(f).setReadable(true))
+      }
+
       verifySourceFiles(config, files)
 
       val latexDimensions = layoutStringToPaperSize(layout)

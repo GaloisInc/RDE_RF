@@ -182,6 +182,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   def getFileType(path: String): FileType.Value = {
+    require(path.nonEmpty, "path must not be empty")
     if (FileUtil.isOfFileType(path, "events")) return FileType.EventFile
     if (FileUtil.isOfFileType(path, "requirements")) return FileType.RequirementFile
     if (FileUtil.isOfFileType(path, "scenarios")) return FileType.ScenarioFile

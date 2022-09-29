@@ -22,6 +22,11 @@ class FileUtilTest extends AnyFlatSpec with should.Matchers {
     FileUtil.getFileType(filePath3) should be("tex")
   }
 
+  it should "be able to " in {
+    val path = "lando.el"
+    FileUtil.getFileType(path) should be("el")
+  }
+
   it should "be able to extract file path" in {
     val filePath1 = "src/test/resources/test1.txt"
     val filePath2 = "src/test/resources/test2.cry"

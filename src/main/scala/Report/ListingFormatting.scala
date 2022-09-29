@@ -246,7 +246,7 @@ object ListingFormatting {
           keywords = Array("system", "subsystem", "component", "relation", "contains", "inherit", "client", "events", "scenarios"),
           lineComment = "//",
           blockComment = BlockComment("/*", "*/"),
-          literates = Array.empty[Literate]
+          literates = Array(Literate("—", ","))
         )
       case DocumentType.Cryptol =>
         LanguageFormatting(
@@ -266,7 +266,7 @@ object ListingFormatting {
             "end", "view", "flow", "viewpoint", "inout", "stakeholder", "redefines", "connect", "actor", "objective"),
           "//",
           BlockComment("/*", "*/"),
-          literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case "))
+          literates = Array(Literate("⊑", "$\\sqsubseteq$ "), Literate("use\\ case", "\\color{keywordcolor}\\bfseries use\\ case "), Literate("—", ","), Literate("⊢", "$\\vdash$ "), Literate("-", ","))
         )
       case DocumentType.SV =>
         LanguageFormatting(

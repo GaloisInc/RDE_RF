@@ -71,7 +71,7 @@ object LatexGenerator extends Logging {
     require(directory.isDirectory, "Not a directory")
     val auxFiles = directory.listFiles().filter(f => fileTypesToDelete.exists(f.getName.endsWith))
     auxFiles.foreach(_.delete())
-  } ensuring(_ => directory.listFiles().map(f => FileUtil.getFileType(f.getName)).toSet.intersect(fileTypesToDelete.toSet).isEmpty, "Auxiliary files not deleted")
+  } ensuring(_ => !directory.listFiles().exists(f => fileTypesToDelete.exists(f.getName.endsWith)))
 
   def includeListing(documentInfo: DocumentInfo): String = {
     require(FileUtil.fileExists(documentInfo.filePath), s"File ${documentInfo.filePath} does not exist")

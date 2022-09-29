@@ -87,8 +87,7 @@ object DocumentationEnhancerApp extends App with Logging {
       val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
-      val supportedSourceFiles = files.filter(f => fileTypesOfTypesOfInterest.contains(FileUtil.getFileType(f)))
-
+      //val supportedSourceFiles = files.filter(f => fileTypesOfTypesOfInterest.contains(FileUtil.getFileType(f)))
 
       println("Starting Documentation Enhancer")
 

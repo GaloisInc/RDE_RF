@@ -23,12 +23,24 @@ object FileUtil {
     var sourceFiles = List.empty[String]
     Files.walk(Paths.get(sourcePath))
       .filter(Files.isRegularFile(_))
-      .filter(p => fileTypesOfTypesOfInterest.contains(getFileType(p.toFile.getName)))
+      .filter(f => f.toString.nonEmpty)
+      .filter(p => fileOfCorrectType(p.toFile.toString, fileTypesOfTypesOfInterest))
       .map(_.toFile.getAbsolutePath)
-      .forEach(sourceFiles ::= _)
+      .forEach(f => sourceFiles = f :: sourceFiles)
 
     sourceFiles.toArray
-  } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.exists(file.endsWith) && FileUtil.fileExists(file)))
+  } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
+
+
+  def fileOfCorrectType(file: String, fileTypes: Set[String]): Boolean = {
+    require(file.nonEmpty, "file must not be empty")
+    require(fileTypes.nonEmpty, "fileTypes must not be empty")
+    if (fileExists(file) && file.contains('.') && file.split('.').lastOption.isDefined && file.split('.').lastOption.get.matches("[a-zA-Z0-9]+")) {
+      fileTypes.contains(getFileType(file))
+    } else {
+      false
+    }
+  }
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
@@ -53,16 +65,26 @@ object FileUtil {
 
   def getFileName(path: String): String = {
     require(path.nonEmpty, "Path is empty")
+
     val fileName = path.split("/").takeRight(1).head.takeWhile(c => c != '.')
     fileName
   } ensuring ((fileName: String) => !fileName.contains(".") && path.contains(fileName) && fileName.nonEmpty)
 
   def getFileType(path: String): String = {
     require(path.nonEmpty, "Path is empty")
+    require(path.contains('.'), "Path does not contain a file type" + path)
+    require(path.split('.').takeRight(1).headOption.isDefined, s"Path ${path} does not contain a file type after the last dot")
     val fileType = path.split('.').takeRight(1).head
-    fileType
-  } ensuring ((fileName: String) => !fileName.contains("/") && !fileName.contains(".") && path.contains(fileName) && fileName.nonEmpty)
-
+    fileType.matches("[a-zA-Z0-9]+") match {
+      case true => fileType
+      case false => throw new Exception(s"File type ${fileType} is not valid")
+    }
+  } ensuring ((fileName: String) => {
+    assert(fileName.nonEmpty, "File type is empty")
+    assert(fileName.matches("^[a-zA-Z0-9_/]*$"), s"FileType $fileName contains illegal characters")
+    assert(path.contains(fileName), s"File type $fileName is not contained in path $path")
+    true
+  })
 
   def getDirectory(path: String): String = {
     require(path.nonEmpty)

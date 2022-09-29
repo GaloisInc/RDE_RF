@@ -23,7 +23,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
     val decoratedFile = new File(decoratedFilePath) // Temporary File
     val writer = new PrintWriter(decoratedFile)
     var lastLine = ""
-    Control.using(io.Source.fromFile(filePath)) { source => {
+    Control.using(io.Source.fromFile(filePath)(io.Codec.UTF8)) { source => {
       source.getLines()
         .map(line => {
           if (skipTodos && line.contains("@todo")) ""

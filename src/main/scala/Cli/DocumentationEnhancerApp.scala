@@ -13,6 +13,7 @@ import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
 import java.io.File
+import scala.reflect.io.Directory
 
 
 object DocumentationEnhancerApp extends App with Logging {
@@ -45,6 +46,10 @@ object DocumentationEnhancerApp extends App with Logging {
             createDirectory(x)
             success
           }).text("outputFolder is a required string property that specifies the folder where the enhanced documentation files should be placed."),
+      opt[Seq[String]]('e', "excludeFolders")
+        .valueName("<folder1>,<folder2>,...")
+        .action((x, c) => c.copy(excludeFolders = x))
+        .text("folders to exclude in the analysis and report."),
       opt[String]('f', "configFile")
         .valueName("<file.conf>")
         .action((x, c) => c.copy(refinementFile = x))
@@ -87,30 +92,33 @@ object DocumentationEnhancerApp extends App with Logging {
       val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
-      //val supportedSourceFiles = files.filter(f => fileTypesOfTypesOfInterest.contains(FileUtil.getFileType(f)))
+
+      val excludedFolders = config.excludeFolders
+
+      val filteredFiles = files.filterNot(file => excludedFolders.exists(folder => file.contains(folder)))
 
       println("Starting Documentation Enhancer")
 
-      if (files.isEmpty) {
+      if (filteredFiles.isEmpty) {
         println("No files found in source folder: " + sourceFolder)
         System.exit(1)
       }
 
-      if(FileUtil.allFilesReadable(files)) {
+      if(FileUtil.allFilesReadable(filteredFiles)) {
         println("All files are readable")
       } else {
         println("Not all files are readable")
-        println("The following files are not readable:" + FileUtil.getNonReadableFiles(files).mkString(","))
-        files.foreach(f => new File(f).setReadable(true))
+        println("The following files are not readable:" + FileUtil.getNonReadableFiles(filteredFiles).mkString(","))
+        filteredFiles.foreach(f => new File(f).setReadable(true))
       }
 
-      verifySourceFiles(config, files)
+      verifySourceFiles(config, filteredFiles)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
       val latexGenerationData = LatexDocumentData(latexTitle, targetFolder, latexDimensions._1, latexDimensions._2)
 
-      val documentReport: ReportReference = generateReport(refinementFile, files, latexGenerationData)
+      val documentReport: ReportReference = generateReport(refinementFile, filteredFiles, latexGenerationData)
 
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (config.generateLatex) {

@@ -1,6 +1,6 @@
 package Parser
 
-import Parsers.LobotParser.Compile.{LobotLexer, ParserExpression, ParserTop}
+import Parsers.LobotParser.Compile.{LobotLexer, ParserTop}
 import Parsers.LobotParser.Models.{IDENTIFIER, TYPE}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -123,12 +123,14 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
     }
   }
 
-
   "LobotParser" should "be able to parse file" in {
     val filePath = getClass.getResource("../lobot/lobotSmall.lobot").getPath
-    val input = {
-      scala.io.Source.fromFile(filePath).mkString
+
+    val lines = Utils.Control.using(io.Source.fromFile(filePath)(io.Codec.UTF8)) {
+      source => (for (line <- source.getLines()) yield line).toList
     }
+    val input = lines.mkString
+
     val parser = new ParserTop
 
     val x = for {

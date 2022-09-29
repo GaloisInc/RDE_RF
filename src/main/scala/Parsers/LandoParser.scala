@@ -21,7 +21,7 @@ object LandoParser extends Parser {
     require(fileToAnalyze.nonEmpty, "File to analyze cannot be empty")
     val fileName = FileUtil.getFileName(fileToAnalyze)
 
-    val lines = Utils.Control.using(io.Source.fromFile(fileToAnalyze)) {
+    val lines = Utils.Control.using(io.Source.fromFile(fileToAnalyze)(io.Codec.UTF8)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
 

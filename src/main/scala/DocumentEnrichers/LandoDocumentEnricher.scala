@@ -193,7 +193,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     require(filePath.nonEmpty, "The file path should not be empty")
     val fileName = FileUtil.getFileName(filePath)
     val fileType = getFileType(filePath)
-    Control.using(io.Source.fromFile(filePath)) { source => {
+    Control.using(io.Source.fromFile(filePath)((io.Codec.UTF8))) { source => {
       val lines = source.getLines().toArray
       lines
         .indices.filter(idx => {

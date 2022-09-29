@@ -9,7 +9,7 @@ object Control {
     try f(resource) finally resource.close()
 
   def extractReferences(filePath: String, transformReference: (String) => Option[DocReference]): Set[DocReference] = {
-    using(io.Source.fromFile(filePath)) { source => {
+    using(io.Source.fromFile(filePath)(io.Codec.UTF8)) { source => {
       val lines = source.getLines().toArray
       lines.map(line => {
         transformReference(line)

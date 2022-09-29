@@ -27,8 +27,12 @@ object BlueSpecInterpreter extends Logging {
   }
 
   def ensureBlueSpecInPath: Boolean = {
-    val status = s"$blueSpecCmd -help".!(ProcessLogger(_ => ())) // ignore output
-    status == 0
+    try {
+      val status = s"$blueSpecCmd -help".!(ProcessLogger(_ => ())) // ignore output
+      status == 0
+    } catch {
+      case _: Throwable => false
+    }
   }
 
   def bscCheck(filePath: String) : Unit = {

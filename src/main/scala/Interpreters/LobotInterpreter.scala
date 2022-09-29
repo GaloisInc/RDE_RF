@@ -12,8 +12,12 @@ object LobotInterpreter extends Logging {
   // Check if the Lobot executable is available
   def verifyLobotInPath: Boolean = {
     val cmd = lobotCMD + " -h"
-    val result = scala.sys.process.Process(cmd).!(ProcessLogger(_ => ())) // ignore output
-    result == 0
+    try {
+      val status = scala.sys.process.Process(cmd).!(ProcessLogger(_ => ())) // ignore output
+      status == 0
+    } catch {
+      case _: Throwable => false
+    }
   }
 
   // Run Lobot on a given file
@@ -25,7 +29,7 @@ object LobotInterpreter extends Logging {
 
     val cmd = lobotCMD + " " + filePath
     val result = scala.sys.process.Process(cmd).!
-    if(result == 0) {
+    if (result == 0) {
       logger.info("Lobot verified file " + filePath)
       true
     } else {

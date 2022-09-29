@@ -18,6 +18,7 @@ object LobotLexer extends RegexParsers {
     parse(tokens, code) match {
       case NoSuccess(msg,  next) ⇒ Left(LexerError(Location(next.pos.line, next.pos.column), msg))
       case Success(result, _)    ⇒ Right(result)
+      case _                     ⇒ Left(LexerError(Location(0, 0), "Unknown error"))
     }
   }
 

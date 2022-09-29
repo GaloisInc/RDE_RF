@@ -11,7 +11,7 @@ lazy val root = (project in file("."))
     version := "0.1",
     maintainer := "STH",
     scalaVersion := "2.13.8",
-    organization := "org.Galois",
+    organization := "org.Galois"
   )
 
 

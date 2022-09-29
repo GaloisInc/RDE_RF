@@ -85,14 +85,7 @@ object DocumentationEnhancerApp extends App with Logging {
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
 
-      logger.info("Starting Documentation Enhancer")
-
-      logger.info("Checking environment")
-      if (!EnvironmentChecker.dependenciesInstalled)
-        logger.error("Not all dependencies are installed, please install them before using the tool.")
-      else
-        logger.info("All Dependencies are installed")
-
+      println("Starting Documentation Enhancer")
 
       if (files.isEmpty) {
         println("No files found in source folder: " + sourceFolder)
@@ -125,6 +118,11 @@ object DocumentationEnhancerApp extends App with Logging {
 
   private def verifySourceFiles(config: CLIConfig, sourceFolder: String): Unit = {
     if (config.verifySourceFiles) {
+      println("Checking that all dependencies are installed environment")
+      if (!EnvironmentChecker.dependenciesInstalled)
+        logger.error("Not all dependencies are installed, please install them before using the tool.")
+      else
+        logger.info("All Dependencies are installed")
       logger.info("Verifying source files")
       val sourceFiles = FileUtil.findSourceFiles(sourceFolder, Analyzers.AnalyzerSettings.supportedDocumentTypesString)
       val nonVerifiedSourceFiles = SourceVerifier.verifySourceFiles(sourceFiles)

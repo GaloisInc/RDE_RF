@@ -11,9 +11,12 @@ object LandoInterpreter extends Logging {
   // Check if the Lando executable is available
   def verifyLandoInPath: Boolean = {
     val cmd = landoCmd + " -h"
-    //val result = scala.sys.process.Process(cmd).!(ProcessLogger(_ => ())) // ignore output
-    //result == 0
-    true
+    try {
+      val status = scala.sys.process.Process(cmd).!(ProcessLogger(_ => ())) // ignore output
+      status == 0
+    } catch {
+      case _: Throwable => false
+    }
   }
 
   // Run Lando on a given file
@@ -25,7 +28,7 @@ object LandoInterpreter extends Logging {
 
     val cmd = landoCmd + " " + filePath
     val result = scala.sys.process.Process(cmd).!
-    if(result == 0) {
+    if (result == 0) {
       logger.info("Lando verified file " + filePath)
       true
     } else {

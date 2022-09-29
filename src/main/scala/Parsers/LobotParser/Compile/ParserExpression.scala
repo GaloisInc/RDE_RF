@@ -67,10 +67,10 @@ class ParserExpression extends ParserBase {
     }
 
     lazy val fieldAccessExpression: PackratParser[FieldAccessExp] = {
-      simpleVarExpression ~ DOT() ~ identifier ^^ {
-        case (expr1: Expression) ~ DOT() ~ IDENTIFIER(field) ⇒
-          if (debugMatch) logger.info(s"PARSE:EXPRESSION: fieldAccessExpression $expr1, $field")
-          FieldAccessExp(expr1, field)
+      simpleVarExpression ~ DOT() ~ variable ^^ {
+        case (expr1: SimpleExpression) ~ DOT() ~ (expr2: VariableTerm) ⇒
+          if (debugMatch) logger.info(s"PARSE:EXPRESSION: fieldAccessExpression $expr1, $expr2")
+          FieldAccessExp(expr1, expr2.name)
       }
     }
 

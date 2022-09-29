@@ -9,6 +9,7 @@ class ParserTop extends ParserExpression {
     lobotSpecParser(reader) match {
       case NoSuccess(msg, next) ⇒ Left(ParserError(Location(next.pos.line, next.pos.column), msg))
       case Success(result, _) ⇒ Right(result)
+      case _ ⇒ Left(ParserError(Location(0, 0), "Unknown error"))
     }
   }
 

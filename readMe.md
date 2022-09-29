@@ -12,19 +12,22 @@ The tool parses the source code and adds additional information to it and genera
 * SysML
 
 ## Dependencies
-The tool requires the following dependencies to be installed:
+The tool requires the following dependencies to be installed and in path:
 
 * Cryptol
 * Sbt
 * Latex
 * Java
 * Scala
+* BlueSpec Compiler
+* Lobot
+* Lando
 
 Alternatively, you can use the docker image (simonthrane/document_enricher:latest) to run the tool.
 
 ## Usage
 
-The tool is written in Scala. To run it, you need to have Java 8, Scala and SBT installed on your machine.
+The tool is written in Scala. To run and build it, you need to have Java 8, Scala and SBT installed on your machine.
 
 ## Usage Docker
 
@@ -34,7 +37,14 @@ To run the docker image, you need to pull the docker image and run it with the f
 ```bash
 docker pull simonthrane/document_enricher:latest
 
-docker run -v <path to the directory containing the documentation>:/data simonthrane/document_enricher:latest -s /data -t /data  <OptionalArguments>
+docker run -v <path to the directory containing the documentation>:<srcFiles> simonthrane/document_enricher:latest -i <srcFiles> -o <srcFiles>  <OptionalArguments>
+```
+
+Example of a command that compiles the latex document into an a4 pdf document and generate an overview of the refinements in the project:
+
+```bash
+
+docker run -v /home/user/Documents/Project/SourceFiles:/data simonthrane/document_enricher:latest -s /data -t /data -l -r -d=a4
 ```
 
 Note that the docker image generates the documentation from the source code. 
@@ -43,12 +53,29 @@ Therefore, you need to have the source code available in the local directory/vol
 
 The following arguments are supported:
 
-    * -s --source <value>     Required argument the directory returning the source code
-    * -t --target <value>     Required argument the directory where the documentation should be generated
-    * -l, --generateLatex      Whether to generate the Pdf from the generated LaTeX documentation
-    * -v, --verifyCryptolSpecifications  Whether to verify the Cryptol specifications
-    * -t --title <value>      The title of the documentation
-    * -c, --refinementConfig <value>  The path to the explicit refinement configuration file.
-    * -r, --Generate Refinement Overview  Whether to generate the refinement overview
-    * -h, --help               prints this usage text
+    * -i, --inputFolder <folder>    Required argument the directory returning the source code
+    * -o, --outputFolder <folder>   Required argument the directory where the documentation should be generated
+    * -f  --configFile <file>       The path to the explicit refinement configuration file.
+    * -g, --generateLatex           Whether to generate the Pdf from the generated LaTeX documentation
+        * -d, --dimension <value>        The dimension of the generated pdf document. Possible values are a4, b4. Default is a4.
+        * -t, --title <value>            The title of the documentation
+    * -R, --GenerateRefinementOverview  Whether to generate the refinement overview
+    * -A, --verifyAll         Whether to verify the source files by compilation all of them - it requires that the tools are installed and available in the path.  
+    * -v, --version           prints the version of the tool
+    * -h, --help              prints this usage text
 
+## Short-term Backlog 
+
+* Add support for more languages (e.g. C, Lobot, Saw)
+* Add support for verification of SAW specifications
+* Improve parsing of Cryptol specifications
+* Improve parsing of SystemVerilog specifications
+* Your wish here!
+
+## Long-term Backlog
+
+* Add support for automatic refinement - of Lando into Cryptol.
+* Add support for automatic refinement - of Cryptol into SystemVerilog.
+* Include Yosys for automatic synthesis of SystemVerilog into Verilog.
+
+Copyright (c) 2022 Galois, Inc.

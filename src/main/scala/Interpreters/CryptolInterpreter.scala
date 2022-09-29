@@ -1,37 +1,66 @@
 package Interpreters
 
 import Types.DocReference.DocReference
-
-import scala.sys.process._
 import Types.DocumentInfos.CryptolDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 
 import scala.sys.process._
 
-object CryptolInterpreter {
-  private val cmd: String = "cryptol"
+object CryptolInterpreter extends Logging {
+  private val cryptolCMD: String = "cryptol"
 
   private def typeCmd(nameOfModule: String): String = {
     require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(nameOfModule.nonEmpty, "Filename is not specified.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
+
     s"-c :b $nameOfModule"
   }
 
   private def verifyCmd(nameOfModule: String): String = {
     require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(nameOfModule.nonEmpty, "Filename is not specified.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
+
     s"-c :prove $nameOfModule"
   }
 
+  private def verificationScriptCmd(nameOfScript: String): String = {
+    require(nameOfScript.endsWith(".icry"), "The file is not a cryptol file.")
+    require(nameOfScript.nonEmpty, "Filename is not specified.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+    require(FileUtil.fileExists(nameOfScript), "The file does not exist.")
+
+    s"-b $nameOfScript"
+  }
+
+  private def wellformednessCmd(nameOfModule: String): String = {
+    require(nameOfModule.nonEmpty, "Filename is not specified.")
+    require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
+
+    val result = s"-c :b $nameOfModule"
+    result
+  }
+
   def ensureCryptolIsInPath: Boolean = {
-    val status = s"$cmd -v".! (ProcessLogger(_ => ())) // ignore output
-    status == 0
+    val path = System.getenv("PATH")
+    assert(path != null || path.contains(cryptolCMD), "Cryptol not found in PATH")
+    true
   }
 
   def interpret(fileToCryptolModule: String): CryptolDocumentInfo = {
     require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
     require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+    require(FileUtil.fileExists(fileToCryptolModule), "The file does not exist.")
 
-    val interpreterCmd = s"$cmd ${typeCmd(fileToCryptolModule)}"
+    val interpreterCmd = s"$cryptolCMD ${typeCmd(fileToCryptolModule)}"
     val result = interpreterCmd.!!
     val extractDocument: CryptolDocumentInfo = extractDocumentFromString(result, fileToCryptolModule)
 
@@ -41,14 +70,39 @@ object CryptolInterpreter {
   def verifyProperties(fileToCryptolModule: String): Boolean = {
     require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
     require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
-    
-    val proveCmd = s"$cmd ${verifyCmd(fileToCryptolModule)}"
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+
+    val proveCmd = s"$cryptolCMD ${verifyCmd(fileToCryptolModule)}"
     val result = proveCmd.!!
     val lines = result.split("""\n""").map(_.trim)
     val numberOfProved = lines.count(_.startsWith("Q.E.D."))
     val numberOfProperties = lines.count(_.startsWith(":prove"))
 
     numberOfProved == numberOfProperties
+  }
+
+  def runVerificationScript(fileToCryptolModule: String): Boolean = {
+    require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
+    require(fileToCryptolModule.endsWith(".icry"), "The file is not a cryptol file.")
+
+    val proveCmd = s"$cryptolCMD ${verificationScriptCmd(fileToCryptolModule)}"
+    val result = proveCmd.!!
+
+    //TODO: parse result
+    true
+  }
+
+
+  def verifyWellformednessCmd(fileToCryptolModule: String): Boolean = {
+    require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
+    require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
+    require(ensureCryptolIsInPath, "Cryptol is not in the path.")
+
+    logger.info(s"Verifying wellformedness of $fileToCryptolModule")
+    val proveCmd = s"$cryptolCMD ${wellformednessCmd(fileToCryptolModule)}"
+    val result = proveCmd.!!
+
+    true
   }
 
 
@@ -84,7 +138,7 @@ object CryptolInterpreter {
       fileName,
       filePath,
       Set.empty,
-      typesOfModule.map{
+      typesOfModule.map {
         case line@typeRegex(name) => new DocReference(fileName, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line)
         case _ => throw new Exception("Regex did not match")
       }.toSet,
@@ -99,7 +153,7 @@ object CryptolInterpreter {
     )
   }
 
-  def extractRegexFromList(strings: Array[String], moduleName: String, regex : String): Array[String] = {
+  def extractRegexFromList(strings: Array[String], moduleName: String, regex: String): Array[String] = {
     val stringOfInterest = strings.dropWhile(!_.contains(s"From $moduleName"))
       //The first three lines are not interesting
       .drop(3)

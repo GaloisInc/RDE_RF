@@ -1,12 +1,12 @@
 package DocumentEnrichers
 
 import Formatter.{LatexFormatter, ReferenceFormatter}
+import Specs.FileSpecs
 import Types.DocumentInfos.DocumentInfo
 import Types.EnrichableString
 import Utils.{Control, FileUtil}
 
 import java.io.{File, PrintWriter}
-import scala.util.matching.Regex
 
 abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) {
@@ -46,6 +46,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
   }
 
   def enrichDocuments(filesToAnalyze: Array[String]): Array[String] = {
+    FileSpecs.allFilesExist(filesToAnalyze.toSet)
     filesToAnalyze.indices.map(idx => {
       val currentFile = filesToAnalyze(idx)
       val documentInfo = parseDocument(currentFile)

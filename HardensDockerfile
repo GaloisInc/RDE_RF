@@ -1,0 +1,167 @@
+# Base
+FROM ubuntu:22.04 as base
+ARG DEBIAN_FRONTEND=noninteractive
+RUN mkdir /tools
+WORKDIR /
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y wget git python3 pip \
+    python3-dev software-properties-common \
+    iproute2 usbutils srecord \
+    build-essential clang bison flex  \
+    libreadline-dev gawk tcl-dev libffi-dev git \
+    graphviz xdot pkg-config python3 libboost-system-dev \
+    libboost-python-dev libboost-filesystem-dev zlib1g-dev \
+    libboost-all-dev python3-pip \
+    cmake openocd \
+    libeigen3-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools \
+    autoconf automake autotools-dev curl libmpc-dev \
+    libmpfr-dev libgmp-dev texinfo gperf \
+    libtool patchutils bc zlib1g-dev libexpat-dev \
+    libftdi-dev unzip \
+    cabal-install libffi7 \
+    libftdi1-2 libftdi1-dev libhidapi-libusb0 libhidapi-dev libudev-dev make g++ \
+    libc++-dev libc++abi-dev nodejs python2 npm \
+    iverilog verilator \
+    vim mercurial libboost-program-options-dev
+
+# Builder
+FROM base as builder
+ARG VERSION_LOG=/tools/log.txt
+RUN echo "Installed tools:" >> ${VERSION_LOG}
+
+# Yosys
+ARG TOOL=yosys
+ARG TAG=yosys-0.17
+ARG REPO=https://github.com/YosysHQ/yosys.git
+RUN git clone ${REPO} /tmp/${TOOL}
+WORKDIR /tmp/${TOOL}
+RUN \
+    git checkout ${TAG} \
+    && make -j$(nproc) \
+    && make install PREFIX=/opt
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# Trellis
+ARG TOOL=prjtrellis
+ARG TAG=1.2.1
+ARG REPO=https://github.com/YosysHQ/prjtrellis.git
+RUN git clone --recursive ${REPO} /tmp/${TOOL}
+WORKDIR /tmp/${TOOL}/libtrellis
+RUN \
+    git checkout ${TAG} \
+    && cmake -DCMAKE_INSTALL_PREFIX=/opt . \
+    && make -j$(nproc) \
+    && make install
+ENV TRELLIS="/opt/share/trellis"
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# nextpnr
+ARG TOOL=nextpnr
+ARG TAG=nextpnr-0.3
+ARG REPO=https://github.com/YosysHQ/nextpnr.git
+RUN git clone ${REPO} /tmp/${TOOL}
+WORKDIR /tmp/${TOOL}
+RUN \
+    git checkout ${TAG} \
+    && cmake . -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX=/opt \
+    && make -j$(nproc) \
+    && make install
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+
+# Iverilog
+RUN echo "`iverilog -v | head -1`" >> ${VERSION_LOG}
+
+# Bluespec compiler
+ARG TOOL=bluespec-compiler
+ARG TAG=bsc-2021.07-ubuntu-20.04
+ARG REPO=https://github.com/B-Lang-org/bsc
+WORKDIR /tmp
+RUN \
+    wget ${REPO}/releases/download/2021.07/${TAG}.tar.gz \
+    && tar xvzf ${TAG}.tar.gz \
+    && mv ${TAG} /tools/${TAG} \
+    && rm ${TAG}.tar.gz
+ENV PATH="/tools/${TAG}/bin:${PATH}"
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+
+# Bluespec libraries
+ARG TOOL=bsc-contrib
+ARG TAG=aa205330885f6955e24fd99a0319e2733b5353f1
+ARG REPO=https://github.com/B-Lang-org/bsc-contrib.git
+RUN git clone ${REPO} /tools/${TOOL}
+WORKDIR /tools/${TOOL}
+RUN \
+    git checkout ${TAG} \
+    && make PREFIX=/tools/bsc-2021.07-ubuntu-20.04/
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# GHC and Cabal
+RUN cabal update
+
+# cryptol 2.11
+ARG TOOL=cryptol
+ARG TAG=dfae4580e322584185235f301bc8a03b6bc19a65
+ARG REPO=https://github.com/GaloisInc/cryptol.git
+RUN git clone ${REPO} /tmp/${TOOL}
+WORKDIR /tmp/${TOOL}
+RUN \
+    git checkout ${TAG} \
+    && git submodule update --init \
+    && ./cry build \
+    && cabal v2-install --installdir=/tools
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# Z3 solver
+ARG TOOL=z3
+ARG TAG=4.8.14-x64-glibc-2.31
+ARG REPO=https://github.com/Z3Prover/z3/releases/download/z3-4.8.14
+WORKDIR /tmp
+RUN wget ${REPO}/${TOOL}-${TAG}.zip
+RUN unzip ${TOOL}-${TAG}.zip
+RUN    mv ${TOOL}-${TAG} /tools/${TOOL}
+ENV PATH="/tools/${TOOL}/bin:${PATH}"
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# SAW
+ARG TOOL=saw
+ARG TAG=e2fef66d7cf4c67ecb86b0fe096977cd7e925183
+ARG REPO=https://github.com/GaloisInc/saw-script.git
+RUN git clone ${REPO} /tmp/${TOOL}
+WORKDIR /tmp/${TOOL}
+RUN git checkout ${TAG} \
+    && git submodule update --init \
+    && ./build.sh \
+    && cp bin/saw /usr/local/bin
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+
+# Lando/Lobot
+ARG TOOL=lando
+ARG TAG=428ea1174de2bed7c069a6ef8edb30ca75ed441a
+ARG REPO=https://github.com/GaloisInc/BESSPIN-Lando.git
+RUN git clone ${REPO} /tools/${TOOL}
+WORKDIR /tools/${TOOL}
+RUN apt-get install -y maven
+RUN ./lando.sh -r
+RUN cd /tools/${TOOL}/source/lobot/ && cabal v2-build
+ENV PATH="/tools/${TOOL}:${PATH}"
+RUN echo "${TOOL} ${REPO} ${TAG}" >> ${VERSION_LOG}
+
+# Runner
+FROM base as runner
+COPY --from=builder /opt/ /opt/
+COPY --from=builder /tools/ /tools/
+COPY --from=builder /root/.cabal/ /root/.cabal/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+COPY --from=builder /usr/local/lib/python2.7/dist-packages/ /usr/local/lib/python2.7/dist-packages/
+COPY --from=builder /usr/local/share/ /usr/local/share/
+RUN cat ${VERSION_LOG}
+WORKDIR /HARDENS
+
+# Install java so we can run lando
+RUN apt-get install -y default-jre
+
+ENV PATH="/tools/lando:/tools:/tools/z3/bin:/tools/bsc-2021.07-ubuntu-20.04/bin:/opt/riscv/bin:/opt/bin:${PATH}"

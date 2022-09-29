@@ -1,15 +1,9 @@
 import DocumentEnrichers.LandoDocumentEnricher
 import Formatter.InlineFormatter
 import TestUtils.TestUtility
-import Types.{DocumentType, ReferenceName, ReferenceType}
-import Utils.{Control, FileUtil}
-import org.scalatest._
+import Types.{DocumentType, ReferenceName}
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
-
-import java.io.File
-import scala.collection.mutable
-import scala.io.Source
 
 class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = new InlineFormatter()

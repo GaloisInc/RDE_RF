@@ -1,0 +1,117 @@
+import "SHA512_easy.cry";
+import "SHA512_decomposed.cry";
+import "SHA512_easy_test.cry";
+
+let ss0 = cryptol_ss ();
+
+let prove_print_ a b = prove_print a (rewrite ss0 b);
+let prove_print_time a b = time (prove_print_ a b);
+
+let {{
+  ProcessBlock_wrapped : State -> [16][64] -> State
+  ProcessBlock_wrapped = ProcessBlock_Common
+}};
+
+// Saw errors out on input-size 0 for some reason, but the output is correct.
+let inputSizes =
+  [ /*0,*/ 1, 20
+  , 895, 896
+  , 1023, 1024, 1025
+  , 1919 /*1024+895*/, 1920 /*1024+896*/
+  , 2047, 2048, 2049
+  ];
+
+print "Verifying padding equivalent to spec for the following input sizes";
+pad_equiv_lemmas <- time (for inputSizes (\N ->
+  do {
+    print N;
+    prove_print_ z3
+      (unfold_term ["pad_ref"] {{
+        \(m:[N]) -> pad_easy m == pad_ref m
+      }});
+  }));
+
+print "Verifying MessageSchedule equivalent to spec";
+MessageSchedule_equiv <- prove_print_time
+  (do {
+    goal_eval_unint ["sigma0", "sigma1", "sigma_0", "sigma_1"];
+    simplify ss0;
+    z3;
+  })
+  {{
+    \m -> MessageSchedule m == messageSchedule_Common m
+  }};
+
+print "Verifying compress equivalent to spec";
+compress_equiv <- prove_print_time z3
+  {{
+    \h m -> compress h m == compress_Common h m
+  }};
+
+print "Verifying ProcessBlock equivalent to spec";
+ProcessBlock_wrap <- prove_print_time
+  (do {
+    unfolding ["ProcessBlock", "ProcessBlock_ref", "ProcessBlock_wrapped", "processBlock_Common"];
+    simplify (addsimps [MessageSchedule_equiv, compress_equiv] ss0);
+    w4_unint_z3 ["MessageSchedule_ref", "compress", "compress_ref"];
+  })
+  {{
+    \h m -> ProcessBlock h m == ProcessBlock_wrapped h m
+  }};
+
+print "Verifying ProcessBlock_decomposed lemma";
+ProcessBlock_decomposed_lemma <- prove_print_time
+  (do {
+    goal_eval_unint ["sigma0", "sigma1", "compress1"];
+    w4_unint_z3 ["sigma0", "sigma1", "compress1"];
+  })
+  {{
+    \h m -> ProcessBlock_decomposed h m == ProcessBlock h m
+  }};
+
+print "Verifying ProcessBlock_decomposed equivalent to spec";
+ProcessBlock_decomposed_wrap <- prove_print_time
+  (do {
+    simplify (addsimp ProcessBlock_decomposed_lemma empty_ss);
+    simplify (addsimp ProcessBlock_wrap empty_ss);
+    z3;
+  })
+  {{
+    \h m -> ProcessBlock_decomposed h m == ProcessBlock_wrapped h m
+  }};
+
+print "Verifying non-parameterized ProcessBlock_Common substitution";
+ProcessBlock_Common_wrap <- prove_print_ z3
+  (unfold_term ["ProcessBlock_Common"]
+    {{ \h m -> ProcessBlock_Common h m == ProcessBlock_wrapped h m }});
+
+print "Verifying sha384 equivalent to spec for the following input sizes:";
+res1 <- time (for inputSizes (\N ->
+  do {
+    print (show N);
+    prove_print_ (do {
+      unfolding ["sha384_ref", "sha", "SHA_2_Common'", "sha384"];
+      simplify (addsimps [ProcessBlock_Common_wrap, ProcessBlock_wrap] empty_ss);
+      simplify (addsimps pad_equiv_lemmas empty_ss);
+      goal_eval_unint ["ProcessBlock_wrapped"];
+      w4_unint_z3 ["ProcessBlock_wrapped"];
+    }) {{ \(m:[N]) -> sha384 m == sha384_ref m }};
+  }));
+
+print "Verifying sha384_decomposed equivalent to spec for the following input sizes:";
+res2 <- time (for inputSizes (\N ->
+  do {
+    print (show N);
+    prove_print_ (do {
+      unfolding ["sha384_ref", "sha", "SHA_2_Common'", "sha384_decomposed"];
+      simplify (addsimps [ProcessBlock_Common_wrap, ProcessBlock_decomposed_wrap] empty_ss);
+      simplify (addsimps pad_equiv_lemmas empty_ss);
+      goal_eval_unint ["ProcessBlock_wrapped"];
+      w4_unint_z3 ["ProcessBlock_wrapped"];
+    }) {{ \(m:[N]) -> sha384_decomposed m == sha384_ref m }};
+  }));
+
+print "*******************************************************";
+print "*** Results ***";
+print res1;
+print res2;

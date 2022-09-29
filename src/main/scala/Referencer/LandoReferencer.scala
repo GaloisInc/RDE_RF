@@ -11,6 +11,7 @@ class LandoReferencer extends Referencer {
   } ensuring ((resDoc: DocumentInfo) => DocumentInfoCompare.compare(resDoc, documentToExtend))
 
   def addAbstractionsToDocument(specializedDocument: DocumentInfo, documentsBeingRefined: Array[DocumentInfo]): DocumentInfo = {
+    require(documentsBeingRefined.isEmpty, "There must be no documents being refined for Lando")
     specializedDocument
   } ensuring ((res: DocumentInfo) => res == specializedDocument, "The result is the same as the input - no abstractions are defined for Lando.")
 

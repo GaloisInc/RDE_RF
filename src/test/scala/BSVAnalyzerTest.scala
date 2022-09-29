@@ -1,15 +1,9 @@
 import DocumentEnrichers.BSVDocumentEnricher
-import Types.{DocumentType, ReferenceType}
-import Utils.{Control, FileUtil}
-import TestUtils.TestUtility
 import Formatter.InlineFormatter
-import org.scalatest._
+import TestUtils.TestUtility
+import Types.DocumentType
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
-
-import java.io.File
-import scala.collection.mutable
-import scala.io.Source
 
 class BSVAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = new InlineFormatter()

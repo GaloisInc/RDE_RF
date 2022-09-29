@@ -13,6 +13,7 @@ class CryptolDocumentInfo(
                            override val documentType: DocumentType.Value = DocumentType.Cryptol,
                          ) extends DocumentInfo {
 
+  require(documentType == DocumentType.Cryptol, "CryptolDocumentInfo must have documentType Cryptol")
 
   def copy(
             documentName: String = documentName,

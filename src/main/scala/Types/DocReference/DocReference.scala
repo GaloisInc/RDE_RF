@@ -59,7 +59,7 @@ class DocReference(
   def isReferencingAnything: Boolean = references.isDefined && references.nonEmpty
 
   def addReference(ref: (String, DocReference)): Unit = {
-    require(ref != null && ref != this, "ref must not be null")
+    require(ref != null, "ref must not be null")
     require(ref._2.getDocumentType == getDocumentType, "ref must have the same document type to be referenced!")
     require(!referencing.contains(ref._1), "ref must not be already referenced!")
     require(references.get.exists(r => r.getCleanName.equalsIgnoreCase(ref._1)), "ref must be in the references of this reference! But was: " + ref._1)

@@ -4,6 +4,8 @@ import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.DocumentInfo
+import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -11,7 +13,7 @@ import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 import scala.sys.process.Process
 
-object LatexGenerator {
+object LatexGenerator extends Logging {
   private val latexBuildCmd = "pdflatex"
   private val packages = Array[String]("listings", "url", "alltt", "amssymb", "amsthm", "xspace",
     "lstautogobble", "tcolorbox", "float", "xcolor", "graphicx", "todonotes", "varioref", "hyperref", "cleveref", "marginnote")
@@ -23,15 +25,10 @@ object LatexGenerator {
   }
 
   def generateList(list: List[String]): String = {
-    val sb = new mutable.StringBuilder()
-    sb.append("\\begin{itemize}")
-    sb.append(emptyLine)
-    for (item <- list) {
-      sb.append(s"\\item $item")
-      sb.append(emptyLine)
-    }
-    sb.append("\\end{itemize}")
-    sb.toString()
+    val entries = list.foldLeft("")((s, item) => {
+      s + (s"\\item $item") + emptyLine
+    })
+    "\\begin{itemize}" + emptyLine + entries + "\\end{itemize}"
   }
 
   def addContentInsideEnvironment(content: Array[String], environment: String): String = {
@@ -46,31 +43,67 @@ object LatexGenerator {
     sb.toString()
   }
 
+  private val latexAuxFiles = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
+
   def buildLatexFile(latexFile: File, buildTwice: Boolean, removeAuxFiles: Boolean = true): Unit = {
     val fPath = latexFile.getAbsolutePath
+    logger.info(s"Building LaTeX file $fPath")
+    val currentDirectory = new File(latexFile.getParent)
+    // Delete aux files to avoid conflicts
+    deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
+
     val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
-    val pLog = new LatexProcessLogger()
-    val exitCode = Process(cmd).!(pLog)
+    val exitCode = Process(cmd).!
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
+      val pLog = new LatexProcessLogger()
       val exitCode = Process(cmd).!(pLog)
+      logger.info(s"LaTeX build finished with exit code $exitCode")
       assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     }
 
     if (removeAuxFiles) {
-      val currentDirectory = new java.io.File(".")
-      val auxFileTypes = Array[String]("aux", "log", "out", "toc", "lof", "lot", "fls", "fdb_latexmk")
-      val auxFiles = currentDirectory.listFiles().filter(f => auxFileTypes.exists(f.getName.endsWith))
-      auxFiles.foreach(_.delete())
+      deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
     }
   }
 
+  private def deleteAuxLatexFiles(directory: File, fileTypesToDelete: Array[String]): Unit = {
+    require(directory.isDirectory, "Not a directory")
+    val auxFiles = directory.listFiles().filter(f => fileTypesToDelete.exists(f.getName.endsWith))
+    auxFiles.foreach(_.delete())
+  } ensuring(_ => directory.listFiles().map(f => FileUtil.getFileType(f.getName)).toSet.intersect(fileTypesToDelete.toSet).isEmpty, "Auxiliary files not deleted")
+
   def includeListing(documentInfo: DocumentInfo): String = {
+    require(FileUtil.fileExists(documentInfo.filePath), s"File ${documentInfo.filePath} does not exist")
+    val style = listingStyle(documentInfo.documentType)
     s"""
-       |\\lstinputlisting[language=${documentInfo.getLanguage},
+       |\\lstinputlisting[$style=${documentInfo.getLanguage},
        |label={lst:${documentInfo.getReferenceName}},
-       |caption={Listing ${documentInfo.getCaption}}]
+       |caption={Listing ${documentInfo.getCaption}.}]
        |{${documentInfo.filePath}}""".stripMargin
+  }
+
+  def listingStyle(documentType: Types.DocumentType.Value): String = {
+    documentType match {
+      case Types.DocumentType.Lando => "language"
+      case Types.DocumentType.Lobot => "language"
+      case Types.DocumentType.SysML => "language"
+      case Types.DocumentType.Cryptol => "language"
+      case Types.DocumentType.Saw => "language"
+      case Types.DocumentType.SV => "language"
+      case Types.DocumentType.BSV => "language"
+    }
+  } ensuring((res: String) => res.equals("style") || res.equals("language"), "Listing style not correct")
+
+
+  def includeFigure(documentInfo: DocumentInfo): String = {
+    s"""
+       |\\begin{figure}[H]
+       |\\centering
+       |\\includegraphics[width=\\textwidth]{${documentInfo.filePath}}
+       |\\caption{${documentInfo.getCaption}}
+       |\\label{fig:${documentInfo.getReferenceName}}
+       |\\end{figure}""".stripMargin
   }
 
 
@@ -84,25 +117,24 @@ object LatexGenerator {
     latex.append(emptyLine)
     latex.append(ListingFormatting.cryptolFormatting)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.lobotFormatting)
+    latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
-    latex.append(ListingFormatting.svFormatting)
-    latex.append(emptyLine)
-    latex.append(ListingFormatting.bsvFormatting)
+    latex.append(ListingFormatting.Verilog)
     latex.append(emptyLine)
 
     latex.toString()
   }
 
-  def generateLatexDocument(content: String, paperLayout: PaperLayout): String = {
-    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument + emptyLine + content + emptyLine + endDocument
+  def generateLatexDocument(content: String, title: String, paperLayout: PaperLayout): String = {
+    require(title.nonEmpty, "Title must not be empty")
+    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument(title) + emptyLine + content + emptyLine + endDocument
   }
 
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
-    latexContent.append(generateSection(report.title))
-    latexContent.append(emptyLine)
 
     latexContent.append(includeListings("Lando Models", report.landoDocuments))
     latexContent.append(includeListings("SysML Models", report.sysmlDocuments))
@@ -110,7 +142,7 @@ object LatexGenerator {
     latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments))
     latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments))
 
-    val latexDocument = generateLatexDocument(latexContent.toString(), report.layout)
+    val latexDocument = generateLatexDocument(latexContent.toString(), report.title, report.layout)
 
     val reportFileName = report.title.replaceAll(" ", "_")
 
@@ -121,7 +153,8 @@ object LatexGenerator {
   }
 
 
-  def includeListings[Doc <: DocumentInfo](sectionName: String, documents: Array[Doc]): String = {
+  def includeListings[Doc <: DocumentInfo](sectionName: String,
+                                           documents: Array[Doc]): String = {
     val latexContent = new mutable.StringBuilder()
     latexContent.append(generateSection(sectionName))
     latexContent.append(emptyLine)
@@ -151,6 +184,9 @@ object LatexGenerator {
       emptyLine ++
       //Needed for the margin notes to work
       "\\maxdeadcycles=500" ++
+      "\\title{}" ++
+      "\\author{Documentation Enricher}" ++
+      "\\date{\\today}" ++
       emptyLine
   }
 
@@ -172,10 +208,7 @@ object LatexGenerator {
 
 }
 
-object PaperLayout extends Enumeration {
-  type PaperLayout = Value
-  val A4, B4 = Value
-}
+
 
 
 

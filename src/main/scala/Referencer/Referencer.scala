@@ -2,8 +2,9 @@ package Referencer
 
 import Types.DocReference.DocReference
 import Types.DocumentInfos.DocumentInfo
+import org.apache.logging.log4j.scala.Logging
 
-abstract class Referencer(hammingDistanceMeasure: Double = 0.15) {
+abstract class Referencer(hammingDistanceMeasure: Double = 0.15) extends Logging{
   def addRefinementRelations(documentToExtend: DocumentInfo, abstractDocuments: Array[DocumentInfo], refinedDocuments: Array[DocumentInfo]): DocumentInfo
 
   def addSpecializationsToDocument(abstractDocument: DocumentInfo, refinedDocuments: Array[DocumentInfo]): DocumentInfo

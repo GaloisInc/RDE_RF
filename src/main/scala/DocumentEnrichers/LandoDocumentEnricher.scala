@@ -6,22 +6,26 @@ import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types._
 import Utils.Matcher.referenceNameMatches
 import Utils.{Control, FileUtil}
+import org.apache.logging.log4j.scala.Logging
 
 import scala.util.matching.Regex
 
 class LandoDocumentEnricher(override val formatterType: LatexFormatter,
-                            override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
+                            override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) with Logging {
 
 
   val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
   //All components, systems and subsystems are referenced by their name which start with a capital letter
   val componentRegex: Regex = """^component\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
-  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+(?:\((.*)\)))?""".r
+  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
 
   def parseDocument(filePath: String): LandoDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(FileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
+    require(FileUtil.fileExists(filePath), "filePath must exist")
+
+    logger.info(s"Start parsing lando file $filePath")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
     val relations: Set[DocRelation] = extractRelations(filePath)
     val requirements: Set[DocReference] = extractReferences(filePath, FileType.RequirementFile)
@@ -31,10 +35,12 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     val fileName = FileUtil.getFileName(filePath)
     val enrichedRelations = enrichRelations(relations, references, fileName)
 
+    logger.info(s"Finished parsing lando file $filePath")
     new LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
   } ensuring ((landoDoc: DocumentInfo) =>
     landoDoc.documentType == DocumentType.Lando
-      && landoDoc.filePath == filePath)
+      && landoDoc.filePath == filePath
+      && landoDoc.documentName == FileUtil.getFileName(filePath))
 
   override def formatLine(line: String, documentInfo: DocumentInfo): String = {
     val references = documentInfo.getAllReferences

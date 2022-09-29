@@ -1,57 +1,75 @@
 package Cli
 
-import Analyzers.{DocumentAnalyzer, LatexDocumentData}
+import Analyzers.{DocumentAnalyzer, LatexDocumentData, SourceVerifier}
 import ConfigParser.{ObjectConfigGenerator, RefinementLoader, RefinementModel}
+import EnvironmentChecker.EnvironmentChecker
 import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
-import Interpreters.CryptolInterpreter
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
+import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
 import java.io.File
 
 
-object DocumentationEnhancerApp extends App {
-  val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv")
+object DocumentationEnhancerApp extends App with Logging {
+  val fileTypesOfTypesOfInterest = Analyzers.AnalyzerSettings.supportedDocumentTypesString
 
   val builder = OParser.builder[CLIConfig]
 
   val parser = {
+    //Command line GNU
     import builder._
     OParser.sequence(
-      //programName("DocumentationEnhancer"),
+      programName("DocumentationEnhancer"),
       head("DocumentationEnhancer", "1.0"),
-      opt[String]('s', "sourceFolder")
+      opt[String]('i', "inputFolder")
         .required()
+        .valueName("<folder>")
         .action((x, c) => c.copy(sourceFolder = x))
-        .text("sourceFolder is a required string property that specifies the folder where the source/code files are located."),
-      opt[String]('t', "targetFolder")
+        .validate(x =>
+          if (new File(x).isDirectory) success
+          else failure("Input folder with the source files does not exist"))
+        .text("inputFolder is a required string property that specifies the folder where the source/code files are located."),
+      opt[String]('o', "outputFolder")
         .required()
+        .valueName("<folder>")
         .action((x, c) => c.copy(targetFolder = x))
-        .text("targetFolder is a required string property that specifies the folder where the enhanced documentation files are located."),
-      opt[String]('c', "refinementConfig")
-        .action((x, c) => c.copy(explicitReferences = x))
-        .text("refinementConfig is a file containing explicit refinements that should be considered by the tool."),
-      opt[Unit]('l', "generateLatex")
+        .validate(x =>
+          if (new File(x).isDirectory) success
+          else failure("Output folder does not exist"))
+        .text("outputFolder is a required string property that specifies the folder where the enhanced documentation files should be placed."),
+      opt[String]('f', "configFile")
+        .valueName("<file.conf>")
+        .action((x, c) => c.copy(refinementFile = x))
+        .validate(x =>
+          if (new File(x).isFile) success
+          else failure("Config file does not exist"))
+        .text("configFile is a an optional string property that specifies the file where the configuration is located."),
+      opt[Unit]('g', "generateLatex")
         .action((_, c) => c.copy(generateLatex = true))
-        .text("generateLatex is an optional boolean property that specifies whether to generate LaTeX documentation files."),
-      opt[String]('d', "layoutOfDocumentation")
-        .action((x, c) => c.copy(layout = x))
-        .text("dimensions is an optional boolean property that specifies the dimensions of the paper, allowed values (a4,b4)."),
-      opt[String]('t', "latexTitle")
-        .action((x, c) => c.copy(latexTitle = x))
-        .text("latexTitle is an optional string property that specifies whether to generate LaTeX documentation files. " +
-          "If not specified the title of the LaTeX document will be Documentation."),
-      opt[Unit]('r', "Generate Refinement Overview")
-        .action((_, c) => c.copy(generateRefinementOverview = true))
-        .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview."),
-      opt[Unit]('v', "verifyCryptolSpecifications")
-        .action((_, c) => c.copy(verifyCryptol = true))
-        .text("verifyCryptolSpecifications is an optional boolean property that specifies whether to verify the Cryptol specifications." +
-          "This requires the Cryptol executable to be in the PATH."),
-      help("help").text("prints this usage text")
+        .text("generateLatex is a command that generates a pdf document from the source files.")
+        .children(
+          opt[String]('d', "layoutOfDocumentation")
+            .action((x, c) => c.copy(latexLayout = x))
+            .text("layoutOfDocumentation is an optional boolean property that specifies the dimensions of the paper, allowed values (a4,b4)."),
+          opt[String]('t', "latexTitle")
+            .action((x, c) => c.copy(latexTitle = x))
+            .text("latexTitle is an optional string property that specifies whether to generate LaTeX documentation files. " +
+              "If not specified the title of the LaTeX document will be Documentation.")
+        ),
+      opt[Unit]('R', "Generate Refinement Overview")
+        .action((_, c) => c.copy(generateRefinementFile = true))
+        .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview.")
+      ,
+      opt[Unit]('A', "verifyAll")
+        .action((_, c) => c.copy(verifySourceFiles = true))
+        .text("verifyAll is an optional boolean property that specifies whether to verify all source files.")
+      ,
+      version('v', "version").text("Prints the version of the tool."),
+      help('h', "help").text("prints this usage text")
     )
   }
 
@@ -60,18 +78,28 @@ object DocumentationEnhancerApp extends App {
       val sourceFolder = new File(config.sourceFolder).getAbsolutePath
       val targetFolder = new File(config.targetFolder).getAbsolutePath
       val latexTitle = if (config.latexTitle.isEmpty) "Documentation" else config.latexTitle
-      val explicitRefinements = config.explicitReferences
+      val explicitRefinements = config.refinementFile
       val refinementFile = new File(explicitRefinements)
-      val layout = if (config.layout.equalsIgnoreCase("b4") || config.layout.equalsIgnoreCase("a4")) config.layout else "a4"
+      val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
-      if(files.isEmpty) {
+
+      logger.info("Starting Documentation Enhancer")
+
+      logger.info("Checking environment")
+      if (!EnvironmentChecker.dependenciesInstalled)
+        logger.error("Not all dependencies are installed, please install them before using the tool.")
+      else
+        logger.info("All Dependencies are installed")
+
+
+      if (files.isEmpty) {
         println("No files found in source folder: " + sourceFolder)
         System.exit(1)
       }
 
-      verifyCryptolDocuments(config, sourceFolder)
+      verifySourceFiles(config, sourceFolder)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
@@ -84,7 +112,7 @@ object DocumentationEnhancerApp extends App {
         LatexGenerator.generateLatexReportOfSources(documentReport)
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
       }
-      if (config.generateRefinementOverview) {
+      if (config.generateRefinementFile) {
         ObjectConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")
         println("The refinement overview has been generated in the folder " + targetFolder + ".")
       }
@@ -95,14 +123,14 @@ object DocumentationEnhancerApp extends App {
       System.exit(1)
   }
 
-  private def verifyCryptolDocuments(config: CLIConfig, sourceFolder: String): Unit = {
-    if (config.verifyCryptol) {
-      val cryptolFiles = FileUtil.findSourceFiles(sourceFolder, Set("cry"))
-      assert(CryptolInterpreter.ensureCryptolIsInPath, "Cryptol executable not found in PATH. Please install Cryptol and add it to the PATH.")
-      if (cryptolFiles.forall(CryptolInterpreter.verifyProperties)) {
-        println("All Cryptol specifications verified successfully.")
-      } else {
-        println("Cryptol specifications could not be verified.")
+  private def verifySourceFiles(config: CLIConfig, sourceFolder: String): Unit = {
+    if (config.verifySourceFiles) {
+      logger.info("Verifying source files")
+      val sourceFiles = FileUtil.findSourceFiles(sourceFolder, Analyzers.AnalyzerSettings.supportedDocumentTypesString)
+      val nonVerifiedSourceFiles = SourceVerifier.verifySourceFiles(sourceFiles)
+      if (nonVerifiedSourceFiles.nonEmpty) {
+        logger.info("The following source files could not be verified: ")
+        nonVerifiedSourceFiles.foreach(f => logger.info(f))
         System.exit(1)
       }
     }
@@ -113,9 +141,9 @@ object DocumentationEnhancerApp extends App {
       files.foreach(file => println("Processing file: " + file))
       println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)
       val explicitRefinements = RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements
-      DocumentAnalyzer.generateReport(files, latexGenerationData, explicitRefinements.toSet)
+      DocumentAnalyzer.generateReport(files.toSet, latexGenerationData, explicitRefinements.values.flatten.toSet)
     } else {
-      DocumentAnalyzer.generateReport(files, latexGenerationData, Set.empty[RefinementModel])
+      DocumentAnalyzer.generateReport(files.toSet, latexGenerationData, Set.empty[RefinementModel])
     }
     documentReport
   }

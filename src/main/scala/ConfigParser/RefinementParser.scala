@@ -14,9 +14,9 @@ case class DOT()
 case class ARROW()
 
 trait IdentifierParser extends RegexParsers {
-  def fileIdentifier: Parser[IdRef] = """[a-zA-Z][\w\-]*\w""".r ^^ { str => IdRef(str) }
+  def fileIdentifier: Parser[IdRef] = """[a-zA-Z]*[\w\-]*\w+""".r ^^ { str => IdRef(str) }
 
-  def refIdentifier: Parser[IdRef] = """[a-zA-Z0-9][\w\s\[\-/\\\&]*[\w\]]""".r ^^ { str => IdRef(str) }
+  def refIdentifier: Parser[IdRef] = """[a-zA-Z0-9]*[\w\s\[\-/\\&\]]*[a-zA-Z0-9\]]+""".r ^^ { str => IdRef(str) }
 }
 
 class FileRefParser extends IdentifierParser {
@@ -38,11 +38,30 @@ object RefinementParserSingleton extends RefinementParser
 final case class RefinementModel(
                             srcRef: FileDocRef,
                             trgRef: FileDocRef,
-                          )
+                          ){
+  require(srcRef.file != trgRef.file, "Source and target file must be different")
+
+}
 
 
 final case class MasterModel(
                               name: String,
-                              implicit_refinements: List[RefinementModel],
-                              explicit_refinements: List[RefinementModel],
-                            )
+                              implicit_refinements: Map[String, List[RefinementModel]],
+                              explicit_refinements: Map[String, List[RefinementModel]],
+                            ){
+  require(name.nonEmpty, "Master model name must not be empty")
+  require(implicit_refinements.values.flatten.toSet.intersect(explicit_refinements.values.flatten.toSet).isEmpty, "Implicit and explicit refinements must be disjoint")
+  require(implicit_refinements.forall(fileRefs => {
+    fileRefs._2.forall(ref => {
+      assert(ref.srcRef.file == fileRefs._1, "All implicit refinements must have the same source file. " + ref.srcRef.file + " != " + fileRefs._1)
+      true
+    })
+  }), "All implicit refinements must have the same source file")
+  require(explicit_refinements.forall(fileRefs => {
+    fileRefs._2.forall(ref => {
+      assert(ref.srcRef.file == fileRefs._1, "All explicit refinements must have the same source file. " + ref.srcRef.file + " != " + fileRefs._1)
+      true
+    })
+  }), "All explicit refinements must have the same source file")
+}
+

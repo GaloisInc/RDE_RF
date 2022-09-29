@@ -1,9 +1,7 @@
 package Formatter
 
-import Types.DocReference.DocReference
-import scala.collection.mutable
 
-class InlineFormatter extends LatexFormatter {
+class InlineFormatter extends Formatter.LatexFormatter {
   override def formatLatex(line: String): String = {
     require(line.nonEmpty, "line must not be empty")
     line

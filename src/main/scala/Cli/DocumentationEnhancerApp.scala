@@ -8,6 +8,7 @@ import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
+import Utils.FileUtil.createDirectory
 import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
@@ -39,8 +40,11 @@ object DocumentationEnhancerApp extends App with Logging {
         .action((x, c) => c.copy(targetFolder = x))
         .validate(x =>
           if (new File(x).isDirectory) success
-          else failure("Output folder does not exist"))
-        .text("outputFolder is a required string property that specifies the folder where the enhanced documentation files should be placed."),
+          else {
+            println("Output folder does not exist yet. Creating it now.")
+            createDirectory(x)
+            success
+          }).text("outputFolder is a required string property that specifies the folder where the enhanced documentation files should be placed."),
       opt[String]('f', "configFile")
         .valueName("<file.conf>")
         .action((x, c) => c.copy(refinementFile = x))
@@ -83,6 +87,7 @@ object DocumentationEnhancerApp extends App with Logging {
       val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
+      val supportedSourceFiles = files.filter(f => fileTypesOfTypesOfInterest.contains(FileUtil.getFileType(f)))
 
 
       println("Starting Documentation Enhancer")
@@ -92,7 +97,7 @@ object DocumentationEnhancerApp extends App with Logging {
         System.exit(1)
       }
 
-      verifySourceFiles(config, sourceFolder)
+      verifySourceFiles(config, files)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
@@ -116,7 +121,8 @@ object DocumentationEnhancerApp extends App with Logging {
       System.exit(1)
   }
 
-  private def verifySourceFiles(config: CLIConfig, sourceFolder: String): Unit = {
+  private def verifySourceFiles(config: CLIConfig, files: Array[String]): Unit = {
+    require(files.nonEmpty, "No files found in source folder")
     if (config.verifySourceFiles) {
       println("Checking that all dependencies are installed environment")
       if (!EnvironmentChecker.dependenciesInstalled)
@@ -124,8 +130,7 @@ object DocumentationEnhancerApp extends App with Logging {
       else
         logger.info("All Dependencies are installed")
       logger.info("Verifying source files")
-      val sourceFiles = FileUtil.findSourceFiles(sourceFolder, Analyzers.AnalyzerSettings.supportedDocumentTypesString)
-      val nonVerifiedSourceFiles = SourceVerifier.verifySourceFiles(sourceFiles)
+      val nonVerifiedSourceFiles = SourceVerifier.verifySourceFiles(files)
       if (nonVerifiedSourceFiles.nonEmpty) {
         logger.info("The following source files could not be verified: ")
         nonVerifiedSourceFiles.foreach(f => logger.info(f))
@@ -135,6 +140,16 @@ object DocumentationEnhancerApp extends App with Logging {
   }
 
   private def generateReport(refinementFile: File, files: Array[String], latexGenerationData: LatexDocumentData): ReportReference = {
+    require(files.nonEmpty, "No files found in source folder")
+    require(files.forall(f => {
+      assert(fileTypesOfTypesOfInterest.contains(FileUtil.getFileType(f)), "File type not supported: " + f)
+      true
+    }), "File type not supported")
+    require(files.forall(f => {
+      assert(FileUtil.fileExists(f), "File does not exist: " + f)
+      true
+    }), "File does not exist")
+
     val documentReport = if (refinementFile.exists()) {
       files.foreach(file => println("Processing file: " + file))
       println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)

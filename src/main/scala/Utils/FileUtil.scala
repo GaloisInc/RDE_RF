@@ -15,6 +15,7 @@ object FileUtil {
 
   def findSourceFiles(sourcePath: String, fileTypesOfTypesOfInterest: Set[String]): Array[String] = {
     require(fileTypesOfTypesOfInterest.nonEmpty, "fileTypesOfTypesOfInterest must not be empty")
+
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
@@ -22,13 +23,12 @@ object FileUtil {
     var sourceFiles = List.empty[String]
     Files.walk(Paths.get(sourcePath))
       .filter(Files.isRegularFile(_))
-      .filter(p => fileTypesOfTypesOfInterest.exists(p.toFile.getName.endsWith))
+      .filter(p => fileTypesOfTypesOfInterest.contains(getFileType(p.toFile.getName)))
       .map(_.toFile.getAbsolutePath)
       .forEach(sourceFiles ::= _)
 
     sourceFiles.toArray
-    //    sourceDir.listFiles.filter(f => f.isFile && fileTypesOfTypesOfInterest.exists(f.getName.endsWith)).map(_.getAbsolutePath)
-  }
+  } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.exists(file.endsWith) && FileUtil.fileExists(file)))
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
@@ -100,17 +100,20 @@ object FileUtil {
     }
   }
 
+  def createDirectory(dir: String): Unit = {
+    require(dir.nonEmpty, "Directory name is empty")
+    val d = new File(dir)
+    if (!d.exists) {
+      d.mkdirs()
+    }
+  }
+
   def moveRenameFile(source: String, destinationDirectory: String): String = {
     require(source.nonEmpty, "Source path is empty")
     require(FileUtil.fileExists(source), "Source file does not exist at path" + source)
     val fileName = source.split("/").takeRight(1).head
 
-    val directory = new File(destinationDirectory)
-    if (!directory.exists) {
-      directory.mkdir
-      // If you require it to make the entire directory path including parents,
-      // use directory.mkdirs(); here instead.
-    }
+    createDirectory(destinationDirectory)
 
     val path = Files.move(
       Paths.get(source),

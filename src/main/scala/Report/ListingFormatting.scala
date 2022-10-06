@@ -246,7 +246,7 @@ object ListingFormatting {
           keywords = Array("system", "subsystem", "component", "relation", "contains", "inherit", "client", "events", "scenarios"),
           lineComment = "//",
           blockComment = BlockComment("/*", "*/"),
-          literates = Array(Literate("—", ","))
+          literates = Array(Literate("—", ","), Literate("-", ","))
         )
       case DocumentType.Cryptol =>
         LanguageFormatting(
@@ -326,6 +326,21 @@ object ListingFormatting {
   lazy val cryptolFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.Cryptol)
     buildLanguageFormatting(formatting)
+  }
+
+  lazy val sawFormatting: String = {
+    """\lstdefinelanguage{saw}{
+      |  basicstyle=\scriptsize\ttfamily,
+      |  keywordstyle=\color{keywordcolor}\bfseries,
+      |  commentstyle=\itshape,
+      |  comment = [l]{//},
+      |  morecomment  = [is]{/*}{*/},
+      |  extendedchars=\true,
+      |  language=Cryptol,
+      |  morekeywords={include, let, cryptol\_add\_path, cryptol\_load, llvm\_verify,
+      |  llvm\_return, llvm\_execute\_func, z3, llvm\_load\_module, false, true,
+      |  do, ptr_to_fresh, llvm\_fresh\_var, llvm\_term, llvm\_precond, llvm\_int, write\_verilog,enable\_experimental}
+      |}""".stripMargin
   }
 
   lazy val sysmlFormatting: String = {

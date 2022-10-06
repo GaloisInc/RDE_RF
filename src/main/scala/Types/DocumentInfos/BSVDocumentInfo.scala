@@ -1,16 +1,16 @@
 package Types.DocumentInfos
 
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Types.DocReference.DocReference
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
 class BSVDocumentInfo(
-                      override val documentName: String,
-                      override val filePath: String,
-                      packages: Set[DocReference],
-                      modules: Set[DocReference],
-                      override val documentType: DocumentType.Value = DocumentType.BSV,
-                    ) extends DocumentInfo {
+                       override val documentName: String,
+                       override val filePath: String,
+                       packages: Set[DocReference],
+                       modules: Set[DocReference],
+                       override val documentType: DocumentType.Value = DocumentType.BSV,
+                     ) extends DocumentInfo {
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")

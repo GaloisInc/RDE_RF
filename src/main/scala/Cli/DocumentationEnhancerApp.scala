@@ -77,8 +77,11 @@ object DocumentationEnhancerApp extends App with Logging {
         .action((_, c) => c.copy(verifySourceFiles = true))
         .text("verifyAll is an optional boolean property that specifies whether to verify all source files.")
       ,
+      //opt[String]('r', "gitRepo")
+      //  .action((x, c) => c.copy(gitRepo = x))
+      //  .text("gitRepo is an optional string property that specifies the git repository to clone."),
       version('v', "version").text("Prints the version of the tool."),
-      help('h', "help").text("prints this usage text")
+      help('h', "help").text("prints this usage text"),
     )
   }
 
@@ -90,6 +93,7 @@ object DocumentationEnhancerApp extends App with Logging {
       val explicitRefinements = config.refinementFile
       val refinementFile = new File(explicitRefinements)
       val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
+
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 

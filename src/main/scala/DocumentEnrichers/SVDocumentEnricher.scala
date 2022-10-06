@@ -2,7 +2,7 @@ package DocumentEnrichers
 
 import Formatter.LatexFormatter
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{DocumentInfo, SVDocumentInfo}
+import Types.DocumentInfos.{DocumentInfo, LobotDocumentInfo, SVDocumentInfo, SawDocumentInfo}
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
@@ -49,3 +49,13 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
   } ensuring ((res: String) => res.length <= line.length && line.contains(res))
 
 }
+
+
+
+
+
+
+
+
+
+

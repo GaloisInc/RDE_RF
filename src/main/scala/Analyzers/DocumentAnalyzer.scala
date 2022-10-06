@@ -49,6 +49,12 @@ object DocumentAnalyzer {
       doc.copy(filePath = filePath)
     })
 
+    val newLobotFiles = reportReference.lobotDocuments.map(doc => {
+      val destinationPath = Paths.get(targetFolder, "decoratedLobot").toString
+      val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
+      doc.copy(filePath = filePath)
+    })
+
     val newSysMLFiles = reportReference.sysmlDocuments.map(doc => {
       val destinationPath = Paths.get(targetFolder, "decoratedSysML").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
@@ -57,6 +63,12 @@ object DocumentAnalyzer {
 
     val newCryptolFiles = reportReference.cryptolDocuments.map(doc => {
       val destinationPath = Paths.get(targetFolder, "decoratedCryptol").toString
+      val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
+      doc.copy(filePath = filePath)
+    })
+
+    val newSawFiles = reportReference.sawDocuments.map(doc => {
+      val destinationPath = Paths.get(targetFolder, "decoratedSaw").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)
       doc.copy(filePath = filePath)
     })
@@ -75,8 +87,10 @@ object DocumentAnalyzer {
 
     reportReference.copy(
       landoDocuments = newLandoFiles,
+      lobotDocuments = newLobotFiles,
       sysmlDocuments = newSysMLFiles,
       cryptolDocuments = newCryptolFiles,
+      sawDocuments = newSawFiles,
       bsvDocuments = newBSVFiles,
       svDocuments = newSVFiles)
   }
@@ -89,8 +103,10 @@ object DocumentAnalyzer {
     val enrichedDocuments = enrichDocuments(filesToAnalyze, formatter)
 
     val enrichedLandoDocuments = FileUtil.getLandoDocuments(enrichedDocuments)
+    val enrichedLobotDocuments = FileUtil.getLobotDocuments(enrichedDocuments)
     val enrichedSysMLDocuments = FileUtil.getSysMLDocuments(enrichedDocuments)
     val enrichedCryptolDocuments = FileUtil.getCryptolDocuments(enrichedDocuments)
+    val enrichedSawDocuments = FileUtil.getSawDocuments(enrichedDocuments)
     val enrichedBSVDocuments = FileUtil.getBlusSpecDocuments(enrichedDocuments)
     val enrichedSVDocuments = FileUtil.getSystemVerilogDocumetns(enrichedDocuments)
 
@@ -98,8 +114,10 @@ object DocumentAnalyzer {
       latexDocumentData.title,
       latexDocumentData.folder,
       enrichedLandoDocuments.map(_.asInstanceOf[LandoDocumentInfo]),
+      enrichedLobotDocuments.map(_.asInstanceOf[LobotDocumentInfo]),
       enrichedSysMLDocuments.map(_.asInstanceOf[SysMLDocumentInfo]),
       enrichedCryptolDocuments.map(_.asInstanceOf[CryptolDocumentInfo]),
+      enrichedSawDocuments.map(_.asInstanceOf[SawDocumentInfo]),
       enrichedBSVDocuments.map(_.asInstanceOf[BSVDocumentInfo]),
       enrichedSVDocuments.map(_.asInstanceOf[SVDocumentInfo]),
       latexDocumentData.layout
@@ -157,16 +175,22 @@ object DocumentAnalyzer {
     val cryptolAnalyzer = new CryptolDocumentEnricher(formatter)
     val bsvAnalyzer = new BSVDocumentEnricher(formatter)
     val svAnalyzer = new SVDocumentEnricher(formatter)
+    val sawAnalyzer = new SawDocumentEnricher(formatter)
+    val lobotAnalyzer = new LobotDocumentEnricher(formatter)
 
     val landoFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("lando"))
+    val lobotFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("lobot"))
     val sysmlFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("sysml"))
     val cryptolFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("cry"))
+    val sawFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("saw"))
     val bsvFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("bsv"))
     val svFilesToAnalyse = filesToAnalyze.filter(file => FileUtil.getFileType(file).equals("sv"))
 
     val landoDocuments = landoFilesToAnalyse.map(landoAnalyzer.parseDocument)
+    val lobotDocuments = lobotFilesToAnalyse.map(lobotAnalyzer.parseDocument)
     val sysMLDocuments = sysmlFilesToAnalyse.map(sysmlAnalyzer.parseDocument)
     val cryptolDocuments = cryptolFilesToAnalyse.map(cryptolAnalyzer.parseDocument)
+    val sawDocuments = sawFilesToAnalyse.map(sawAnalyzer.parseDocument)
     val bsvDocuments = bsvFilesToAnalyse.map(bsvAnalyzer.parseDocument)
     val svDocuments = svFilesToAnalyse.map(svAnalyzer.parseDocument)
 
@@ -194,7 +218,7 @@ object DocumentAnalyzer {
     }
     enrichedSVDocuments.foreach(doc => addReferences(doc, enrichedSVDocuments.flatMap(_.getAllReferences)))
 
-    val result = enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ enrichedSVDocuments ++ enrichedBSVDocuments
+    val result = enrichedLandoDocuments ++ enrichedSysMLDocuments ++ enrichedCryptolDocuments ++ enrichedSVDocuments ++ enrichedBSVDocuments ++ lobotDocuments ++ sawDocuments
 
     result.toArray
   } ensuring((res: Array[DocumentInfo]) => FileSpecs.allFilesAnalyzed(filesToAnalyze,res), "Not all files were analyzed")

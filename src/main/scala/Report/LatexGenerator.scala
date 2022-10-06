@@ -107,7 +107,8 @@ object LatexGenerator extends Logging {
   }
 
 
-  lazy val listingAndDefaultCommands: String = {
+  def listingAndDefaultCommands(folderName: String): String = {
+    require(folderName.nonEmpty, "Folder name cannot be empty")
     val latex = new mutable.StringBuilder()
     latex.append(ListingFormatting.standardCommands)
     latex.append(emptyLine)
@@ -121,28 +122,40 @@ object LatexGenerator extends Logging {
     latex.append(emptyLine)
     latex.append(ListingFormatting.sysmlFormatting)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.sawFormatting)
+    latex.append(emptyLine)
     latex.append(ListingFormatting.Verilog)
     latex.append(emptyLine)
+    //To hide weird characters in the listing environments
+    latex.append("""\lstset{showstringspaces=false}""")
+    latex.append(emptyLine)
 
-    latex.toString()
+    val filePath = Files.write(Paths.get(folderName, "languageCommands.tex"),
+      latex.toString().getBytes(StandardCharsets.UTF_8))
+
+    s"""\\input{$filePath}"""
   }
 
-  def generateLatexDocument(content: String, title: String, paperLayout: PaperLayout): String = {
+  def generateLatexDocument(content: String, title: String, folderOfDocument: String, paperLayout: PaperLayout.Value): String = {
     require(title.nonEmpty, "Title must not be empty")
-    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands + emptyLine + beginDocument(title) + emptyLine + content + emptyLine + endDocument
+    require(folderOfDocument.nonEmpty, "Folder of document must not be empty")
+    latexHeader(paperLayout) + emptyLine + listingAndDefaultCommands(folderOfDocument) + emptyLine + beginDocument(title) + emptyLine + content + emptyLine + endDocument
   }
 
 
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
 
-    latexContent.append(includeListings("Lando Models", report.landoDocuments))
-    latexContent.append(includeListings("SysML Models", report.sysmlDocuments))
-    latexContent.append(includeListings("Cryptol Specifications", report.cryptolDocuments))
-    latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments))
-    latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments))
 
-    val latexDocument = generateLatexDocument(latexContent.toString(), report.title, report.layout)
+    latexContent.append(includeListings("Lando Models", report.landoDocuments, report.folder))
+    latexContent.append(includeListings("Lobot Specifications", report.lobotDocuments, report.folder))
+    latexContent.append(includeListings("SysML Models", report.sysmlDocuments, report.folder))
+    latexContent.append(includeListings("Cryptol Specifications", report.cryptolDocuments,report.folder))
+    latexContent.append(includeListings("Saw Specifications", report.sawDocuments, report.folder))
+    latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments, report.folder))
+    latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments, report.folder))
+
+    val latexDocument = generateLatexDocument(latexContent.toString(), report.title, report.folder, report.layout)
 
     val reportFileName = report.title.replaceAll(" ", "_")
 
@@ -154,7 +167,12 @@ object LatexGenerator extends Logging {
 
 
   def includeListings[Doc <: DocumentInfo](sectionName: String,
-                                           documents: Array[Doc]): String = {
+                                           documents: Array[Doc],
+                                           folder: String): String = {
+    //require(documents.nonEmpty, "No documents to include in section " + sectionName)
+    require(folder.nonEmpty, "File path must not be empty")
+    require(sectionName.nonEmpty, "Section name must not be empty")
+
     val latexContent = new mutable.StringBuilder()
     latexContent.append(generateSection(sectionName))
     latexContent.append(emptyLine)
@@ -163,7 +181,16 @@ object LatexGenerator extends Logging {
       latexContent.append(includeListing(m))
       latexContent.append(emptyLine)
     })
-    latexContent.toString()
+
+    val sanitizedSectionName = sectionName.replaceAll(" ", "_")
+    val filePath = Files.write(Paths.get(folder, s"$sanitizedSectionName.tex"),
+      latexContent.toString().getBytes(StandardCharsets.UTF_8))
+
+
+    s"""\\input{$filePath}
+         |
+         |""".stripMargin
+
   }
 
   def latexHeader(paperLayout: PaperLayout): String = {

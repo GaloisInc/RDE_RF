@@ -7,6 +7,7 @@ import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
 
 object FileUtil {
+
   def fileExists(file: String): Boolean = {
     require(file.nonEmpty, "file must not be empty")
     val path = Paths.get(file)
@@ -61,6 +62,14 @@ object FileUtil {
   def getSystemVerilogDocumetns(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.SV)
   } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SV))
+
+  def getLobotDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lobot)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lobot))
+
+  def getSawDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Saw)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Saw))
 
 
   def getFileName(path: String): String = {

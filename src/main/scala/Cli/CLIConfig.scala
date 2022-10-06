@@ -10,4 +10,5 @@ case class CLIConfig(
                       latexTitle: String = "Latex Document",
                       generateRefinementFile: Boolean = false,
                       verifySourceFiles: Boolean = false,
+                      //gitRepo: String = ""
                     )

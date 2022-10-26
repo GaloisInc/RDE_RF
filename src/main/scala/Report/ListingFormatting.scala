@@ -343,6 +343,57 @@ object ListingFormatting {
       |}""".stripMargin
   }
 
+  // C formatting
+  lazy val cFormatting: String = {
+    """\lstdefinelanguage{CStyle}{
+      |  basicstyle=\scriptsize\ttfamily,
+      |  keywordstyle=\color{keywordcolor}\bfseries,
+      |  commentstyle=\itshape,
+      |  extendedchars=\true,
+      |  language=C,
+      |  morekeywords={uint8_t, uint16_t, uint32_t, ssize_t, size_t, uint64_t, uint128_t, uint256_t, inline, malloc}
+      |}""".stripMargin
+  }
+
+  //Json Formatting to be used to include FRET documents in the documentation
+  lazy val jsonFormatting: String = {
+    """
+      |\colorlet{punct}{red!60!black}
+      |\definecolor{delim}{RGB}{20,105,176}
+      |\colorlet{numb}{magenta!60!black}
+      |
+      \lstdefinelanguage{json}{
+      |    basicstyle=\scriptsize\ttfamily,
+      |    keywordstyle=\color{keywordcolor}\bfseries,
+      |    commentstyle=\itshape,
+      |    numbers=left,
+      |    numberstyle=\scriptsize,
+      |    stepnumber=1,
+      |    numbersep=8pt,
+      |    showstringspaces=false,
+      |    breaklines=true,
+      |    frame=lines,
+      |    literate=
+      |     *{0}{{{\color{numb}0}}}{1}
+      |      {1}{{{\color{numb}1}}}{1}
+      |      {2}{{{\color{numb}2}}}{1}
+      |      {3}{{{\color{numb}3}}}{1}
+      |      {4}{{{\color{numb}4}}}{1}
+      |      {5}{{{\color{numb}5}}}{1}
+      |      {6}{{{\color{numb}6}}}{1}
+      |      {7}{{{\color{numb}7}}}{1}
+      |      {8}{{{\color{numb}8}}}{1}
+      |      {9}{{{\color{numb}9}}}{1}
+      |      {:}{{{\color{punct}{:}}}}{1}
+      |      {,}{{{\color{punct}{,}}}}{1}
+      |      {\{}{{{\color{delim}{\{}}}}{1}
+      |      {\}}{{{\color{delim}{\}}}}}{1}
+      |      {[}{{{\color{delim}{[}}}}{1}
+      |      {]}{{{\color{delim}{]}}}}{1},
+      |}""".stripMargin
+  }
+
+
   lazy val sysmlFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.SysML)
     buildLanguageFormatting(formatting)

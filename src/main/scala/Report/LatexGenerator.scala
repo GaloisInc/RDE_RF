@@ -92,6 +92,7 @@ object LatexGenerator extends Logging {
       case Types.DocumentType.Saw => "language"
       case Types.DocumentType.SV => "language"
       case Types.DocumentType.BSV => "language"
+      case Types.DocumentType.C => "language"
     }
   } ensuring((res: String) => res.equals("style") || res.equals("language"), "Listing style not correct")
 
@@ -126,6 +127,9 @@ object LatexGenerator extends Logging {
     latex.append(emptyLine)
     latex.append(ListingFormatting.Verilog)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.cFormatting)
+    latex.append(emptyLine)
+
     //To hide weird characters in the listing environments
     latex.append("""\lstset{showstringspaces=false}""")
     latex.append(emptyLine)
@@ -146,7 +150,6 @@ object LatexGenerator extends Logging {
   def generateLatexReportOfSources(report: ReportReference): String = {
     val latexContent = new mutable.StringBuilder()
 
-
     latexContent.append(includeListings("Lando Models", report.landoDocuments, report.folder))
     latexContent.append(includeListings("Lobot Specifications", report.lobotDocuments, report.folder))
     latexContent.append(includeListings("SysML Models", report.sysmlDocuments, report.folder))
@@ -154,6 +157,7 @@ object LatexGenerator extends Logging {
     latexContent.append(includeListings("Saw Specifications", report.sawDocuments, report.folder))
     latexContent.append(includeListings("SystemVerilog Implementations", report.svDocuments, report.folder))
     latexContent.append(includeListings("BlueSpec Implementations", report.bsvDocuments, report.folder))
+    latexContent.append(includeListings("C Implementations", report.cDocuments, report.folder))
 
     val latexDocument = generateLatexDocument(latexContent.toString(), report.title, report.folder, report.layout)
 

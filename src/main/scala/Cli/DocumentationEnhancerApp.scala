@@ -13,8 +13,6 @@ import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
 import java.io.File
-import scala.reflect.io.Directory
-
 
 object DocumentationEnhancerApp extends App with Logging {
   val fileTypesOfTypesOfInterest = Analyzers.AnalyzerSettings.supportedDocumentTypesString

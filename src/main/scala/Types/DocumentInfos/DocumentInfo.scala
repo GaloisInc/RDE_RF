@@ -41,6 +41,7 @@ abstract class DocumentInfo {
       case DocumentType.Saw => "Saw"
       case DocumentType.SV => "Verilog"
       case DocumentType.BSV => "Verilog"
+      case DocumentType.C => "CStyle"
     }
   }
 

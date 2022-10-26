@@ -15,6 +15,7 @@ case class ReportReference(title: String,
                            sawDocuments: Array[SawDocumentInfo],
                            bsvDocuments: Array[BSVDocumentInfo],
                            svDocuments: Array[SVDocumentInfo],
+                           cDocuments : Array[CDocumentInfo],
                            layout: PaperLayout,
                           ) {
   require(title.nonEmpty, "title must not be empty")
@@ -31,6 +32,8 @@ case class ReportReference(title: String,
       case Types.DocumentType.Cryptol => copy(cryptolDocuments = cryptolDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[CryptolDocumentInfo] else d))
       case Types.DocumentType.BSV => copy(bsvDocuments = bsvDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[BSVDocumentInfo] else d))
       case Types.DocumentType.SV => copy(svDocuments = svDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[SVDocumentInfo] else d))
+      case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[CDocumentInfo] else d))
+      case Types.DocumentType.Saw => copy(sawDocuments = sawDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[SawDocumentInfo] else d))
       case _ => throw new IllegalArgumentException(s"Unknown document type ${documentInfo.documentType}")
     }
   }

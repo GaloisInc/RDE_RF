@@ -2,11 +2,14 @@ package Utils
 
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
+import scala.reflect.io.Directory
 
-object FileUtil {
+
+object FileUtil extends Logging {
 
   def fileExists(file: String): Boolean = {
     require(file.nonEmpty, "file must not be empty")
@@ -21,31 +24,22 @@ object FileUtil {
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
 
-    var sourceFiles = List.empty[String]
-    Files.walk(Paths.get(sourcePath))
-      .filter(Files.isRegularFile(_))
-      .filter(f => f.toString.nonEmpty)
-      .filter(p => fileOfCorrectType(p.toFile.toString, fileTypesOfTypesOfInterest))
-      .map(_.toFile.getAbsolutePath)
-      .forEach(f => sourceFiles = f :: sourceFiles)
+    val directory = new Directory(sourceDir)
 
-    sourceFiles.toArray
+    val files = directory.deepFiles.withFilter(
+      f =>
+        fileTypesOfTypesOfInterest.contains(f.extension)
+    ).toArray
+    files.map(_.path)
   } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
-
-
-  def fileOfCorrectType(file: String, fileTypes: Set[String]): Boolean = {
-    require(file.nonEmpty, "file must not be empty")
-    require(fileTypes.nonEmpty, "fileTypes must not be empty")
-    if (fileExists(file) && file.contains('.') && file.split('.').lastOption.isDefined && file.split('.').lastOption.get.matches("[a-zA-Z0-9]+")) {
-      fileTypes.contains(getFileType(file))
-    } else {
-      false
-    }
-  }
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
   } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lando))
+
+  def getCDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(_.documentType == DocumentType.C)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.C))
 
   def getSysMLDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.SysML)

@@ -40,11 +40,13 @@ docker pull simonthrane/document_enricher:latest
 docker run -v <path to the directory containing the documentation>:<srcFiles> simonthrane/document_enricher:latest -i <srcFiles> -o <srcFiles>  <OptionalArguments>
 ```
 
+Note that the docker image is large and might take a while to download.
+
 Example of a command that compiles the latex document into an a4 pdf document and generate an overview of the refinements in the project:
 
 ```bash
 
-docker run -v /home/user/Documents/Project/SourceFiles:/data simonthrane/document_enricher:latest -s /data -t /data -l -r -d=a4
+docker run -v /home/user/Documents/Project/SourceFiles:/data simonthrane/document_enricher:latest -i /data -o /data -g -d=a4
 ```
 
 Note that the docker image generates the documentation from the source code. 
@@ -64,9 +66,18 @@ The following arguments are supported:
     * -v, --version           prints the version of the tool
     * -h, --help              prints this usage text
 
+## Building the Docker Image
+
+To build the docker image, you need to have docker installed on your machine.
+To build the docker image, you need to run the following command:
+
+```bash
+    sbt docker 
+```
+
 ## Short-term Backlog 
 
-* Add support for more languages (e.g. C, Lobot, Saw)
+* Add more elaborate support of languages (e.g. C, Lobot, Saw)
 * Add support for verification of SAW specifications
 * Improve parsing of Cryptol specifications
 * Improve parsing of SystemVerilog specifications
@@ -77,5 +88,8 @@ The following arguments are supported:
 * Add support for automatic refinement - of Lando into Cryptol.
 * Add support for automatic refinement - of Cryptol into SystemVerilog.
 * Include Yosys for automatic synthesis of SystemVerilog into Verilog.
+* Include FRAMA-C for automatic verification of C code.
+* Add support for AADL specifications.
+* Add support for graphical representation of the refinement hierarchy (e.g. using GraphViz).
 
 Copyright (c) 2022 Galois, Inc.

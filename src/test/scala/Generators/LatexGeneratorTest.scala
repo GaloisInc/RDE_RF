@@ -105,8 +105,9 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to build A4 Latex Document" in {
-    val latexDocument = LatexGenerator.generateLatexDocument("", "title", PaperLayout.A4)
     val tempFile = Files.createTempFile("test", ".tex")
+    val tempFilePath = tempFile.toAbsolutePath.toString
+    val latexDocument = LatexGenerator.generateLatexDocument("", "title", tempFilePath, PaperLayout.A4)
     val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
     LatexGenerator.buildLatexFile(latexFile, false)
@@ -115,8 +116,9 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to build B4 Latex Document" in {
-    val latexDocument = LatexGenerator.generateLatexDocument("", "title", PaperLayout.B4)
     val tempFile = Files.createTempFile("test", ".tex")
+    val tempFilePath = tempFile.toAbsolutePath.toString
+    val latexDocument = LatexGenerator.generateLatexDocument("", "title", tempFilePath, PaperLayout.B4)
     val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
     LatexGenerator.buildLatexFile(latexFile, false)

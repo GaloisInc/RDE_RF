@@ -1,20 +1,16 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
-
 ThisBuild / scalaVersion := "2.13.8"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.13"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.14" % "test"
 
 lazy val root = (project in file("."))
   .settings(
     name := "der",
-    version := "0.1.4",
+    version := "0.1.5",
     maintainer := "STH",
     scalaVersion := "2.13.8",
     organization := "org.Galois"
   )
-
-
 
 //wartremoverErrors ++= Warts.unsafe
 
@@ -33,7 +29,6 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
 
 enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
-
 
 docker / dockerfile := {
   val appDir: File = stage.value
@@ -58,12 +53,10 @@ docker / dockerfile := {
     // install -y libtinfo5
     runRaw("apt-get install -y libtinfo5")
 
-    // CMAKE
+    // Install CMAKE
     runRaw("apt-get install -y cmake make")
 
     runRaw("mkdir /tools")
-
-
     //Install Bluespec Compiler
     workDir("/tmp")
     runRaw("wget https://github.com/B-Lang-org/bsc/releases/download/2021.07/bsc-2021.07-ubuntu-20.04.tar.gz")
@@ -72,13 +65,13 @@ docker / dockerfile := {
     runRaw("rm bsc-2021.07-ubuntu-20.04.tar.gz")
     env("PATH", "/tools/bsc-2021.07-ubuntu-20.04/bin:$PATH")
 
-    //Clone the Lando repo
+    //Clone the Bluespec Compiler
     runRaw("git clone https://github.com/B-Lang-org/bsc-contrib.git /tools/bsc-contrib")
     workDir("/tools/bsc-contrib")
     runRaw("git checkout aa205330885f6955e24fd99a0319e2733b5353f1")
     runRaw("make PREFIX=/tools/bsc-2021.07-ubuntu-20.04")
 
-    //Install Yosys
+    //Install Yosys - not sure if this is needed
     //runRaw("apt-get install -y yosys")
 
     //Install SAW Script
@@ -107,24 +100,8 @@ docker / dockerfile := {
     copy(appDir, targetDir, chown = "daemon:daemon")
     //Set the working directory
     workDir(s"$targetDir/bin/")
-    //entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
   }
-
-  //Alternative Dockerfile
-  /*
-  new Dockerfile {
-    from("HardensImage:latest")
-    //Install Latex - takes a while to download
-    runRaw("apt-get update && apt-get install -y --no-install-recommends apt-utils")
-    runRaw("apt-get install texlive-full -y")
-
-    //Copy the application
-    copy(appDir, targetDir, chown = "daemon:daemon")
-    //Set the working directory
-    workDir(s"$targetDir/bin/")
-    //entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-  )
-   */
 }
 
 docker / imageNames := Seq(

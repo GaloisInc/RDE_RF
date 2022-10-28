@@ -22,8 +22,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val filePath = filesToAnalyze.head
     val title = "Lando"
     val folder = getClass.getResource("./").getPath
-    val documentInfo = documentAnalyzer.parseDocument(filePath)
-    val report = ReportReference(title, folder, Array(documentInfo), Array.empty, Array.empty, Array.empty, Array.empty, PaperLayout.A4)
+    val report = ReportReference(title, folder, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty,Array.empty, PaperLayout.A4)
 
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test")
 
@@ -91,7 +90,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val reportPath = getClass.getResource(".").getPath
     val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(supportedTypes.toSet, latexDocumentData, Set.empty[RefinementModel],false)
+    val report = DocumentAnalyzer.generateReport(supportedTypes.toSet, latexDocumentData, Set.empty[RefinementModel], false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit_none")
 
     reportFilePath should not be null

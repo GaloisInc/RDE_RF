@@ -8,6 +8,7 @@ import Utils.Matcher.referenceNameMatches
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
+import scala.io.{Codec, Source}
 import scala.util.matching.Regex
 
 class LandoDocumentEnricher(override val formatterType: LatexFormatter,
@@ -193,7 +194,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     require(filePath.nonEmpty, "The file path should not be empty")
     val fileName = FileUtil.getFileName(filePath)
     val fileType = getFileType(filePath)
-    Control.using(io.Source.fromFile(filePath)((io.Codec.UTF8))) { source => {
+    Control.using(Source.fromFile(filePath)((Codec.UTF8))) { source => {
       val lines = source.getLines().toArray
       lines
         .indices.filter(idx => {

@@ -5,6 +5,8 @@ import Parsers.LobotParser.Models.{IDENTIFIER, TYPE}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
+import scala.io.{Codec, Source}
+
 class LobotParserTest extends AnyFlatSpec with should.Matchers {
 
   "LobotParser" should "be able to generate lexer from simple kindDecl" in {
@@ -126,7 +128,7 @@ class LobotParserTest extends AnyFlatSpec with should.Matchers {
   "LobotParser" should "be able to parse file" in {
     val filePath = getClass.getResource("../lobot/lobotSmall.lobot").getPath
 
-    val lines = Utils.Control.using(io.Source.fromFile(filePath)(io.Codec.UTF8)) {
+    val lines = Utils.Control.using(Source.fromFile(filePath)(Codec.UTF8)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
     val input = lines.mkString

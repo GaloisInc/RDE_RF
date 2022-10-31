@@ -2,6 +2,7 @@ package Utils
 
 import Types.DocReference.DocReference
 
+import scala.io.{Codec, Source}
 import scala.language.reflectiveCalls
 
 object Control {
@@ -9,7 +10,7 @@ object Control {
     try f(resource) finally resource.close()
 
   def extractReferences(filePath: String, transformReference: (String) => Option[DocReference]): Set[DocReference] = {
-    using(io.Source.fromFile(filePath)(io.Codec.UTF8)) { source => {
+    using(Source.fromFile(filePath)(Codec.UTF8)) { source => {
       val lines = source.getLines().toArray
       lines.map(line => {
         transformReference(line)

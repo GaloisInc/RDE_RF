@@ -7,6 +7,7 @@ import Types.EnrichableString
 import Utils.{Control, FileUtil}
 
 import java.io.{File, PrintWriter}
+import scala.io.{Codec, Source}
 
 abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) {
@@ -23,7 +24,8 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
     val decoratedFile = new File(decoratedFilePath) // Temporary File
     val writer = new PrintWriter(decoratedFile)
     var lastLine = ""
-    Control.using(io.Source.fromFile(filePath)(io.Codec.UTF8)) { source => {
+    Control.using(
+      Source.fromFile(filePath)(Codec.UTF8)) { source => {
       source.getLines()
         .map(line => {
           if (skipTodos && line.contains("@todo")) ""

@@ -28,6 +28,15 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api-scala
 libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
 
+// JSON library
+val circeVersion = "0.14.1"
+
+libraryDependencies ++= Seq(
+  "io.circe" %% "circe-core",
+  "io.circe" %% "circe-generic",
+  "io.circe" %% "circe-parser"
+).map(_ % circeVersion)
+
 enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 
 docker / dockerfile := {

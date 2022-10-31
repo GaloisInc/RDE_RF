@@ -4,6 +4,7 @@ import Parsers.ParserTypes.{ParsedDocument, ParsedRef, ParsedReference, Relation
 import Types.{DocumentType, ReferenceType}
 import Utils.FileUtil
 
+import scala.io.{Codec, Source}
 import scala.util.matching.Regex
 
 object LandoParser extends Parser {
@@ -21,7 +22,7 @@ object LandoParser extends Parser {
     require(fileToAnalyze.nonEmpty, "File to analyze cannot be empty")
     val fileName = FileUtil.getFileName(fileToAnalyze)
 
-    val lines = Utils.Control.using(io.Source.fromFile(fileToAnalyze)(io.Codec.UTF8)) {
+    val lines = Utils.Control.using(Source.fromFile(fileToAnalyze)(Codec.UTF8)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
 

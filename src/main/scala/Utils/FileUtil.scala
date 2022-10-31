@@ -6,10 +6,30 @@ import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
+import scala.io.{Codec, Source}
 import scala.reflect.io.Directory
 
 
 object FileUtil extends Logging {
+  def writeFile(filePath: String, jsonString: String): Unit = {
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(jsonString.nonEmpty, "jsonString must not be empty")
+    val file = new File(filePath)
+    val parentDir = file.getParentFile
+    if (!parentDir.exists()) {
+      parentDir.mkdirs()
+    }
+    Files.write(Paths.get(filePath), jsonString.getBytes(Codec.UTF8.charSet))
+  } ensuring (_ => new File(filePath).exists())
+
+  def readFile(filePath: String): String = {
+    require(Files.exists(Paths.get(filePath)), s"File $filePath does not exist")
+    val source = Source.fromFile(filePath)(Codec.UTF8)
+    val content = source.mkString
+    source.close()
+    content
+  }
+
 
   def fileExists(file: String): Boolean = {
     require(file.nonEmpty, "file must not be empty")
@@ -111,7 +131,7 @@ object FileUtil extends Logging {
     require(new File(path).isFile, "Path is not a file")
     require(new File(path).canRead, "File is not readable")
 
-    Control.using(io.Source.fromFile(path)(io.Codec.UTF8)) { source =>
+    Control.using(Source.fromFile(path)(Codec.UTF8)) { source =>
       source.getLines().exists(_.startsWith(filetype))
     }
   }

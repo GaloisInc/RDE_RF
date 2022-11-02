@@ -5,20 +5,21 @@ import Specs.FileSpecs
 import Types.DocumentInfos.DocumentInfo
 import Types.EnrichableString
 import Utils.{Control, FileUtil}
+import org.apache.logging.log4j.scala.Logging
 
 import java.io.{File, PrintWriter}
 import scala.io.{Codec, Source}
 
 abstract class DocumentEnricher(val formatterType: LatexFormatter,
-                                val skipTodos: Boolean = false) {
+                                val skipTodos: Boolean = false) extends Logging {
   val latexFormatter = new ReferenceFormatter(formatterType)
-
 
   def parseDocument(fileString: String): DocumentInfo
 
   def formatLine(line: String, documentInfo: DocumentInfo): String
 
   def decorateFile(documentInfo: DocumentInfo): String = {
+    logger.info(s"Decorating file ${documentInfo.filePath}")
     val filePath = documentInfo.filePath
     val decoratedFilePath = FileUtil.decorateFileName(filePath)
     val decoratedFile = new File(decoratedFilePath) // Temporary File

@@ -11,6 +11,26 @@ import scala.reflect.io.Directory
 
 
 object FileUtil extends Logging {
+
+  // Method to remove all decorated files from a directory
+  def deleteRecursivelyDecoratedFiles(path: String): Unit = {
+    require(path.nonEmpty, "path must not be empty")
+    require(new File(path).exists(), "path must exist")
+
+    val directory = new Directory(new File(path))
+
+    val decoratedFiles = directory.deepFiles.withFilter(
+      f =>
+        // must be latex file and the title must contain the word "decorated"
+        f.extension == ".tex"
+          && f.name.contains("decorated")
+    ).toArray
+
+    decoratedFiles.foreach(f => f.delete())
+
+    logger.info(s"Deleted ${decoratedFiles.length} decorated files")
+  }
+
   def writeFile(filePath: String, jsonString: String): Unit = {
     require(filePath.nonEmpty, "filePath must not be empty")
     require(jsonString.nonEmpty, "jsonString must not be empty")

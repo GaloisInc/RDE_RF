@@ -67,6 +67,10 @@ object DocumentationEnhancerApp extends App with Logging {
             .text("latexTitle is an optional string property that specifies whether to generate LaTeX documentation files. " +
               "If not specified the title of the LaTeX document will be Documentation.")
         ),
+      opt[Unit]('D', "delete decorated files")
+        .action((_, c) => c.copy(deleteDecoratedFiles = true))
+        .text("deleteDecoratedFiles is a command that deletes the decorated before generating the latex documentation."),
+
       opt[Unit]('R', "Generate Refinement Overview")
         .action((_, c) => c.copy(generateRefinementFile = true))
         .text("showRefinements is an optional boolean property that specifies whether to generate a refinement overview.")
@@ -101,6 +105,11 @@ object DocumentationEnhancerApp extends App with Logging {
 
       println("Starting Documentation Enhancer")
 
+      if(config.deleteDecoratedFiles){
+        println("Deleting decorated files")
+        FileUtil.deleteRecursivelyDecoratedFiles(targetFolder)
+      }
+
       if (filteredFiles.isEmpty) {
         println("No files found in source folder: " + sourceFolder)
         System.exit(1)
@@ -124,8 +133,14 @@ object DocumentationEnhancerApp extends App with Logging {
 
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (config.generateLatex) {
+        println("You have chosen to generate a LaTeX document. " +
+          "The document will be generated in the folder " + targetFolder + ".")
+
+        println("The document will be build twice to ensure that all references are correct.")
+
         LatexGenerator.generateLatexReportOfSources(documentReport)
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
+
       }
       if (config.generateRefinementFile) {
         ObjectConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")
@@ -134,7 +149,7 @@ object DocumentationEnhancerApp extends App with Logging {
       println("Done!")
       System.exit(0)
     case _ =>
-      println("Invalid arguments!")
+      println("Invalid arguments! Please check the usage and try again.")
       System.exit(1)
   }
 

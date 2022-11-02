@@ -1,7 +1,13 @@
-# Documentation Enricher (DER)
+# Rigorous Digital Engineering (RDE) Refinement Finder
 
-This is a tool to enrich documentation generated from the source code.
-The tool parses the source code and adds additional information to it and generates a new documentation in LaTeX format.
+This is a tool track refinements through the RDE process.
+The tool parses the source code written in some standard language 
+often used in the RDE process (e.g., Lando, SysML, Cryptol, Bluespec SystemVerilog and SystemVerilog) 
+and generates a graph of the refinement hierarchy.
+
+The tool can furthermore enrich documentation generated from the source code.
+The tool parses the source code and adds additional information to it and 
+generates a new documentation in LaTeX format.
 
 ## Supported Languages
 

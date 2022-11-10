@@ -40,7 +40,6 @@ final case class RefinementModel(
                             trgRef: FileDocRef,
                           ){
   require(srcRef.file != trgRef.file, "Source and target file must be different")
-
 }
 
 

@@ -10,6 +10,7 @@ case class ReportReference(title: String,
                            folder: String,
                            landoDocuments: Array[LandoDocumentInfo],
                            lobotDocuments: Array[LobotDocumentInfo],
+                           fretDocuments: Array[FRETDocumentInfo],
                            sysmlDocuments: Array[SysMLDocumentInfo],
                            cryptolDocuments: Array[CryptolDocumentInfo],
                            sawDocuments: Array[SawDocumentInfo],
@@ -23,7 +24,7 @@ case class ReportReference(title: String,
   require(allDocuments.nonEmpty, "At least one document must be provided")
   require(FileSpecs.allFilesExist(allDocuments.map(_.filePath).toSet), "All documents must exist")
 
-  lazy val allDocuments: Array[DocumentInfo] = landoDocuments ++ sysmlDocuments ++ cryptolDocuments ++ bsvDocuments ++ svDocuments
+  lazy val allDocuments: Array[DocumentInfo] = landoDocuments ++ sysmlDocuments ++ cryptolDocuments ++ bsvDocuments ++ svDocuments ++ cDocuments ++ sawDocuments ++ fretDocuments ++ lobotDocuments
 
   def updateDocument(documentInfo: DocumentInfo, docRef: DocReference) : ReportReference = {
     documentInfo.documentType match {
@@ -34,6 +35,8 @@ case class ReportReference(title: String,
       case Types.DocumentType.SV => copy(svDocuments = svDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[SVDocumentInfo] else d))
       case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[CDocumentInfo] else d))
       case Types.DocumentType.Saw => copy(sawDocuments = sawDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[SawDocumentInfo] else d))
+      case Types.DocumentType.Lobot => copy(lobotDocuments = lobotDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[LobotDocumentInfo] else d))
+      case Types.DocumentType.FRET => copy(fretDocuments = fretDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef).asInstanceOf[FRETDocumentInfo] else d))
       case _ => throw new IllegalArgumentException(s"Unknown document type ${documentInfo.documentType}")
     }
   }

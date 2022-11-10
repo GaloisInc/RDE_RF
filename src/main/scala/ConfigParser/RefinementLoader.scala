@@ -35,7 +35,7 @@ object RefinementLoader extends Logging {
       // This forces pure config to not tolerate unknown keys in the config file.
       // It gives errors when typos happen.
       // From https://pureconfig.github.io/docs/overriding-behavior-for-case-classes.html
-      implicit val hintMasterConfig = ProductHint[RefinementFileConfig](allowUnknownKeys = false)
+      implicit val hintMasterConfig = ProductHint[RefinementFileConfig](allowUnknownKeys = true)
 
       val parsingResults = ConfigSource.fromConfig(conf).load[RefinementFileConfig]
       val masterConfig = extractMasterConfig(parsingResults)

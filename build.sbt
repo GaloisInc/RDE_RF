@@ -14,6 +14,8 @@ lazy val root = (project in file("."))
 
 //wartremoverErrors ++= Warts.unsafe
 
+libraryDependencies += "dev.zio" %% "zio" % "2.0.2"
+
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
 

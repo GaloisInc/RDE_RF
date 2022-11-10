@@ -42,6 +42,7 @@ abstract class DocumentInfo {
       case DocumentType.SV => "Verilog"
       case DocumentType.BSV => "Verilog"
       case DocumentType.C => "CStyle"
+      case DocumentType.FRET => "json"
     }
   }
 

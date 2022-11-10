@@ -93,6 +93,7 @@ object LatexGenerator extends Logging {
       case Types.DocumentType.SV => "language"
       case Types.DocumentType.BSV => "language"
       case Types.DocumentType.C => "language"
+      case Types.DocumentType.FRET => "language"
     }
   } ensuring((res: String) => res.equals("style") || res.equals("language"), "Listing style not correct")
 
@@ -129,6 +130,8 @@ object LatexGenerator extends Logging {
     latex.append(emptyLine)
     latex.append(ListingFormatting.cFormatting)
     latex.append(emptyLine)
+    latex.append(ListingFormatting.jsonFormatting)
+    latex.append(emptyLine)
 
     //To hide weird characters in the listing environments
     latex.append("""\lstset{showstringspaces=false}""")
@@ -152,6 +155,7 @@ object LatexGenerator extends Logging {
 
     latexContent.append(includeListings("Lando Models", report.landoDocuments, report.folder))
     latexContent.append(includeListings("Lobot Specifications", report.lobotDocuments, report.folder))
+    latexContent.append(includeListings("FRET Models", report.fretDocuments, report.folder))
     latexContent.append(includeListings("SysML Models", report.sysmlDocuments, report.folder))
     latexContent.append(includeListings("Cryptol Specifications", report.cryptolDocuments,report.folder))
     latexContent.append(includeListings("Saw Specifications", report.sawDocuments, report.folder))

@@ -63,8 +63,6 @@ class CryptolDocumentInfo(
     FileType.ComponentFile
   }
 
-  def getImports: Set[DocReference] = imports
-
   def getTypes: Set[DocReference] = types
 
   def getFunctions: Set[DocReference] = functions

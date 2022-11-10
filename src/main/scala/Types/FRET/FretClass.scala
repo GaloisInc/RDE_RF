@@ -7,8 +7,6 @@ case class FRETRequirement(
                           fulltext: String,
                           semantics: FRETSemantics,
                         )
-
-
 case class FRETSemantics(
                         description: String
                     )

@@ -38,7 +38,7 @@ object LatexReferenceTypes  extends Enumeration {
 
 object DocumentType  extends Enumeration {
   type documentType = Value
-  val Lando, Lobot, SysML, Cryptol, Saw, SV, BSV, C = Value
+  val Lando, Lobot, SysML, Cryptol, Saw, SV, BSV, C, FRET = Value
 
   override def toString(): String = {
     this match {
@@ -50,6 +50,7 @@ object DocumentType  extends Enumeration {
       case SV => "sv"
       case BSV => "bsv"
       case C => "c"
+      case FRET => "json"
       case _ => throw new Exception("Unknown document type")
     }
   }

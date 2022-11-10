@@ -1,5 +1,6 @@
 package Utils
 
+import DocumentEnrichers.FretJsonMethods
 import Types.DocumentInfos.DocumentInfo
 import Types.DocumentType
 import org.apache.logging.log4j.scala.Logging
@@ -9,9 +10,7 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 import scala.io.{Codec, Source}
 import scala.reflect.io.Directory
 
-
 object FileUtil extends Logging {
-
   // Method to remove all decorated files from a directory
   def deleteRecursivelyDecoratedFiles(path: String): Unit = {
     require(path.nonEmpty, "path must not be empty")
@@ -22,8 +21,8 @@ object FileUtil extends Logging {
     val decoratedFiles = directory.deepFiles.withFilter(
       f =>
         // must be latex file and the title must contain the word "decorated"
-        f.extension == ".tex"
-          && f.name.contains("decorated")
+        f.extension.contains("decorated")
+        || f.extension.contains("aux")
     ).toArray
 
     decoratedFiles.foreach(f => f.delete())
@@ -44,10 +43,16 @@ object FileUtil extends Logging {
 
   def readFile(filePath: String): String = {
     require(Files.exists(Paths.get(filePath)), s"File $filePath does not exist")
-    val source = Source.fromFile(filePath)(Codec.UTF8)
-    val content = source.mkString
-    source.close()
-    content
+    try {
+      val source = Source.fromFile(filePath)(Codec.UTF8)
+      val content = source.mkString
+      source.close()
+      content
+    } catch {
+      case e: Exception =>
+        logger.error(s"Could not read file $filePath")
+        throw e
+    }
   }
 
 
@@ -70,8 +75,23 @@ object FileUtil extends Logging {
       f =>
         fileTypesOfTypesOfInterest.contains(f.extension)
     ).toArray
-    files.map(_.path)
+
+    val validFiles = files.filter(file => file.extension != "json"
+                                    || (file.extension == "json" && isFretFile(file.path))
+                              )
+    validFiles.map(_.path)
   } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
+
+
+  private def isFretFile(filePath: String): Boolean = {
+    require(filePath.nonEmpty, "filePath must not be empty")
+    require(fileExists(filePath), s"File $filePath does not exist")
+    val content = readFile(filePath)
+    FretJsonMethods.isFretDocument(content)
+  }
+  def getFRETDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
+    enrichedDocuments.filter(_.documentType == DocumentType.FRET)
+  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.FRET))
 
   def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
     enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
@@ -184,18 +204,19 @@ object FileUtil extends Logging {
     if (!d.exists) {
       d.mkdirs()
     }
-  }
+  }ensuring(_ => new File(dir).exists, "Directory was not created")
 
   def moveRenameFile(source: String, destinationDirectory: String): String = {
     require(source.nonEmpty, "Source path is empty")
     require(FileUtil.fileExists(source), "Source file does not exist at path" + source)
     val fileName = source.split("/").takeRight(1).head
+    val destination = Paths.get(destinationDirectory, fileName).toString
 
     createDirectory(destinationDirectory)
 
     val path = Files.move(
       Paths.get(source),
-      Paths.get(Paths.get(destinationDirectory, fileName).toString),
+      Paths.get(destination),
       StandardCopyOption.REPLACE_EXISTING
     )
     path.toString

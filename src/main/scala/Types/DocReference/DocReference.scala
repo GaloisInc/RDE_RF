@@ -104,22 +104,29 @@ class DocReference(
     abstractionOf,
     references,
   )
-
-  def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
-
-  override def enrichedLine(formatter: ReferenceFormatter): String = {
+  def refinementString(formatter: ReferenceFormatter): String ={
     val refinementOfString = getAbstractions match {
       case Some(abstracts) => formatter.addAbstractions(abstracts, documentName)
       case None => ""
     }
+    refinementOfString
+  }
 
+  def abstrationString(formatter: ReferenceFormatter): String = {
     val abstractionOfString = getRefinements match {
       case Some(specializes) => formatter.addSpecializations(specializes, documentName)
       case None => ""
     }
+    abstractionOfString
+  }
+
+  def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
+
+  override def enrichedLine(formatter: ReferenceFormatter): String = {
+    val refinementOfString = refinementString(formatter)
+    val abstractionOfString = abstrationString(formatter)
 
     //If the original line contains a reference to another reference, we highlight it by making a clickable link
-
     val highlightedLine = references match {
       case Some(reference) => formatter.highlightLineWithReferences(originalLine, reference.head.symbol, getReferences)
       case None => originalLine

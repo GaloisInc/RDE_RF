@@ -5,7 +5,6 @@ import Report.ReportTypes.{BlockComment, LanguageFormatting, Literate}
 import Types.DocumentType
 
 object ListingFormatting {
-
   val Verilog: String =
     """
       |\lstdefinelanguage{Verilog}

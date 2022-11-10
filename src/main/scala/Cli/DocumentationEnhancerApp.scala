@@ -12,6 +12,7 @@ import Utils.FileUtil.createDirectory
 import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
+
 import java.io.File
 
 object DocumentationEnhancerApp extends App with Logging {
@@ -94,7 +95,8 @@ object DocumentationEnhancerApp extends App with Logging {
       val latexTitle = if (config.latexTitle.isEmpty) "Documentation" else config.latexTitle
       val explicitRefinements = config.refinementFile
       val refinementFile = new File(explicitRefinements)
-      val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
+      val layout = if (config.latexLayout.equalsIgnoreCase("b4")
+          || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
 
 
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)

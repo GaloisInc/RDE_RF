@@ -23,7 +23,7 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     require(FileUtil.getFileType(filePath) == "cry", "filePath must be a Cryptol file")
     require(FileUtil.fileExists(filePath), "filePath must exist")
 
-    if(CryptolInterpreter.ensureCryptolIsInPath){
+    if(CryptolInterpreter.toolInstalled){
       CryptolInterpreter.interpret(filePath)
     }else{
       val fileName = FileUtil.getFileName(filePath)

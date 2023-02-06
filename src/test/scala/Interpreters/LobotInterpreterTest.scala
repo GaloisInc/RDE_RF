@@ -6,7 +6,7 @@ import org.scalatest.matchers.should
 class LobotInterpreterTest extends AnyFlatSpec with should.Matchers {
 
   "Lobot" should "be be in environment" in {
-    LobotInterpreter.verifyLobotInPath should be(true)
+    LobotInterpreter.toolInstalled should be(true)
   }
 
   it should "be able to check the lobot file of HARDENS" in {

@@ -2,8 +2,11 @@ package Analyzers
 
 import Interpreters.{BlueSpecInterpreter, CryptolInterpreter, LandoInterpreter, LobotInterpreter}
 import Report.LatexGenerator
+import Utils.CommandLineTool
 
 object AnalyzerSettings {
+  val supportedTools : Set[CommandLineTool] = Set(CryptolInterpreter, LandoInterpreter, LobotInterpreter, LatexGenerator, BlueSpecInterpreter)
+
   val supportedDocumentTypesString: Set[String] = Set("sv", "bsv", "lando", "lobot", "sysml", "cry", "saw", "c", "h")
 
   val supportedDocumentTypes: Set[Types.DocumentType.Value] = Set(Types.DocumentType.SV, Types.DocumentType.BSV, Types.DocumentType.Lando,
@@ -11,11 +14,11 @@ object AnalyzerSettings {
 
   lazy val dependenciesSupported: installedDependencies = {
     installedDependencies(
-      CryptolInterpreter.ensureCryptolIsInPath,
-      LandoInterpreter.verifyLandoInPath,
-      LobotInterpreter.verifyLobotInPath,
-      LatexGenerator.checkLatexInPath(),
-      BlueSpecInterpreter.ensureBlueSpecInPath
+      CryptolInterpreter.toolInstalled,
+      LandoInterpreter.toolInstalled,
+      LobotInterpreter.toolInstalled,
+      LatexGenerator.toolInstalled,
+      BlueSpecInterpreter.toolInstalled
     )
   }
 

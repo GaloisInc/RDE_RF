@@ -156,7 +156,7 @@ object DocumentationEnhancerApp extends App with Logging {
   private def verifySourceFiles(config: CLIConfig, files: Array[String]): Unit = {
     require(files.nonEmpty, "No files found in source folder")
     if (config.verifySourceFiles) {
-      println("Checking that all dependencies are installed environment")
+      println("Checking that all dependencies are installed in the environment")
       if (!EnvironmentChecker.dependenciesInstalled)
         logger.error("Not all dependencies are installed, please install them before using the tool.")
       else

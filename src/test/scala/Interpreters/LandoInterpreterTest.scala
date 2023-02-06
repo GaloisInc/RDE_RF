@@ -6,7 +6,7 @@ import org.scalatest.matchers.should
 class LandoInterpreterTest extends AnyFlatSpec with should.Matchers {
 
   "Lando" should "be in environment" in {
-    LandoInterpreter.verifyLandoInPath should be(true)
+    LandoInterpreter.toolInstalled should be(true)
   }
 
 

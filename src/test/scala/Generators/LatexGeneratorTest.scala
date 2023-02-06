@@ -15,7 +15,7 @@ import java.nio.file.Files
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
   "Latex" should "be in Path" in {
-    LatexGenerator.checkLatexInPath() should be(true)
+    LatexGenerator.toolInstalled should be(true)
   }
   //
   //  "LatexGenerator" should "be able to generate A4 header" in {

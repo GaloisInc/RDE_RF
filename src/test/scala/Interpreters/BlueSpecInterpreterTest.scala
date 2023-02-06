@@ -6,7 +6,7 @@ import org.scalatest.matchers.should
 class BlueSpecInterpreterTest extends AnyFlatSpec with should.Matchers {
 
   "BlueSpecCompiler" should "be in environment" in {
-    BlueSpecInterpreter.ensureBlueSpecInPath shouldBe(true)
+    BlueSpecInterpreter.toolInstalled shouldBe(true)
   }
 
   it should "compile actuation" in {

@@ -4,7 +4,7 @@ import Formatter.LatexSyntax.{beginDocument, endDocument, generateSection}
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.DocumentInfo
-import Utils.FileUtil
+import Utils.{CommandLineTool, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
@@ -13,16 +13,12 @@ import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 import scala.sys.process.Process
 
-object LatexGenerator extends Logging {
-  private val latexBuildCmd = "pdflatex"
+object LatexGenerator extends Logging with CommandLineTool {
+  override val command = "pdflatex"
+  override val toolName = "Latex - pdflatex"
   private val packages = Array[String]("listings", "url", "alltt", "amssymb", "amsthm", "xspace",
     "lstautogobble", "tcolorbox", "float", "xcolor", "graphicx", "todonotes", "varioref", "hyperref", "cleveref", "marginnote")
 
-  def checkLatexInPath(): Boolean = {
-    val path = System.getenv("PATH")
-    assert(path != null || path.contains(latexBuildCmd), "LaTeX not found in PATH")
-    true
-  }
 
   def generateList(list: List[String]): String = {
     val entries = list.foldLeft("")((s, item) => {
@@ -52,7 +48,7 @@ object LatexGenerator extends Logging {
     // Delete aux files to avoid conflicts
     deleteAuxLatexFiles(currentDirectory, latexAuxFiles)
 
-    val cmd = s"""$latexBuildCmd -output-directory=${latexFile.getParent} $fPath"""
+    val cmd = s"""$command -output-directory=${latexFile.getParent} $fPath"""
     val exitCode = Process(cmd).!
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     if (buildTwice) {
@@ -170,9 +166,9 @@ object LatexGenerator extends Logging {
   }
 
 
-  def includeListings[Doc <: DocumentInfo](sectionName: String,
-                                           documents: Array[Doc],
-                                           folder: String): String = {
+  private def includeListings[Doc <: DocumentInfo](sectionName: String,
+                                                   documents: Array[Doc],
+                                                   folder: String): String = {
     //require(documents.nonEmpty, "No documents to include in section " + sectionName)
     require(folder.nonEmpty, "File path must not be empty")
     require(sectionName.nonEmpty, "Section name must not be empty")

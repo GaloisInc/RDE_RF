@@ -6,7 +6,7 @@ import org.scalatest.matchers.should
 class CryptolInterpreterTest extends AnyFlatSpec with should.Matchers {
 
   "Cryptol" should "be be in environment" in {
-    CryptolInterpreter.ensureCryptolIsInPath should be(true)
+    CryptolInterpreter.toolInstalled should be(true)
   }
 
   it should "be able to load a module" in {

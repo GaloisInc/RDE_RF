@@ -1,6 +1,5 @@
 package ConfigParser
 
-
 import scala.util.parsing.combinator.RegexParsers
 
 abstract sealed class AnyArgument

@@ -1,6 +1,6 @@
 package Types
 
-import Formatter.{LatexSanitizer, LatexSyntax, ReferenceFormatter}
+import Formatter.{LatexSanitizer, ReferenceFormatter}
 import Types.DocReference.DocReference
 
 
@@ -37,7 +37,6 @@ class DocRelation(
 
 
   def getRelationType: RelationTypes.relationType = relationType
-
 
   def getSourceRef: Option[DocReference] = sourceRef
 

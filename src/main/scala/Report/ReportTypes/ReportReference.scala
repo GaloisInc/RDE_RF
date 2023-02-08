@@ -1,12 +1,13 @@
 package Report.ReportTypes
 
+import Report.PaperLayout
 import Report.PaperLayout.PaperLayout
 import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
 import Utils.FileUtil
 
-case class ReportReference(title: String,
+final case class ReportReference(title: String,
                            folder: String,
                            landoDocuments: Array[LandoDocumentInfo],
                            lobotDocuments: Array[LobotDocumentInfo],
@@ -16,7 +17,7 @@ case class ReportReference(title: String,
                            bsvDocuments: Array[BSVDocumentInfo],
                            svDocuments: Array[SVDocumentInfo],
                            cDocuments : Array[CDocumentInfo],
-                           layout: PaperLayout,
+                           layout: PaperLayout = PaperLayout.A4,
                           ) {
   require(title.nonEmpty, "title must not be empty")
   require(folder.nonEmpty, "folder must not be empty")

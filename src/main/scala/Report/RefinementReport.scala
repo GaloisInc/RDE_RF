@@ -1,7 +1,7 @@
 package Report
 
 import Analyzers.ReportAnalyzer
-import Formatter.{LatexSanitizer, LatexSyntax}
+import Formatter.LatexSanitizer
 import Report.ReportTypes.ReportReference
 import Types.DocReference.DocReference
 import Types.LatexReferenceTypes
@@ -14,49 +14,46 @@ import scala.collection.mutable
 
 object RefinementReport {
   private val refinementSymbol: String = "|-"
+  def buildReport(report: ReportReference): String = {
+    val latexDocument = generateRefinementReport(report)
+    val latexFile = new File(report.folder, "refinement_report.tex")
+    Files.write(Paths.get(latexFile.getAbsolutePath), latexDocument.toLatex.getBytes(StandardCharsets.UTF_8))
+    LatexGenerator.buildLatexFile(latexFile, buildTwice = true)
+    latexFile.getAbsolutePath
+  }
 
-  def generateRefinementReport(report: ReportReference): String = {
+  private def generateRefinementReport(report: ReportReference): LatexDocument = {
     val noneRefinedReferences = report.getNonRefinedReferences
     val refinedReferences = report.getRefinedReferences
+    val title = "Refinement Report"
+    val author = "Refinement Report"
 
     val documentNameToFilePath = report.allDocumentNamesToPaths
-
+    //Sort references by document name and type
     val topOfRefinementChain = ReportAnalyzer.topOfRefinementChain(refinedReferences)
 
     val refinementChains = topOfRefinementChain.map(ref => formatReferenceChain(ref))
 
-    val reportString = new mutable.StringBuilder
-
-    reportString.append(LatexSyntax.generateSection("Refinement"))
-
-    reportString.append(LatexGenerator.emptyLine)
-
-    reportString.append(LatexGenerator.addContentInsideEnvironment(refinementChains.toArray, "alltt"))
-
-    reportString.append(LatexSyntax.generateSection("NonRefined"))
-    reportString.append(LatexGenerator.emptyLine)
+    val refinementChainVisualisation = Environment("alltt", refinementChains.toList)
+    val refinementSection = LatexSection("Refinement Chains", "refinement_chain", List(refinementChainVisualisation))
 
     val mapOfReferencesPerDocumentType = noneRefinedReferences.groupBy(_.getDocumentType)
       .map(docTypeRef => (docTypeRef._1, docTypeRef._2.groupBy(_.getDocumentName)))
 
-    mapOfReferencesPerDocumentType.foreach(docTypeRef => {
-      reportString.append(LatexSyntax.generateSubSection(docTypeRef._1.toString))
-      docTypeRef._2.foreach(docRef => {
-        val subsecHref = LatexSyntax.addClickableLocalLink(documentNameToFilePath(docRef._1), docRef._1, LatexReferenceTypes.File)
-        val subsecLabel = LatexSanitizer.sanitizeReferenceName(docRef._1)
-        reportString.append(LatexSyntax.generateSubSubSection(subsecHref, subsecLabel))
+    val subsections = mapOfReferencesPerDocumentType.map(docTypeRef => {
+      val subsubSections = docTypeRef._2.map(docRef => {
+        val href = ClickableLink(documentNameToFilePath(docRef._1), docRef._1, LatexReferenceTypes.File).toLatex
+        val label = docRef._1
         val listsOfReferences = docRef._2.map(formatReference).toList.sorted
-        reportString.append(LatexGenerator.generateList(listsOfReferences))
+        val listBlock = ListBlock(listsOfReferences, "itemize")
+        Subsubsection(href, label, List(listBlock))
       })
+      Subsection(docTypeRef._1.toString, docTypeRef._1.toString, subsubSections.toList)
     })
 
-    val latexDocument = LatexGenerator.generateLatexDocument(reportString.toString(), report.title, report.folder, report.layout)
+    val nonRefinementSection = LatexSection("Overview over non-refined concepts", "non_refined", subsections.toList)
 
-    val filePath = Files.write(Paths.get(report.folder, s"${report.title}.tex"), latexDocument.getBytes(StandardCharsets.UTF_8))
-
-    LatexGenerator.buildLatexFile(new File(filePath.toString), buildTwice = true)
-
-    filePath.toString
+    LatexDocument(title, author, List(refinementSection, nonRefinementSection), report.layout)
   }
 
 
@@ -64,7 +61,7 @@ object RefinementReport {
     reference.sanitizedName + " (" + LatexSanitizer.sanitizeName(reference.documentName) + ")"
   }
 
-  def formatReferenceChain(reference: DocReference): String = {
+  private def formatReferenceChain(reference: DocReference): String = {
     @tailrec
     def formatReferenceChainRec(docReference: DocReference, acc: String): String = {
       docReference.getRefinements match {
@@ -72,7 +69,7 @@ object RefinementReport {
           val arbitraryRefinement = refinements.head
           val refinementText = refinements.map(ref => {
             val text = s"${ref.documentName}.${ref.sanitizedName}"
-            LatexSyntax.colorText(text, ref.getDocumentType)
+            Text(text, identity, "red").toLatex
           }).mkString("\\{", ", ", "\\}")
           val newAcc = acc + refinementSymbol + refinementText
           formatReferenceChainRec(arbitraryRefinement, newAcc)
@@ -81,7 +78,7 @@ object RefinementReport {
     }
 
     val startString = s"${reference.documentName}.${reference.sanitizedName}"
-    val coloredStartString = LatexSyntax.colorText(startString, reference.getDocumentType)
+    val coloredStartString = Text(startString, identity, "red").toLatex
     formatReferenceChainRec(reference, coloredStartString)
   }
 }

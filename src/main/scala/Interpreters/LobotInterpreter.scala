@@ -16,14 +16,12 @@ object LobotInterpreter extends Logging with CommandLineTool{
     require(filePath.endsWith(".lobot"), "filePath must end with .lobot")
     require(toolInstalled, "Lobot must be in the path")
 
-    val cmd = command + " " + filePath
-    val result = scala.sys.process.Process(cmd).!
+    val result = runCommand(List(filePath))
     if (result == 0) {
       logger.info("Lobot verified file " + filePath)
-      true
     } else {
       logger.error("Lobot could not verify file " + filePath)
-      false
     }
+    result == 0
   }
 }

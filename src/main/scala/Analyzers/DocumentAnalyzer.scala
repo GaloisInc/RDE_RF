@@ -8,7 +8,9 @@ import Report.ReportTypes.ReportReference
 import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
+import Types.DocumentType
 import Utils.{FileUtil, Matcher}
+import org.w3c.dom.DocumentType
 
 import java.nio.file.Paths
 
@@ -41,8 +43,20 @@ object DocumentAnalyzer {
     moveFilesInReport(report)
   } ensuring ((report: ReportReference) => FileSpecs.allFilesAnalyzed(filesToAnalyze, report))
 
-  def moveFilesInReport(reportReference: ReportReference): ReportReference = {
+
+  /*
+  private def moveFiles[DocType <: DocumentInfo](filesToMove: Array[DocType], destination: String, documentType: Types.DocumentType.Value): Array[DocumentInfo] = {
+    val destinationPath = Paths.get(destination, documentType.toString).toString
+    filesToMove.map(file => {
+      val filePath = FileUtil.moveRenameFile(file.filePath, destinationPath)
+      file.copy(filePath = filePath)
+    })
+  }
+   */
+
+  private def moveFilesInReport(reportReference: ReportReference): ReportReference = {
     val targetFolder = reportReference.folder
+
     val newLandoFiles = reportReference.landoDocuments.map(doc => {
       val destinationPath = Paths.get(targetFolder, "decoratedLando").toString
       val filePath = FileUtil.moveRenameFile(doc.filePath, destinationPath)

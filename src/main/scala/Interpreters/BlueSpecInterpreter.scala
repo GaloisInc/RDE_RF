@@ -10,19 +10,13 @@ object BlueSpecInterpreter extends Logging with CommandLineTool {
   override val toolName: String = "BlueSpecVerilog"
 
   def isWellFormed(filePath: String): Boolean = {
-    require(filePath.nonEmpty, "Filename is not specified.")
-    require(filePath.endsWith(".bsv"), "The file is not a cryptol file.")
-    require(toolInstalled, "BlueSpec is not in the path.")
-    require(FileUtil.fileExists(filePath), "The file does not exist.")
-
+    bscCheck(filePath)
     logger.info("BlueSpec checking file " + filePath)
     val result = s"$command $filePath".!
     if (result == 0) {
       logger.info(s"The file $filePath is well-formed.")
-      true
     } else {
       logger.info(s"The file $filePath is not well-formed.")
-      false
     }
     result == 0
   }
@@ -33,31 +27,27 @@ object BlueSpecInterpreter extends Logging with CommandLineTool {
     require(FileUtil.fileExists(filePath), "The file does not exist.")
   }
 
-  def generateVerilogFile(filePath: String): String = {
+  private def generateFile(filePath: String, flag: String, fileEnding : String): String = {
     bscCheck(filePath)
-
-    val result = s"$command -verilog -u $filePath".!
+    logger.info("BlueSpec generating file " + filePath)
+    val result = runCommand(List(flag, filePath))
     if (result == 0) {
-      logger.info(s"Successfully generated verilog file for $filePath.")
-      filePath.replace(".bsv", ".v")
+      logger.info(s"Successfully generated file for $filePath.")
+      filePath.replace(".bsv", fileEnding)
     } else {
-      logger.info(s"Failed to generate verilog file for $filePath.")
+      logger.info(s"Failed to generate file for $filePath.")
       ""
     }
+  } ensuring(FileUtil.fileExists(_), "The file does not exist.")
+
+  def generateVerilogFile(filePath: String): String = {
+    logger.info("BlueSpec generating verilog file " + filePath)
+    generateFile(filePath, "-u", ".v")
   } ensuring(FileUtil.fileExists(_), "The file does not exist.")
 
   def generateBluesimObject(filePath: String): String = {
     bscCheck(filePath)
-
-    val result = s"$command -sim $filePath".!
-    if (result == 0) {
-      logger.info(s"Successfully generated bluesim object for $filePath.")
-      filePath.replace(".bsv", ".bo")
-    } else {
-      logger.info(s"Failed to generate bluesim object for $filePath.")
-      ""
-    }
+    logger.info("BlueSpec generating bluesim object " + filePath)
+    generateFile(filePath, "-sim", ".bo")
   } ensuring(FileUtil.fileExists(_), "The file does not exist.")
-
-
 }

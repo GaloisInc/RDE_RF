@@ -13,11 +13,16 @@ import scala.io.{Codec, Source}
 abstract class DocumentEnricher(val formatterType: LatexFormatter,
                                 val skipTodos: Boolean = false) extends Logging {
   val latexFormatter = new ReferenceFormatter(formatterType)
-
   def parseDocument(fileString: String): DocumentInfo
 
   def formatLine(line: String, documentInfo: DocumentInfo): String
 
+  /**
+   * Decorates a file with the enriched text
+   *
+   * @param documentInfo DocumentInfo
+   * @return Path to the decorated file
+   */
   def decorateFile(documentInfo: DocumentInfo): String = {
     logger.info(s"Decorating file ${documentInfo.filePath}")
     val filePath = documentInfo.filePath
@@ -67,12 +72,12 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
       }
   }
 
-  def highlightURLLinks(str: String): String = {
+  private def highlightURLLinks(str: String): String = {
     val urlRegex = """https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)""".r
     val urls = urlRegex findAllIn str
     if (urls.isEmpty) str
     else urls.foldLeft(str)((line, url) => {
-      val formattedUrl = latexFormatter.createWebLink(url)
+      val formattedUrl = latexFormatter.createWebLink(url).toLatex
       line.replace(url, formattedUrl)
     })
   } ensuring((highlightedString: String) => highlightedString.length >= str.length,

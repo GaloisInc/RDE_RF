@@ -1,12 +1,36 @@
 package Report
 
-import Report.LatexGenerator.listingStyle
 import Report.ReportTypes.{BlockComment, LanguageFormatting, Literate}
 import Types.DocumentType
 
-object ListingFormatting {
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
 
-  val Verilog: String =
+object ListingFormatting {
+  def createDefault(folderName: String): IncludedFile = {
+    require(folderName.nonEmpty, "Folder name cannot be empty")
+    val content =
+      s"""
+        |${ListingFormatting.standardCommands}
+        |${ListingFormatting.basicFormatListing}
+        |${ListingFormatting.landoFormatting}
+        |${ListingFormatting.cryptolFormatting}
+        |${ListingFormatting.lobotFormatting}
+        |${ListingFormatting.sysmlFormatting}
+        |${ListingFormatting.sawFormatting}
+        |${ListingFormatting.Verilog}
+        |${ListingFormatting.cFormatting}
+        |% To hide weird characters in the listing environments
+        |\\lstset{showstringspaces=false}
+        |""".stripMargin
+
+    val filePath = Files.write(Paths.get(folderName, "languageCommands.tex"),
+      content.toString().getBytes(StandardCharsets.UTF_8))
+
+    IncludedFile(filePath.toString)
+  }
+
+  private val Verilog: String =
     """
       |\lstdefinelanguage{Verilog}
       |{
@@ -190,7 +214,7 @@ object ListingFormatting {
       |""".stripMargin
 
 
-  lazy val standardCommands: String = {
+  private lazy val standardCommands: String = {
     """
       |\newcommand{\lando}{\textsc{Lando}\xspace}
       |\newcommand{\lobot}{\textsc{Lobot}\xspace}
@@ -222,7 +246,7 @@ object ListingFormatting {
       |""".stripMargin
   }
 
-  lazy val basicFormatListing: String = {
+  private lazy val basicFormatListing: String = {
     """
       |\lstset{
       |basicstyle =\scriptsize\ttfamily,
@@ -238,8 +262,7 @@ object ListingFormatting {
     }""".stripMargin
   }
 
-  def lstFormattingOfDocumentType(documentType: DocumentType.Value): LanguageFormatting = {
-    require(listingStyle(documentType) == "language", "Listing style must be Language")
+  private def lstFormattingOfDocumentType(documentType: DocumentType.Value): LanguageFormatting = {
     val languageFormatting = documentType match {
       case DocumentType.Lando =>
         ReportTypes.LanguageFormatting("Lando",
@@ -313,22 +336,22 @@ object ListingFormatting {
        ${languageFormatting.getLiterates}}""".stripMargin
 
 
-  lazy val landoFormatting: String = {
+  private lazy val landoFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.Lando)
     buildLanguageFormatting(formatting)
   }
 
-  lazy val lobotFormatting: String = {
+  private lazy val lobotFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.Lobot)
     buildLanguageFormatting(formatting)
   }
 
-  lazy val cryptolFormatting: String = {
+  private lazy val cryptolFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.Cryptol)
     buildLanguageFormatting(formatting)
   }
 
-  lazy val sawFormatting: String = {
+  private lazy val sawFormatting: String = {
     """\lstdefinelanguage{saw}{
       |  basicstyle=\scriptsize\ttfamily,
       |  keywordstyle=\color{keywordcolor}\bfseries,
@@ -344,7 +367,7 @@ object ListingFormatting {
   }
 
   // C formatting
-  lazy val cFormatting: String = {
+  private lazy val cFormatting: String = {
     """\lstdefinelanguage{CStyle}{
       |  basicstyle=\scriptsize\ttfamily,
       |  keywordstyle=\color{keywordcolor}\bfseries,
@@ -394,7 +417,7 @@ object ListingFormatting {
   }
 
 
-  lazy val sysmlFormatting: String = {
+  private lazy val sysmlFormatting: String = {
     val formatting = lstFormattingOfDocumentType(DocumentType.SysML)
     buildLanguageFormatting(formatting)
   }

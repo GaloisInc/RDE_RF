@@ -12,21 +12,20 @@ object CryptolInterpreter extends Logging with CommandLineTool {
   override val command: String = "cryptol"
   override val toolName: String = "Cryptol"
 
-  private def typeCmd(nameOfModule: String): String = {
-    require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
-    require(nameOfModule.nonEmpty, "Filename is not specified.")
+  private def check(filePath: String): Unit = {
+    require(filePath.nonEmpty, "Filename is not specified.")
+    require(filePath.endsWith(".cry"), "The file is not a cryptol file.")
     require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
+    require(FileUtil.fileExists(filePath), "The file does not exist.")
+  }
 
+  private def typeCmd(nameOfModule: String): String = {
+    check(nameOfModule)
     s"-c :b $nameOfModule"
   }
 
   private def verifyCmd(nameOfModule: String): String = {
-    require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
-    require(nameOfModule.nonEmpty, "Filename is not specified.")
-    require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
-
+    check(nameOfModule)
     s"-c :prove $nameOfModule"
   }
 

@@ -2,8 +2,8 @@ package Generators
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import ConfigParser.RefinementModel
-import Formatter.{InlineFormatter, LatexSyntax, MarginFomatter}
-import Report.{LatexGenerator, PaperLayout}
+import Formatter.{InlineFormatter, MarginFomatter}
+import Report.{Environment, LatexDocument, LatexElement, LatexGenerator, LatexSection, ListBlock, PaperLayout, Text}
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -68,12 +68,9 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   //        |""".stripMargin)
   //  }
 
-  "LatexGenerator" should "be able to generate footer" in {
-    LatexSyntax.endDocument should be("\\end{document}")
-  }
 
   "LatexGenerator" should "be able to generate environment" in {
-    LatexGenerator.addContentInsideEnvironment(Array("content"), "alltt") should
+    Environment("alltt", List("content")).toLatex should
       be(
         """|\begin{alltt}
            |content
@@ -81,7 +78,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
   }
 
   "LatexGenerator" should "be able to generate itemize" in {
-    LatexGenerator.generateList(List("content")) should
+    ListBlock(List("content"), "itemize").toLatex should
       be(
         """|\begin{itemize}
            |\item content
@@ -91,37 +88,42 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
   "LatexGenerator" should "be able to generate section" in {
     val sectionName = "Section"
-    val section = LatexSyntax.generateSection(sectionName)
-    section should be(
+    val section = LatexSection(sectionName, sectionName, List.empty[LatexElement])
+    section.toLatex should be(
       s"""\\section{$sectionName}
-         |\\label{sec:$sectionName}""".stripMargin)
+         |\\label{sec:$sectionName}
+         |""".stripMargin)
   }
 
   "LatexGenerator" should "be able to generate section for two words" in {
     val sectionName = "Section TwoWords"
-    LatexSyntax.generateSection(sectionName) should be(
+    val section = LatexSection(sectionName, sectionName, List.empty[LatexElement])
+    section.toLatex should be(
       s"""\\section{$sectionName}
-         |\\label{sec:Section_TwoWords}""".stripMargin)
+         |\\label{sec:Section_TwoWords}
+         |""".stripMargin)
   }
 
   "LatexGenerator" should "be able to build A4 Latex Document" in {
     val tempFile = Files.createTempFile("test", ".tex")
-    val tempFilePath = tempFile.toAbsolutePath.toString
-    val latexDocument = LatexGenerator.generateLatexDocument("", "title", tempFilePath, PaperLayout.A4)
-    val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
+    val text = Text("text", identity)
+    val packageList = List("amsmath")
+    val latexDocument = LatexDocument("title", "author", List(text), PaperLayout.A4, packageList)
+    val filePath = Files.write(tempFile, latexDocument.toLatex.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
-    LatexGenerator.buildLatexFile(latexFile, false)
+    LatexGenerator.buildLatexFile(latexFile, buildTwice = false)
     latexFile.exists() should be(true)
     latexFile.delete()
   }
 
   "LatexGenerator" should "be able to build B4 Latex Document" in {
     val tempFile = Files.createTempFile("test", ".tex")
-    val tempFilePath = tempFile.toAbsolutePath.toString
-    val latexDocument = LatexGenerator.generateLatexDocument("", "title", tempFilePath, PaperLayout.B4)
-    val filePath = Files.write(tempFile, latexDocument.getBytes(StandardCharsets.UTF_8))
+    val text = Text("text", identity)
+    val packageList = List("amsmath")
+    val latexDocument = LatexDocument("title", "author", List(text), PaperLayout.B4, packageList)
+    val filePath = Files.write(tempFile, latexDocument.toLatex.getBytes(StandardCharsets.UTF_8))
     val latexFile = new File(filePath.toString)
-    LatexGenerator.buildLatexFile(latexFile, false)
+    LatexGenerator.buildLatexFile(latexFile, buildTwice = false)
     latexFile.exists() should be(true)
     latexFile.delete()
   }

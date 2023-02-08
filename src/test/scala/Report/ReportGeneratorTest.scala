@@ -25,7 +25,7 @@ class ReportGeneratorTest extends AnyFlatSpec with Matchers {
 
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentData, Set.empty[RefinementModel],sortFiles = false)
 
-    val reportFilePath = RefinementReport.generateRefinementReport(report)
+    val reportFilePath = RefinementReport.buildReport(report)
 
     //Ensure that the report is generated
     val reportFile = new File(reportFilePath)

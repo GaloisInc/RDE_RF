@@ -125,7 +125,6 @@ class DocReference(
       case None => originalLine
     }
 
-
     val lineWithLabel = formatter.enrichLineWithLabel(highlightedLine, getLabelText)
     if (isInRefinementChain) {
       lineWithLabel + refinementOfString + abstractionOfString

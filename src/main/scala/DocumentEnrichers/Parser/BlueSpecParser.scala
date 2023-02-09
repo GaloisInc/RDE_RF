@@ -1,7 +1,4 @@
-package DocumentEnrichers
-
-
-import DocumentEnrichers.Parser._
+package DocumentEnrichers.Parser
 
 import scala.util.parsing.combinator.RegexParsers
 
@@ -17,9 +14,9 @@ trait TypeParser extends RegexParsers {
 
   def actionValue: Parser[ACTIONVALUE] = "ActionValue" ^^ { _ => ACTIONVALUE() }
 
-  def unitType = (boolean | action)
+  def unitType: Parser[Type] = boolean | action
 
-  def composedType = vector | actionValue | bit
+  def composedType: Parser[Type] = vector | actionValue | bit
 
 }
 

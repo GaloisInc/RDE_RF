@@ -10,10 +10,9 @@ class CryptolDocumentInfo(
                            types: Set[DocReference],
                            functions: Set[DocReference],
                            properties: Set[DocReference],
-                           override val documentType: DocumentType.Value = DocumentType.Cryptol,
                          ) extends DocumentInfo[CryptolDocumentInfo] {
 
-  require(documentType == DocumentType.Cryptol, "CryptolDocumentInfo must have documentType Cryptol")
+  override val documentType: DocumentType.Value = DocumentType.Cryptol
 
   def copy(
             documentName: String = documentName,
@@ -21,17 +20,14 @@ class CryptolDocumentInfo(
             imports: Set[DocReference] = imports,
             types: Set[DocReference] = types,
             functions: Set[DocReference] = functions,
-            properties: Set[DocReference] = properties,
-            documentType: DocumentType.Value = documentType,
-          ): CryptolDocumentInfo = {
+            properties: Set[DocReference] = properties): CryptolDocumentInfo = {
     new CryptolDocumentInfo(
       documentName,
       filePath,
       imports,
       types,
       functions,
-      properties,
-      documentType,
+      properties
     )
   }
 

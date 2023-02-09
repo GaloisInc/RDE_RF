@@ -16,9 +16,9 @@ class SysMLDocumentInfo(
                          imports: Set[DocReference],
                          views: Set[DocReference],
                          items: Set[DocReference],
-                         attributes: Set[DocReference],
-                         override val documentType: DocumentType.Value = DocumentType.SysML
-                       ) extends DocumentInfo[SysMLDocumentInfo] {
+                         attributes: Set[DocReference]) extends DocumentInfo[SysMLDocumentInfo] {
+
+  override val documentType: DocumentType.Value = DocumentType.SysML
 
   def copy(
             documentName: String = documentName,
@@ -32,8 +32,7 @@ class SysMLDocumentInfo(
             imports: Set[DocReference] = imports,
             views: Set[DocReference] = views,
             items: Set[DocReference] = items,
-            attributes: Set[DocReference] = attributes,
-            documentType: DocumentType.Value = documentType
+            attributes: Set[DocReference] = attributes
           ): SysMLDocumentInfo = {
     new SysMLDocumentInfo(
       documentName,
@@ -47,9 +46,7 @@ class SysMLDocumentInfo(
       imports,
       views,
       items,
-      attributes,
-      documentType
-    )
+      attributes)
   }
 
   private val validRefenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)

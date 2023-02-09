@@ -47,7 +47,7 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
       case _ => Set.empty[DocReference]
     }
     relevantReferences.find(ref => line.contains(ref.getName) && line.trim.replaceAll(" +", " ").contains(ref.originalLine)) match {
-      case Some(reference) => reference.enrichedLine(latexFormatter)
+      case Some(reference) => reference.enrich(latexFormatter)
       case None => line
     }
   }

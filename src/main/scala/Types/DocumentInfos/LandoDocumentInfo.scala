@@ -12,10 +12,9 @@ class LandoDocumentInfo(
                          events: Set[DocReference],
                          requirements: Set[DocReference],
                          scenarios: Set[DocReference],
-                         override val documentType: DocumentType.Value = DocumentType.Lando,
                        ) extends DocumentInfo[LandoDocumentInfo] {
 
-  require(documentType == DocumentType.Lando, "Document type must be Lando")
+  override val documentType: DocumentType.Value = DocumentType.Lando
 
   def copy(
             documentName: String = documentName,
@@ -25,7 +24,6 @@ class LandoDocumentInfo(
             events: Set[DocReference] = events,
             requirements: Set[DocReference] = requirements,
             scenarios: Set[DocReference] = scenarios,
-            documentType: DocumentType.Value = documentType,
           ): LandoDocumentInfo = {
     new LandoDocumentInfo(
       documentName,
@@ -34,9 +32,7 @@ class LandoDocumentInfo(
       relations,
       events,
       requirements,
-      scenarios,
-      documentType,
-    )
+      scenarios)
   }
 
   override def updateReference(ref: DocReference): LandoDocumentInfo = {

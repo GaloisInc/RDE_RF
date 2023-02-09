@@ -12,10 +12,9 @@ class LobotDocumentInfo(
                          typeDecl: Set[DocReferencePosition],
                          abstTypeDecl: Set[DocReferencePosition],
                          abstFunctionDecl: Set[DocReferencePosition],
-                         override val documentType: DocumentType.Value = DocumentType.Lobot,
                        ) extends DocumentInfo[LobotDocumentInfo] {
 
-  require(documentType == DocumentType.Lobot, "Document type must be Lobot")
+  override val documentType: DocumentType.Value = DocumentType.Lobot
 
   def copy(
             documentName: String = documentName,
@@ -25,7 +24,6 @@ class LobotDocumentInfo(
             typeDecl: Set[DocReferencePosition] = typeDecl,
             abstTypeDecl: Set[DocReferencePosition] = abstTypeDecl,
             abstFunctionDecl: Set[DocReferencePosition] = abstFunctionDecl,
-            documentType: DocumentType.Value = documentType,
           ): LobotDocumentInfo = {
     new LobotDocumentInfo(
       documentName,
@@ -34,9 +32,7 @@ class LobotDocumentInfo(
       kindDecl,
       typeDecl,
       abstTypeDecl,
-      abstFunctionDecl,
-      documentType,
-    )
+      abstFunctionDecl)
   }
 
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)

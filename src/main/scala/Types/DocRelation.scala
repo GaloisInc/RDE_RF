@@ -11,7 +11,7 @@ class DocRelation(
                    override val originalLine: String,
                    sourceRef: Option[DocReference],
                    targetRef: Option[DocReference],
-                 ) extends EnrichableString with DocumentReference {
+                 ) extends DecorateableString with DocumentReference {
 
   require(originalLine.nonEmpty, "originalLine must not be empty")
   require(documentName.nonEmpty, "documentName must not be empty")
@@ -42,7 +42,7 @@ class DocRelation(
 
   def getTargetRef: Option[DocReference] = targetRef
 
-  override def enrichedLine(formatter: ReferenceFormatter): String = {
+  override def enrich(formatter: ReferenceFormatter): String = {
     val linkToSource = if (sourceRef.isDefined) formatter.addReference(sourceRef.get, documentName, LatexReferenceTypes.ConnectionArtifact) else getSourceName
     val linkToTarget = if (targetRef.isDefined) formatter.addReference(targetRef.get, documentName, LatexReferenceTypes.ConnectionArtifact) else getTargetName
 

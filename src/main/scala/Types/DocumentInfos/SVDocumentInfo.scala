@@ -7,16 +7,16 @@ class SVDocumentInfo(
                       override val documentName: String,
                       override val filePath: String,
                       modules: Set[DocReference],
-                      override val documentType: DocumentType.Value = DocumentType.SV,
                     ) extends DocumentInfo[SVDocumentInfo] {
+
+  override val documentType: DocumentType.Value = DocumentType.SV
 
   def copy(
             documentName: String = documentName,
             filePath: String = filePath,
             modules: Set[DocReference] = modules,
-            documentType: DocumentType.Value = documentType,
           ): SVDocumentInfo = {
-    new SVDocumentInfo(documentName, filePath, modules, documentType)
+    new SVDocumentInfo(documentName, filePath, modules)
   }
 
   override def updateReference(ref: DocReference): SVDocumentInfo = {

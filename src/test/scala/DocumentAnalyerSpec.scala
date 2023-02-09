@@ -47,17 +47,17 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
     val referencesWithActualReferences = documentInfo.getAllReferences.filter(_.getReferences.nonEmpty)
 
     val reference = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Synthesizer")).get
-    val enrichedLineSynthesize = reference.enrichedLine(formatter)
+    val enrichedLineSynthesize = reference.enrich(formatter)
 
     assert(enrichedLineSynthesize.contains("\\hyperref"), "Synthesizer not enriched")
 
     val referenceASIC = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("ASIC")).get
-    val enrichedLineASIC = referenceASIC.enrichedLine(formatter)
+    val enrichedLineASIC = referenceASIC.enrich(formatter)
 
     assert(enrichedLineASIC.contains("\\hyperref"), "ASIC not enriched")
 
     val referenceUniversalSerialBus = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Universal Serial Bus")).get
-    val enrichedLineUniversalSerialBus = referenceUniversalSerialBus.enrichedLine(formatter)
+    val enrichedLineUniversalSerialBus = referenceUniversalSerialBus.enrich(formatter)
 
     assert(enrichedLineUniversalSerialBus.contains("\\hyperref"), "Universal Serial Bus not enriched with reference.")
   }

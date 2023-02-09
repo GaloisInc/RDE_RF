@@ -13,7 +13,7 @@ class DocReference(
                     refinementOf: Option[Set[DocReference]] = None,
                     abstractionOf: Option[Set[DocReference]] = None,
                     references: Option[Set[Ref]] = None,
-                  ) extends EnrichableString with DocumentReference {
+                  ) extends DecorateableString with DocumentReference {
 
 
   def addAbstraction(abstraction: DocReference): DocReference = {
@@ -107,7 +107,7 @@ class DocReference(
 
   def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
 
-  override def enrichedLine(formatter: ReferenceFormatter): String = {
+  override def enrich(formatter: ReferenceFormatter): String = {
     val refinementOfString = getAbstractions match {
       case Some(abstracts) => formatter.addAbstractions(abstracts, documentName)
       case None => ""

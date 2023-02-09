@@ -68,12 +68,12 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
 
   "SysMLReader" should "to extract requirements" in {
     val fileName = "RTS_Requirements"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 4, 0, 0, 17, 0, 0, 0)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 4, 0, 0, 17)
   }
 
   "SysMLReader" should "to extract packages" in {
     val fileName = "HARDENS"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 7, 0, 0, 0, 0, 0, 0)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 7)
   }
 
   "SysMLReader" should "to extract Scenarios" in {
@@ -104,17 +104,17 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     val formatter = new ReferenceFormatter(new InlineFormatter())
 
     val reference = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Synthesizer")).get
-    val enrichedLineSynthesize = reference.enrichedLine(formatter)
+    val enrichedLineSynthesize = reference.enrich(formatter)
 
     assert(enrichedLineSynthesize.contains("\\hyperref"), "Synthesizer not enriched")
 
     val referenceASIC = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("ASIC")).get
-    val enrichedLineASIC = referenceASIC.enrichedLine(formatter)
+    val enrichedLineASIC = referenceASIC.enrich(formatter)
 
     assert(enrichedLineASIC.contains("\\hyperref"), "ASIC not enriched")
 
     val referenceUniversalSerialBus = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Universal Serial Bus")).get
-    val enrichedLineUniversalSerialBus = referenceUniversalSerialBus.enrichedLine(formatter)
+    val enrichedLineUniversalSerialBus = referenceUniversalSerialBus.enrich(formatter)
 
     assert(enrichedLineUniversalSerialBus.contains("\\hyperref"), "Universal Serial Bus not enriched with reference.")
 

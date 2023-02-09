@@ -8,18 +8,13 @@ class BSVDocumentInfo(
                        override val documentName: String,
                        override val filePath: String,
                        packages: Set[DocReference],
-                       modules: Set[DocReference],
-                       override val documentType: DocumentType.Value = DocumentType.BSV,
+                       modules: Set[DocReference]
                      ) extends DocumentInfo[BSVDocumentInfo] {
 
-  require(documentName.nonEmpty, "Document name cannot be empty")
-  require(filePath.nonEmpty, "File path cannot be empty")
+  override val documentType: DocumentType.Value = DocumentType.BSV
+
   require(FileUtil.getFileType(filePath) == "bsv", "File path must be a BSV file")
-  require(FileUtil.fileExists(filePath), "File path must exist")
   require(packages.intersect(modules).isEmpty, "Packages and modules cannot intersect")
-
-  require(documentType == DocumentType.BSV, "Document type must be BSV")
-
   require(packages.forall(_.getReferenceType == ReferenceType.System))
   require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
 
@@ -28,9 +23,8 @@ class BSVDocumentInfo(
             filePath: String = filePath,
             packages: Set[DocReference] = packages,
             modules: Set[DocReference] = modules,
-            documentType: DocumentType.Value = documentType,
           ): BSVDocumentInfo = {
-    new BSVDocumentInfo(documentName, filePath, packages, modules, documentType)
+    new BSVDocumentInfo(documentName, filePath, packages, modules)
   }
 
   override def updateReference(ref: DocReference): BSVDocumentInfo = {

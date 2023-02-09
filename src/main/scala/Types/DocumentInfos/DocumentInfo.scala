@@ -10,7 +10,6 @@ abstract class DocumentInfo[+T <: DocumentInfo[T]] {
 
   def filePath: String
 
-  //  def references: String
   def documentType: DocumentType.Value
 
   def getFileType: FileType.Value
@@ -20,16 +19,10 @@ abstract class DocumentInfo[+T <: DocumentInfo[T]] {
   def getRelations: Set[DocRelation]
 
   require(documentName.nonEmpty, "Document name cannot be empty")
+  require(filePath.nonEmpty, "File path cannot be empty")
   require(filePath.contains(documentName), "File path must contain document name")
   require(FileUtil.fileExists(filePath), s"File $filePath does not exist")
-  //All reference names must be unique
-  require(
-    {
-      val referenceNames = getAllReferences.map(_.getLabelText)
-      assert(referenceNames.size == referenceNames.size, "Reference names must be unique")
-      true
-    }
-  )
+  require(getAllReferences.forall(_.getDocumentName == documentName), "All references must be to the same document")
 
   def getLanguage: String = {
     documentType match {
@@ -48,13 +41,13 @@ abstract class DocumentInfo[+T <: DocumentInfo[T]] {
 
   def getCaption: String = s"$getLanguage Model of ${LatexSanitizer.sanitizeName(documentName)}"
 
-  def updateReference (ref: DocReference): T
+  def updateReference(ref: DocReference): T
 
-  def updateReferences (refs: Set[DocReference]): T = {
+  def updateReferences(refs: Set[DocReference]): T = {
     refs.foldLeft(this.asInstanceOf[T])((doc, ref) => doc.updateReference(ref))
   }
 
-  def updateFilePath (newFilePath: String): T
+  def updateFilePath(newFilePath: String): T
 
 }
 

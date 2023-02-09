@@ -147,7 +147,7 @@ object CryptolInterpreter extends Logging with CommandLineTool {
     )
   }
 
-  def extractRegexFromList(strings: Array[String], moduleName: String, regex: String): Array[String] = {
+  private def extractRegexFromList(strings: Array[String], moduleName: String, regex: String): Array[String] = {
     val stringOfInterest = strings.dropWhile(!_.contains(s"From $moduleName"))
       //The first three lines are not interesting
       .drop(3)

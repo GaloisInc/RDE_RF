@@ -3,7 +3,7 @@ package DocumentEnrichers
 import Formatter.{LatexFormatter, ReferenceFormatter}
 import Specs.FileSpecs
 import Types.DocumentInfos.DocumentInfo
-import Types.EnrichableString
+import Types.DecorateableString
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
@@ -63,12 +63,12 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
     }).toArray
   } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
-  protected def extractEnrichedText[A <: EnrichableString](line: String, references: Set[A]): String = {
+  protected def extractEnrichedText[A <: DecorateableString](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)
     if (relevantRefs.isEmpty) line
     else
       relevantRefs.headOption match {
-        case Some(ref) => ref.enrichedLine(latexFormatter)
+        case Some(ref) => ref.enrich(latexFormatter)
         case None => ""
       }
   }

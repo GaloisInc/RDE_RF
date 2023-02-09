@@ -12,22 +12,23 @@ object BlueSpecInterpreter extends Logging with CommandLineTool {
   def isWellFormed(filePath: String): Boolean = {
     bscCheck(filePath)
     logger.info("BlueSpec checking file " + filePath)
-    val result = s"$command $filePath".!
-    if (result == 0) {
+    if (runCommand(List(filePath)) == 0) {
       logger.info(s"The file $filePath is well-formed.")
+      true
     } else {
       logger.info(s"The file $filePath is not well-formed.")
+      false
     }
-    result == 0
   }
-  def bscCheck(filePath: String) : Unit = {
+
+  def bscCheck(filePath: String): Unit = {
     require(filePath.nonEmpty, "Filename is not specified.")
     require(filePath.endsWith(".bsv"), "The file is not a cryptol file.")
     require(toolInstalled, "BlueSpec is not in the path.")
     require(FileUtil.fileExists(filePath), "The file does not exist.")
   }
 
-  private def generateFile(filePath: String, flag: String, fileEnding : String): String = {
+  private def generateFile(filePath: String, flag: String, fileEnding: String): String = {
     bscCheck(filePath)
     logger.info("BlueSpec generating file " + filePath)
     val result = runCommand(List(flag, filePath))

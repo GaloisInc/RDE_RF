@@ -8,7 +8,7 @@ class CDocumentInfo(
                        override val documentName: String,
                        override val filePath: String,
                        override val documentType: DocumentType.Value = DocumentType.C,
-                     ) extends DocumentInfo {
+                     ) extends DocumentInfo[CDocumentInfo] {
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")
@@ -24,10 +24,15 @@ class CDocumentInfo(
     new CDocumentInfo(documentName, filePath, documentType)
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): CDocumentInfo = {
     copy()
   }
 
+  override def updateFilePath(newFilePath: String): CDocumentInfo = {
+    require(FileUtil.getFileType(newFilePath) == "c", "File path must be a C file")
+    require(FileUtil.fileExists(newFilePath), "File path must exist")
+    copy(filePath = newFilePath)
+  }
 
   override lazy val getAllReferences: Set[DocReference] = {
     Set.empty[DocReference]

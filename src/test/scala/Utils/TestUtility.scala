@@ -1,15 +1,16 @@
-package TestUtils
+package Utils
 
-import DocumentEnrichers.DocumentEnricher
+import DocumentEnrichers.{ACSLDocumentEnricher, BSVDocumentEnricher, CryptolDocumentEnricher, DocumentEnricher, LandoDocumentEnricher, LobotDocumentEnricher, SVDocumentEnricher, SysMLDocumentEnricher}
+import Types.DocumentInfos.{BSVDocumentInfo, CDocumentInfo, CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, LobotDocumentInfo, SVDocumentInfo, SysMLDocumentInfo}
 import Types.{DocumentType, ReferenceType}
 import Utils.FileUtil
 
-class TestUtility {
+trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
   def checkExtractReferences(fileName: String,
-                             documentEnricher: DocumentEnricher,
+                             documentEnricher: T,
                              expectedDocumentType: DocumentType.Value,
                              resourceFolderName: String,
-                             numberExprectedSystem: Int = 0,
+                             numberExpectedSystem: Int = 0,
                              numberOfSubSystem: Int = 0,
                              numberOfComponent: Int = 0,
                              numberOfRequirements: Int = 0,
@@ -32,7 +33,7 @@ class TestUtility {
     assert(analyzedDocument.documentType == expectedDocumentType, "Document type is not correct")
 
     val extractedReferences = analyzedDocument.getAllReferences
-    assert(extractedReferences.count(_.getReferenceType == ReferenceType.System) == numberExprectedSystem, "Number of system references is not correct. Expected: " + numberExprectedSystem + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.System))
+    assert(extractedReferences.count(_.getReferenceType == ReferenceType.System) == numberExpectedSystem, "Number of system references is not correct. Expected: " + numberExpectedSystem + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.System))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.SubSystem) == numberOfSubSystem, "Number of subsystem references is not correct. Expected: " + numberOfSubSystem + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.SubSystem))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Component) == numberOfComponent, "Number of component references is not correct. Expected: " + numberOfComponent + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Component))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Requirement) == numberOfRequirements, "Number of requirement references is not correct. Expected: " + numberOfRequirements + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Requirement))
@@ -44,5 +45,19 @@ class TestUtility {
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Scenario) == numberOfScenarios, "Number of scenario references is not correct. Expected: " + numberOfScenarios + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Scenario))
     true
   }
-
 }
+
+object TestUtilityLando extends TestUtility[LandoDocumentInfo, LandoDocumentEnricher]
+object TestUtilityLobot extends TestUtility[LobotDocumentInfo, LobotDocumentEnricher]
+object TestUtilitySysml extends TestUtility[SysMLDocumentInfo, SysMLDocumentEnricher]
+object TestUtilityCryptol extends TestUtility[CryptolDocumentInfo, CryptolDocumentEnricher]
+object TestUtilitySV extends TestUtility[SVDocumentInfo, SVDocumentEnricher]
+object TestUtilityBSV extends TestUtility[BSVDocumentInfo, BSVDocumentEnricher]
+object TestUtilityACSL extends TestUtility[CDocumentInfo, ACSLDocumentEnricher]
+
+
+
+
+
+
+

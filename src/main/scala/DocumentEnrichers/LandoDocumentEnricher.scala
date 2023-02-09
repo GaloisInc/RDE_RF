@@ -12,7 +12,7 @@ import scala.io.{Codec, Source}
 import scala.util.matching.Regex
 
 class LandoDocumentEnricher(override val formatterType: LatexFormatter,
-                            override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) with Logging {
+                            override val skipTodos: Boolean = true) extends DocumentEnricher[LandoDocumentInfo](formatterType, skipTodos) with Logging {
 
 
   val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
@@ -38,12 +38,12 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
 
     logger.info(s"Finished parsing lando file $filePath")
     new LandoDocumentInfo(fileName, filePath, references, enrichedRelations, events, requirements, scenarios)
-  } ensuring ((landoDoc: DocumentInfo) =>
+  } ensuring ((landoDoc: LandoDocumentInfo) =>
     landoDoc.documentType == DocumentType.Lando
       && landoDoc.filePath == filePath
       && landoDoc.documentName == FileUtil.getFileName(filePath))
 
-  override def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: LandoDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     val referenceTypesOfComponent = Set(ReferenceType.Component, ReferenceType.System, ReferenceType.SubSystem)
     getLineType(line, documentInfo.filePath) match {
@@ -209,8 +209,6 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     }
     }
   }
-
-
 }
 
 

@@ -8,7 +8,7 @@ class SawDocumentInfo(
                        override val documentName: String,
                        override val filePath: String,
                        override val documentType: DocumentType.Value = DocumentType.Saw,
-                     ) extends DocumentInfo {
+                     ) extends DocumentInfo[SawDocumentInfo] {
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")
@@ -24,8 +24,14 @@ class SawDocumentInfo(
     new SawDocumentInfo(documentName, filePath, documentType)
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): SawDocumentInfo = {
     copy()
+  }
+
+  override def updateFilePath(newFilePath: String): SawDocumentInfo = {
+    require(FileUtil.getFileType(newFilePath) == "saw", "File path must be a Saw file")
+    require(FileUtil.fileExists(newFilePath), "File path must exist")
+    copy(filePath = newFilePath)
   }
 
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)

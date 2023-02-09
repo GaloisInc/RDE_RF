@@ -6,6 +6,7 @@ import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types.{DocRelation, DocRelationFromParser, ReferenceName}
 import Utils.Matcher
 
+/*
 trait Enricher {
   def enrich(doc: Array[ParsedDocument]): Array[DocumentInfo]
 }
@@ -25,5 +26,5 @@ object LandoEnricher {
     assert(targetReference.nonEmpty, s"Relation target reference not found: ${relation.getTargetName} in $docName")
     new DocRelation(relation.documentName, relation.relationReference, relation.relationType, relation.originalLine, sourceReference.headOption, targetReference.headOption)
   } ensuring (res => res.documentName == relation.documentName && res.getRelationType == relation.relationType && res.originalLine == relation.originalLine)
-
 }
+ */

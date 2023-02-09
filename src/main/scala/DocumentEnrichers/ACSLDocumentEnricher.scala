@@ -6,7 +6,7 @@ import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
 class ACSLDocumentEnricher(override val formatterType: LatexFormatter,
-                           override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) with Logging  {
+                           override val skipTodos: Boolean = true) extends DocumentEnricher[CDocumentInfo](formatterType, skipTodos) with Logging {
 
   def parseDocument(filePath: String): CDocumentInfo = {
     require(filePath.nonEmpty, "filePath must not be empty")
@@ -17,12 +17,11 @@ class ACSLDocumentEnricher(override val formatterType: LatexFormatter,
     val fileName = FileUtil.getFileName(filePath)
     logger.info(s"Parsing file $filePath")
 
-
     new CDocumentInfo(fileName, filePath)
   }
 
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: CDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     line match {
       case _ => line

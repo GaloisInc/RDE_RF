@@ -10,12 +10,13 @@ import org.apache.logging.log4j.scala.Logging
 import java.io.{File, PrintWriter}
 import scala.io.{Codec, Source}
 
-abstract class DocumentEnricher(val formatterType: LatexFormatter,
-                                val skipTodos: Boolean = false) extends Logging {
+abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFormatter,
+                                                      val skipTodos: Boolean = false) extends Logging {
   val latexFormatter = new ReferenceFormatter(formatterType)
-  def parseDocument(fileString: String): DocumentInfo
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String
+  def parseDocument(fileString: String): T
+
+  def formatLine(line: String, documentInfo: T): String
 
   /**
    * Decorates a file with the enriched text
@@ -23,7 +24,7 @@ abstract class DocumentEnricher(val formatterType: LatexFormatter,
    * @param documentInfo DocumentInfo
    * @return Path to the decorated file
    */
-  def decorateFile(documentInfo: DocumentInfo): String = {
+  def decorateFile(documentInfo: T): String = {
     logger.info(s"Decorating file ${documentInfo.filePath}")
     val filePath = documentInfo.filePath
     val decoratedFilePath = FileUtil.decorateFileName(filePath)

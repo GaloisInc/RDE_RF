@@ -11,6 +11,7 @@ sealed trait LatexElement {
   def toLatex: String
 
   require(toLatex.nonEmpty, "The latex string cannot be empty")
+
   protected def formatInsideListing(content: String): String = content
 
 }
@@ -98,6 +99,7 @@ final case class LatexSection(
     val body = elements.map(_.toLatex).mkString("\n")
     s"$section\n$body"
   }
+
   override def getLabel: String = LatexSanitizer.sanitizeReferenceName(label)
 }
 
@@ -142,9 +144,9 @@ final case class Subsubsection(title: String,
   private def getTitle: String = LatexSanitizer.sanitizeName(title)
 }
 
-final case class CodeBlock(documentInfo: DocumentInfo,
-                           language: String,
-                           label: String) extends LatexElement with referencable {
+final case class CodeBlock[T <: DocumentInfo[T]](documentInfo: T,
+                                                 language: String,
+                                                 label: String) extends LatexElement with referencable {
   require(language.nonEmpty, "Code block language cannot be empty")
   require(label.nonEmpty, "Code block label cannot be empty")
 

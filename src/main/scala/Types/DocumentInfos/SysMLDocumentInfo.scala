@@ -18,7 +18,7 @@ class SysMLDocumentInfo(
                          items: Set[DocReference],
                          attributes: Set[DocReference],
                          override val documentType: DocumentType.Value = DocumentType.SysML
-                       ) extends DocumentInfo {
+                       ) extends DocumentInfo[SysMLDocumentInfo] {
 
   def copy(
             documentName: String = documentName,
@@ -69,7 +69,7 @@ class SysMLDocumentInfo(
 
   require(requirements.forall(_.getReferenceType == ReferenceType.Requirement))
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): SysMLDocumentInfo = {
     ref.getReferenceType match {
       case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
       case ReferenceType.System => copy(packages = packages.map(_.updateDocReference(ref)))
@@ -83,6 +83,10 @@ class SysMLDocumentInfo(
       case ReferenceType.Attribute => copy(attributes = attributes.map(_.updateDocReference(ref)))
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
+  }
+
+  override def updateFilePath(newFilePath: String): SysMLDocumentInfo = {
+    copy(filePath = newFilePath)
   }
 
   override lazy val getAllReferences: Set[DocReference] = {

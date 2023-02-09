@@ -12,7 +12,7 @@ object FileSpecs {
     })
   }
 
-  def allFilesOfCorrectType(filesToAnalyze: Set[String], supportedTypes: Set[String]): Boolean = {
+  private def allFilesOfCorrectType(filesToAnalyze: Set[String], supportedTypes: Set[String]): Boolean = {
     filesToAnalyze.forall(file => {
       assert(supportedTypes.exists(file.endsWith), s"File $file has unsupported type")
       true
@@ -24,21 +24,17 @@ object FileSpecs {
     allFilesExist(filesToAnalyze) && allFilesOfCorrectType(filesToAnalyze, supportedTypes)
   }
 
-  def allFilesAnalyzed(filesToAnalyze: Set[String], reportReference: ReportReference): Boolean = {
-    assert(allFilesExist(reportReference.allDocuments.map(_.filePath).toSet), "Not all of the analyzed files exist")
-
-    filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.BSV)
-    filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.Cryptol)
-    filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.Lando)
-    filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.SV)
-    filesAnalyzed(filesToAnalyze, reportReference.allDocuments, Types.DocumentType.SysML)
-
+  def allFilesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], reportReference: ReportReference): Boolean = {
+    filesAnalyzed(filesToAnalyze, reportReference.bsvDocuments, Types.DocumentType.BSV)
+    filesAnalyzed(filesToAnalyze, reportReference.cryptolDocuments, Types.DocumentType.Cryptol)
+    filesAnalyzed(filesToAnalyze, reportReference.landoDocuments, Types.DocumentType.Lando)
+    filesAnalyzed(filesToAnalyze, reportReference.svDocuments, Types.DocumentType.SV)
+    filesAnalyzed(filesToAnalyze, reportReference.sysmlDocuments, Types.DocumentType.SysML)
   }
 
-  def allFilesAnalyzed(filesToAnalyze: Set[String], documents: Array[DocumentInfo]): Boolean = {
+  def allFilesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], documents: Array[T]): Boolean = {
     val allDocuments = documents.map(_.filePath).toSet
     assert(allFilesExist(allDocuments), "Not all of the analyzed files exist")
-
     filesAnalyzed(filesToAnalyze, documents, Types.DocumentType.BSV)
     filesAnalyzed(filesToAnalyze, documents, Types.DocumentType.Cryptol)
     filesAnalyzed(filesToAnalyze, documents, Types.DocumentType.Lando)
@@ -47,7 +43,7 @@ object FileSpecs {
     true
   }
 
-  private def filesAnalyzed(filesToAnalyze: Set[String], documents: Array[DocumentInfo], documentType: Types.DocumentType.Value): Boolean = {
+  private def filesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], documents: Array[T], documentType: Types.DocumentType.Value): Boolean = {
     val extension = documentType.toString
     val files = documents.filter(_.filePath.endsWith(extension))
     val filesAnalyzedOfType = filesToAnalyze.filter(_.endsWith(extension))

@@ -10,7 +10,7 @@ import Utils.{Control, FileUtil}
 import scala.util.matching.Regex
 
 class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
-                              override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
+                              override val skipTodos: Boolean = true) extends DocumentEnricher[CryptolDocumentInfo](formatterType, skipTodos) {
   // Reads a Document to create an object of the necessary information to enrich the document.
   //Regex to match
   val typeRegex: Regex = """^type\s+(.*?)\s*=\s*.*""".r
@@ -36,7 +36,7 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: CryptolDocumentInfo): String = {
     val references = documentInfo.getAllReferences
 
     val relevantReferences = cleanString(line) match {

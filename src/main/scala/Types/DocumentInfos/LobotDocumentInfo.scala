@@ -13,7 +13,7 @@ class LobotDocumentInfo(
                          abstTypeDecl: Set[DocReferencePosition],
                          abstFunctionDecl: Set[DocReferencePosition],
                          override val documentType: DocumentType.Value = DocumentType.Lobot,
-                       ) extends DocumentInfo {
+                       ) extends DocumentInfo[LobotDocumentInfo] {
 
   require(documentType == DocumentType.Lobot, "Document type must be Lobot")
 
@@ -51,11 +51,15 @@ class LobotDocumentInfo(
     (checkDecl ++ kindDecl ++ typeDecl ++ abstTypeDecl ++ abstFunctionDecl).map(ref => ref.asInstanceOf[DocReference])
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): LobotDocumentInfo = {
     ref.getReferenceType match {
-      case ReferenceType.Type => copy(typeDecl = typeDecl).asInstanceOf[DocumentInfo]
+      case ReferenceType.Type => copy(typeDecl = typeDecl)
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
+  }
+
+  override def updateFilePath(newFilePath: String): LobotDocumentInfo = {
+    copy(filePath = newFilePath)
   }
 
   lazy val getRelations: Set[DocRelation] = Set.empty

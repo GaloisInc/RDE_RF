@@ -12,6 +12,7 @@ import org.scalatest.matchers.should
 import java.io.File
 
 class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
+  private val authorName: String = "TestAuthor"
 
   "ObjectConfigGenerator" should "generate a config object" in {
     val documentAnalyzer = new LandoDocumentEnricher(new InlineFormatter())
@@ -22,7 +23,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
     val filePath = filesToAnalyze.head
     val title = "Lando"
     val folder = getClass.getResource("./").getPath
-    val report = ReportReference(title, folder, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty,Array.empty, PaperLayout.A4)
+    val report = ReportReference(title, authorName, folder, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, Array.empty, PaperLayout.A4)
 
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test")
 
@@ -53,9 +54,9 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val reportName = "Report_Refinements"
     val reportPath = getClass.getResource(".").getPath
-    val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
+    val latexDocumentData = LatexDocumentData(reportName, authorName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(filesOfSupportTypes.toSet, latexDocumentData, Set.empty[RefinementModel], false)
+    val report = DocumentAnalyzer.generateReport(filesOfSupportTypes.toSet, latexDocumentData, Set.empty[RefinementModel], sortFiles = false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit")
 
     reportFilePath should not be null
@@ -88,9 +89,9 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val reportName = "Report_Refinements_None"
     val reportPath = getClass.getResource(".").getPath
-    val latexDocumentData = LatexDocumentData(reportName, reportPath, PaperLayout.A4, new InlineFormatter())
+    val latexDocumentData = LatexDocumentData(reportName, authorName, reportPath, PaperLayout.A4, new InlineFormatter())
 
-    val report = DocumentAnalyzer.generateReport(supportedTypes.toSet, latexDocumentData, Set.empty[RefinementModel], false)
+    val report = DocumentAnalyzer.generateReport(supportedTypes.toSet, latexDocumentData, Set.empty[RefinementModel], sortFiles = false)
     val reportFilePath = ObjectConfigGenerator.generateRefinementConfigFile(report, "test_explicit_none")
 
     reportFilePath should not be null

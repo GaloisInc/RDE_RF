@@ -5,7 +5,7 @@ import Types.DocumentInfos.{DocumentInfo, LobotDocumentInfo}
 import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
-class LobotDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher(formatterType) with Logging {
+class LobotDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher[LobotDocumentInfo](formatterType) with Logging {
   // Reads a Document to create an object of the necessary information to enrich the document.
 
   def parseDocument(filePath: String): LobotDocumentInfo = {
@@ -21,7 +21,7 @@ class LobotDocumentEnricher(override val formatterType: LatexFormatter) extends 
     new LobotDocumentInfo(fileName, filePath, Set(), Set(), Set(), Set(), Set())
   }
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: LobotDocumentInfo): String = {
     line match {
       case _ => line
     }

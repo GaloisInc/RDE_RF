@@ -1,12 +1,11 @@
 package Types.DocumentInfos
 
 import Formatter.LatexSanitizer
-import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.{DocRelation, DocumentType, FileType}
 import Utils.FileUtil
 
-abstract class DocumentInfo {
+abstract class DocumentInfo[+T <: DocumentInfo[T]] {
   def documentName: String
 
   def filePath: String
@@ -49,11 +48,15 @@ abstract class DocumentInfo {
 
   def getCaption: String = s"$getLanguage Model of ${LatexSanitizer.sanitizeName(documentName)}"
 
-  def updateReference (ref: DocReference): DocumentInfo
+  def updateReference (ref: DocReference): T
+
+  def updateReferences (refs: Set[DocReference]): T = {
+    refs.foldLeft(this.asInstanceOf[T])((doc, ref) => doc.updateReference(ref))
+  }
+
+  def updateFilePath (newFilePath: String): T
 
 }
-
-
 
 
 

@@ -7,6 +7,8 @@ import org.apache.logging.log4j.scala.Logging
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
 import scala.io.{Codec, Source}
+import scala.language.existentials
+import scala.reflect.ClassTag
 import scala.reflect.io.Directory
 
 
@@ -59,11 +61,9 @@ object FileUtil extends Logging {
 
   def findSourceFiles(sourcePath: String, fileTypesOfTypesOfInterest: Set[String]): Array[String] = {
     require(fileTypesOfTypesOfInterest.nonEmpty, "fileTypesOfTypesOfInterest must not be empty")
-
     val sourceDir = new File(sourcePath)
     require(sourceDir.exists(), "Source directory does not exist")
     require(sourceDir.isDirectory, "Source path is not a directory")
-
     val directory = new Directory(sourceDir)
 
     val files = directory.deepFiles.withFilter(
@@ -73,38 +73,9 @@ object FileUtil extends Logging {
     files.map(_.path)
   } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
 
-  def getLandoDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lando)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lando))
-
-  def getCDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(_.documentType == DocumentType.C)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.C))
-
-  def getSysMLDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.SysML)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SysML))
-
-  def getCryptolDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Cryptol)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Cryptol))
-
-  def getBlusSpecDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.BSV)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.BSV))
-
-  def getSystemVerilogDocumetns(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.SV)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.SV))
-
-  def getLobotDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Lobot)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Lobot))
-
-  def getSawDocuments(enrichedDocuments: Array[DocumentInfo]): Array[DocumentInfo] = {
-    enrichedDocuments.filter(doc => doc.documentType == DocumentType.Saw)
-  } ensuring ((docs: Array[DocumentInfo]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == DocumentType.Saw))
-
+  def getDocumentsOfType[R : ClassTag, T <: DocumentInfo[T]](enrichedDocuments: Array[T], documentType: Types.DocumentType.Value): Array[R] = {
+    enrichedDocuments.filter(doc => doc.documentType == documentType).map(_.asInstanceOf[R])
+  } //ensuring ((docs: Array[R]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == documentType))
 
   def getFileName(path: String): String = {
     require(path.nonEmpty, "Path is empty")
@@ -116,11 +87,10 @@ object FileUtil extends Logging {
   def getFileType(path: String): String = {
     require(path.nonEmpty, "Path is empty")
     require(path.contains('.'), "Path does not contain a file type" + path)
-    require(path.split('.').takeRight(1).headOption.isDefined, s"Path ${path} does not contain a file type after the last dot")
+    require(path.split('.').takeRight(1).headOption.isDefined, s"Path $path does not contain a file type after the last dot")
     val fileType = path.split('.').takeRight(1).head
-    fileType.matches("[a-zA-Z0-9]+") match {
-      case true => fileType
-      case false => throw new Exception(s"File type ${fileType} is not valid")
+    if (fileType.matches("[a-zA-Z0-9]+")) fileType else {
+      throw new Exception(s"File type $fileType is not valid")
     }
   } ensuring ((fileName: String) => {
     assert(fileName.nonEmpty, "File type is empty")

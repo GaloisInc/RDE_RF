@@ -9,7 +9,7 @@ import org.apache.logging.log4j.scala.Logging
 
 import scala.util.matching.Regex
 
-class SVDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher(formatterType) with Logging {
+class SVDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher[SVDocumentInfo](formatterType) with Logging {
   // Reads a Document to create an object of the necessary information to enrich the document.
   val subsystemRegex: Regex = """^module\s+(\w+)\s*""".r
 
@@ -28,7 +28,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     new SVDocumentInfo(fileName, filePath, modules)
   }
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: SVDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     line match {
       case subsystemRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))

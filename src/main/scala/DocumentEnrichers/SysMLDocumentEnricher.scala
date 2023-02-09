@@ -10,10 +10,10 @@ import Utils.{Control, FileUtil}
 import scala.util.matching.Regex
 
 class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
-                            override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
+                            override val skipTodos: Boolean = true) extends DocumentEnricher[SysMLDocumentInfo](formatterType, skipTodos) {
 
-  val systemRegex: Regex = """^(?:package)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r
-  val componentRegex: Regex = """^(?:abstract)?\s*(?:item)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
+  val systemRegex: Regex = """^package\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r
+  val componentRegex: Regex = """^(?:abstract)?\s*item\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val subsystemRegex: Regex = """^(?:abstract)?\s*part\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val attributeRegex: Regex = """^(?:abstract)?\s*attribute\s*(?:def)?\s*(?:id)?\s*(?=.)\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val requirementRegex: Regex = """^requirement\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
@@ -64,7 +64,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: SysMLDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     cleanString(line) match {
       case systemRegex(_, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))

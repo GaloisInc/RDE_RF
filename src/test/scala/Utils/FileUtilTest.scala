@@ -40,7 +40,7 @@ class FileUtilTest extends AnyFlatSpec with should.Matchers {
     val directory = getClass.getResource("../lando").getPath
     FileUtil.findSourceFiles(directory, Set("cry")) should be(Array.empty[String])
     FileUtil.findSourceFiles(directory, Set("lando")).length should be(13)
-    FileUtil.findSourceFiles(directory, Set("lando", "cry")).length should be(13)
+    FileUtil.findSourceFiles(directory, Set("lando", "cry")).length should be(26)
   }
 
 }

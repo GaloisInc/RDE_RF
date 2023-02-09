@@ -8,7 +8,7 @@ class SVDocumentInfo(
                       override val filePath: String,
                       modules: Set[DocReference],
                       override val documentType: DocumentType.Value = DocumentType.SV,
-                    ) extends DocumentInfo {
+                    ) extends DocumentInfo[SVDocumentInfo] {
 
   def copy(
             documentName: String = documentName,
@@ -19,12 +19,16 @@ class SVDocumentInfo(
     new SVDocumentInfo(documentName, filePath, modules, documentType)
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): SVDocumentInfo = {
     require(ref.getReferenceType == ReferenceType.System, "SVDocumentInfo can only update module references")
     ref.getReferenceType match {
       case ReferenceType.System => copy(modules = modules.map(_.updateDocReference(ref)))
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
+  }
+
+  override def updateFilePath(newFilePath: String): SVDocumentInfo = {
+    copy(filePath = newFilePath)
   }
 
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System)

@@ -8,12 +8,14 @@ import java.io.File
 
 final case class LatexDocumentData(
                                     title: String,
+                                    author : String,
                                     folder: String,
                                     layout: PaperLayout,
                                     latexFormatter: LatexFormatter
                                   ) {
   require(title.nonEmpty, "Title must not be empty")
   require(folder.nonEmpty, "Folder must not be empty")
+  require(author.nonEmpty, "Author must not be empty")
 
   require(layout == PaperLayout.A4 || layout == PaperLayout.B4, "Layout must be A4 or B4")
   require(latexFormatter != null, "LatexFormatter must not be null")

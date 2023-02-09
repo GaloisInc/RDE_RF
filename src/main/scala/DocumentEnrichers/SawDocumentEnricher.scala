@@ -5,7 +5,7 @@ import Types.DocumentInfos.{DocumentInfo, SawDocumentInfo}
 import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
-class SawDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher(formatterType) with Logging {
+class SawDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher[SawDocumentInfo](formatterType) with Logging {
   // Reads a Document to create an object of the necessary information to enrich the document.
 
   def parseDocument(filePath: String): SawDocumentInfo = {
@@ -21,7 +21,7 @@ class SawDocumentEnricher(override val formatterType: LatexFormatter) extends Do
     new SawDocumentInfo(fileName, filePath)
   }
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: SawDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     line match {
       case _ => line

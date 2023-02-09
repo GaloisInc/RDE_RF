@@ -13,7 +13,7 @@ class LandoDocumentInfo(
                          requirements: Set[DocReference],
                          scenarios: Set[DocReference],
                          override val documentType: DocumentType.Value = DocumentType.Lando,
-                       ) extends DocumentInfo {
+                       ) extends DocumentInfo[LandoDocumentInfo] {
 
   require(documentType == DocumentType.Lando, "Document type must be Lando")
 
@@ -39,7 +39,7 @@ class LandoDocumentInfo(
     )
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): LandoDocumentInfo = {
     ref.getReferenceType match {
       case Types.ReferenceType.Component | Types.ReferenceType.System | Types.ReferenceType.SubSystem =>
         val newReferences = references.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
@@ -55,7 +55,10 @@ class LandoDocumentInfo(
         copy(events = newEvents)
       case _ => throw new Exception("Unknown reference type")
     }
+  }
 
+  override def updateFilePath(newFilePath: String): LandoDocumentInfo = {
+    copy(filePath = newFilePath)
   }
 
 

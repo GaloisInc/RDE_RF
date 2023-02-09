@@ -9,7 +9,7 @@ import Utils.{Control, FileUtil}
 import scala.util.matching.Regex
 
 class BSVDocumentEnricher(override val formatterType: LatexFormatter,
-                          override val skipTodos: Boolean = true) extends DocumentEnricher(formatterType, skipTodos) {
+                          override val skipTodos: Boolean = true) extends DocumentEnricher[BSVDocumentInfo](formatterType, skipTodos) {
 
   val systemRegex: Regex = """^package\s+(\w+)\s*""".r
   val subsystemRegex: Regex = """^module\s+(\w+)\s*\((\w+)\)\s*""".r
@@ -31,7 +31,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     new BSVDocumentInfo(fileName, filePath, packages, modules)
   }
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
+  def formatLine(line: String, documentInfo: BSVDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     cleanLine(line) match {
       case systemRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))

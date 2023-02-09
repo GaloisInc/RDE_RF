@@ -10,7 +10,7 @@ class BSVDocumentInfo(
                        packages: Set[DocReference],
                        modules: Set[DocReference],
                        override val documentType: DocumentType.Value = DocumentType.BSV,
-                     ) extends DocumentInfo {
+                     ) extends DocumentInfo[BSVDocumentInfo] {
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")
@@ -33,11 +33,17 @@ class BSVDocumentInfo(
     new BSVDocumentInfo(documentName, filePath, packages, modules, documentType)
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): BSVDocumentInfo = {
     require(ref.getDocumentType == documentType && ref.documentName == documentName, "Can only update references to the same document")
     val newPackages = packages.map(_.updateDocReference(ref))
     val newModules = modules.map(_.updateDocReference(ref))
     copy(packages = newPackages, modules = newModules)
+  }
+
+  override def updateFilePath(newFilePath: String): BSVDocumentInfo = {
+    require(FileUtil.getFileType(newFilePath) == "bsv", "File path must be a BSV file")
+    require(FileUtil.fileExists(newFilePath), "File path must exist")
+    copy(filePath = newFilePath)
   }
 
   private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)

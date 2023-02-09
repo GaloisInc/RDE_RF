@@ -127,7 +127,7 @@ object DocumentationEnhancerApp extends App with Logging {
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
-      val latexGenerationData = LatexDocumentData(latexTitle, targetFolder, latexDimensions._1, latexDimensions._2)
+      val latexGenerationData = LatexDocumentData(latexTitle, "Refinement Finder by Galois, Inc", targetFolder, latexDimensions._1, latexDimensions._2)
 
       val documentReport: ReportReference = generateReport(refinementFile, filteredFiles, latexGenerationData)
 

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
+  private val authorName: String = "TestAuthor"
 
   "Latex" should "be in Path" in {
     LatexGenerator.toolInstalled should be(true)
@@ -137,7 +138,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       // use directory.mkdirs(); here instead.
     }
     val latexName = "Test_SourceReport_A4"
-    val latexDocumentData = LatexDocumentData(latexName, directory.getPath, PaperLayout.A4, new InlineFormatter())
+    val latexDocumentData = LatexDocumentData(latexName, authorName, directory.getPath, PaperLayout.A4, new InlineFormatter())
 
     generateReport(latexDocumentData)
   }
@@ -149,7 +150,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       directory.mkdir
     }
     val latexName = "Test_SourceReport_B4"
-    val latexDocumentData = LatexDocumentData(latexName, directory.getPath, PaperLayout.B4, new MarginFomatter())
+    val latexDocumentData = LatexDocumentData(latexName, authorName, directory.getPath, PaperLayout.B4, new MarginFomatter())
 
     generateReport(latexDocumentData)
   }
@@ -169,7 +170,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
 
     val filesOfSupportTypes = filesToAnalyze.filter(file => Analyzers.AnalyzerSettings.supportedDocumentTypesString.contains(FileUtil.getFileType(file)))
 
-    val referenceReport = DocumentAnalyzer.generateReport(filesOfSupportTypes, latexDocumentData, Set.empty[RefinementModel], true)
+    val referenceReport = DocumentAnalyzer.generateReport(filesOfSupportTypes, latexDocumentData, Set.empty[RefinementModel])
     LatexGenerator.generateLatexReportOfSources(referenceReport)
 
     //Ensure that the file was created

@@ -59,7 +59,7 @@ object LatexGenerator extends Logging with CommandLineTool {
 
     val sections = List(landoSection, lobotSection, sysmlSection, cryptolSection, sawSection, svSection, bsvSection, cSection)
     val listingFormatting = ListingFormatting.createDefault(report.folder)
-    val latexDocument = LatexDocument(report.title, reportAuthor, sections, report.layout, packages.toList, List(listingFormatting))
+    val latexDocument = LatexDocument(report.title, report.author, sections, report.layout, packages.toList, List(listingFormatting))
 
 
     val reportFileName = report.title.replaceAll(" ", "_")
@@ -70,8 +70,8 @@ object LatexGenerator extends Logging with CommandLineTool {
     filePath.toString
   }
 
-  private def includeListings[Doc <: DocumentInfo](sectionName: String,
-                                                   documents: Array[Doc],
+  private def includeListings[T <: DocumentInfo[T]](sectionName: String,
+                                                   documents: Array[T],
                                                    folder: String): IncludedFile = {
     require(folder.nonEmpty, "File path must not be empty")
     require(sectionName.nonEmpty, "Section name must not be empty")

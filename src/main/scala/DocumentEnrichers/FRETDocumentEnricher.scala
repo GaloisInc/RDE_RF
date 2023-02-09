@@ -36,12 +36,7 @@ class FRETDocumentEnricher() {
   } yield {
     FRETRequirement(reqid, parent_reqid, rationale, fulltext, semantics)
   }
-  /**
-   * Parses a FRET document
-   *
-   * @param fileString the file to parse
-   * @return the parsed document
-   */
+
   /*
 def parseDocument(filePath: String): FRETDocumentInfo = {
   require(filePath.nonEmpty, "filePath must not be empty")
@@ -86,9 +81,6 @@ def parseDocument(filePath: String): FRETDocumentInfo = {
     FileUtil.writeFile(outputFile, jsonString)
   }ensuring(FileUtil.fileExists(outputFile), "outputFile must exist")
 
-  def formatLine(line: String, documentInfo: DocumentInfo): String = {
-    line
-  }
 }
 
 

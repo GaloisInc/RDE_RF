@@ -11,7 +11,7 @@ class CryptolDocumentInfo(
                            functions: Set[DocReference],
                            properties: Set[DocReference],
                            override val documentType: DocumentType.Value = DocumentType.Cryptol,
-                         ) extends DocumentInfo {
+                         ) extends DocumentInfo[CryptolDocumentInfo] {
 
   require(documentType == DocumentType.Cryptol, "CryptolDocumentInfo must have documentType Cryptol")
 
@@ -47,7 +47,7 @@ class CryptolDocumentInfo(
     imports ++ types ++ properties ++ functions
   }
 
-  override def updateReference(ref: DocReference): DocumentInfo = {
+  override def updateReference(ref: DocReference): CryptolDocumentInfo = {
     ref.getReferenceType match {
       case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
       case ReferenceType.Type => copy(types = types.map(_.updateDocReference(ref)))
@@ -55,6 +55,10 @@ class CryptolDocumentInfo(
       case ReferenceType.Event => copy(functions = functions.map(_.updateDocReference(ref)))
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
+  }
+
+  override def updateFilePath(newFilePath: String): CryptolDocumentInfo = {
+    copy(filePath = newFilePath)
   }
 
   lazy val getRelations: Set[DocRelation] = Set.empty

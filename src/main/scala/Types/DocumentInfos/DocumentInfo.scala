@@ -1,11 +1,14 @@
 package Types.DocumentInfos
 
+import DocumentEnrichers.DocumentEnricher
 import Formatter.LatexSanitizer
 import Types.DocReference.DocReference
 import Types.{DocRelation, DocumentType, FileType}
 import Utils.FileUtil
 
-abstract class DocumentInfo[+T <: DocumentInfo[T]] {
+import java.nio.file.Paths
+
+abstract class DocumentInfo[T <: DocumentInfo[T]] {
   def documentName: String
 
   def filePath: String
@@ -47,8 +50,18 @@ abstract class DocumentInfo[+T <: DocumentInfo[T]] {
     refs.foldLeft(this.asInstanceOf[T])((doc, ref) => doc.updateReference(ref))
   }
 
+  def moveFile(destination: String): T = {
+    val destinationPath = Paths.get(destination, documentType.toString).toString
+    val newFilePath = FileUtil.moveRenameFile(filePath, destinationPath)
+    updateFilePath(newFilePath)
+  }
+
   def updateFilePath(newFilePath: String): T
 
+  def decorate[D <: DocumentEnricher[T]](decorator: D): T = {
+    val newFilePath = decorator.decorateFile(this.asInstanceOf[T])
+    updateFilePath(newFilePath)
+  }
 }
 
 

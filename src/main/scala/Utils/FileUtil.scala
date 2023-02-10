@@ -11,9 +11,7 @@ import scala.language.existentials
 import scala.reflect.ClassTag
 import scala.reflect.io.Directory
 
-
 object FileUtil extends Logging {
-
   // Method to remove all decorated files from a directory
   def deleteRecursivelyDecoratedFiles(path: String): Unit = {
     require(path.nonEmpty, "path must not be empty")
@@ -173,7 +171,6 @@ object FileUtil extends Logging {
     val fileName = source.split("/").takeRight(1).head
     assert(resPath.contains(fileName) && resPath.contains(destinationDirectory), "File was not moved to destination directory")
     assert(FileUtil.fileExists(resPath), "File has not been moved to the desired location:" + resPath)
-    //assert(!FileUtil.fileExists(source), "File still exists at path" + source)
     true
   })
 }

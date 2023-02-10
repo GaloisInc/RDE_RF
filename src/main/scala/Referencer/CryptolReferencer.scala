@@ -1,4 +1,4 @@
 package Referencer
 
-import Types.DocumentInfos.{CryptolDocumentInfo, SysMLDocumentInfo}
-class CryptolReferencer extends Referencer[CryptolDocumentInfo, SysMLDocumentInfo, CryptolDocumentInfo] {}
+import Types.DocumentInfos.{BSVDocumentInfo, CryptolDocumentInfo, SysMLDocumentInfo}
+object CryptolReferencer extends Referencer[CryptolDocumentInfo, SysMLDocumentInfo, BSVDocumentInfo] {}

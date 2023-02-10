@@ -1,5 +1,6 @@
 package Report.ReportTypes
 
+import DocumentEnrichers.DocumentEnricher
 import Report.PaperLayout
 import Report.PaperLayout.PaperLayout
 import Types.DocReference.DocReference
@@ -15,22 +16,55 @@ final case class Documents(
                             bsvDocuments: Array[BSVDocumentInfo],
                             svDocuments: Array[SVDocumentInfo],
                             cDocuments: Array[CDocumentInfo],
-                          )
+                          ) {
+
+  lazy val documentNamesToPaths: Map[String, String] = {
+    val allDocuments = landoDocuments ++ lobotDocuments ++ sysmlDocuments ++ cryptolDocuments ++ sawDocuments ++ bsvDocuments ++ svDocuments ++ cDocuments
+    allDocuments.map(d => d.documentName -> d.filePath).toMap
+  }
+
+  lazy val getAllReferences: Array[DocReference] = {
+    val allDocuments = landoDocuments ++ lobotDocuments ++ sysmlDocuments ++ cryptolDocuments ++ sawDocuments ++ bsvDocuments ++ svDocuments ++ cDocuments
+    allDocuments.flatMap(_.getAllReferences)
+  }
+
+  def updateDocumentByName(documentName: String, docRef: DocReference): Documents = {
+    val allDocuments = landoDocuments ++ lobotDocuments ++ sysmlDocuments ++ cryptolDocuments ++ sawDocuments ++ bsvDocuments ++ svDocuments ++ cDocuments
+    allDocuments.find(_.documentName == documentName) match {
+      case Some(documentInfo) => documentInfo.documentType match {
+        case Types.DocumentType.Lando => copy(landoDocuments = landoDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.Lobot => copy(lobotDocuments = lobotDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.SysML => copy(sysmlDocuments = sysmlDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.Cryptol => copy(cryptolDocuments = cryptolDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.Saw => copy(sawDocuments = sawDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.SV => copy(svDocuments = svDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.BSV => copy(bsvDocuments = bsvDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+      }
+      case None => throw new IllegalArgumentException(s"Document $documentName not found")
+    }
+  }
+
+  def fromDocuments(documents: Array[DocumentInfo[_]]): Documents = {
+    val landoDocuments = documents.collect { case d: LandoDocumentInfo => d }
+    val lobotDocuments = documents.collect { case d: LobotDocumentInfo => d }
+    val sysmlDocuments = documents.collect { case d: SysMLDocumentInfo => d }
+    val cryptolDocuments = documents.collect { case d: CryptolDocumentInfo => d }
+    val sawDocuments = documents.collect { case d: SawDocumentInfo => d }
+    val bsvDocuments = documents.collect { case d: BSVDocumentInfo => d }
+    val svDocuments = documents.collect { case d: SVDocumentInfo => d }
+    val cDocuments = documents.collect { case d: CDocumentInfo => d }
+    Documents(landoDocuments, lobotDocuments, sysmlDocuments, cryptolDocuments, sawDocuments, bsvDocuments, svDocuments, cDocuments)
+  }
+}
 
 final case class ReportReference(
-                                     title: String,
-                                     author: String,
-                                     folder: String,
-                                     landoDocuments: Array[LandoDocumentInfo],
-                                     lobotDocuments: Array[LobotDocumentInfo],
-                                     sysmlDocuments: Array[SysMLDocumentInfo],
-                                     cryptolDocuments: Array[CryptolDocumentInfo],
-                                     sawDocuments: Array[SawDocumentInfo],
-                                     bsvDocuments: Array[BSVDocumentInfo],
-                                     svDocuments: Array[SVDocumentInfo],
-                                     cDocuments: Array[CDocumentInfo],
-                                     layout: PaperLayout = PaperLayout.A4,
-                                   ) {
+                                  title: String,
+                                  author: String,
+                                  folder: String,
+                                  documents: Documents,
+                                  layout: PaperLayout = PaperLayout.A4,
+                                ) {
 
 
   require(title.nonEmpty, "title must not be empty")
@@ -38,51 +72,12 @@ final case class ReportReference(
   require(author.nonEmpty, "author must not be empty")
   //require(allDocuments.nonEmpty, "At least one document must be provided")
   //require(FileSpecs.allFilesExist(allDocuments.map(_.filePath).toSet), "All documents must exist")
-
-  private def updateDocument[T <: DocumentInfo[T]](documentInfo: T, docRef: DocReference): ReportReference = {
-    documentInfo.documentType match {
-      case Types.DocumentType.Lando => copy(landoDocuments = landoDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.SysML => copy(sysmlDocuments = sysmlDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.Cryptol => copy(cryptolDocuments = cryptolDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.BSV => copy(bsvDocuments = bsvDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.SV => copy(svDocuments = svDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case Types.DocumentType.Saw => copy(sawDocuments = sawDocuments.map(d => if (d.documentName == documentInfo.documentName) d.updateReference(docRef) else d))
-      case _ => throw new IllegalArgumentException(s"Unknown document type ${documentInfo.documentType}")
-    }
+  lazy val allDocumentNamesToPaths: Map[String, String] = {
+    documents.documentNamesToPaths
   }
-
-  /*
-  def updateDocumentByName(documentName: String, docRef: DocReference): ReportReference[T] = {
-    allDocuments.find(_.documentName == documentName) match {
-      case Some(documentInfo) => updateDocument(documentInfo, docRef)
-      case None => throw new IllegalArgumentException(s"Document $documentName not found")
-    }
-  }
-   */
-
-  def allDocumentNamesToPaths: Map[String, String] = {
-    val landoDocumentMap = landoDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val lobotDocumentMap = lobotDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val sysmlDocumentMap = sysmlDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val cryptolDocumentMap = cryptolDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val sawDocumentMap = sawDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val bsvDocumentMap = bsvDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val svDocumentMap = svDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    val cDocumentMap = cDocuments.map(doc => doc.documentName -> doc.filePath).toMap
-    landoDocumentMap ++ lobotDocumentMap ++ sysmlDocumentMap ++ cryptolDocumentMap ++ sawDocumentMap ++ bsvDocumentMap ++ svDocumentMap ++ cDocumentMap
-  } //ensuring(_.size == allDocuments.length, "All documents must be present in the map")
 
   lazy val getAllReferences: Array[DocReference] = {
-    val landoRefs = landoDocuments.flatMap(_.getAllReferences)
-    val lobotRefs = lobotDocuments.flatMap(_.getAllReferences)
-    val sysmlRefs = sysmlDocuments.flatMap(_.getAllReferences)
-    val cryptolRefs = cryptolDocuments.flatMap(_.getAllReferences)
-    val sawRefs = sawDocuments.flatMap(_.getAllReferences)
-    val bsvRefs = bsvDocuments.flatMap(_.getAllReferences)
-    val svRefs = svDocuments.flatMap(_.getAllReferences)
-    val cRefs = cDocuments.flatMap(_.getAllReferences)
-    landoRefs ++ lobotRefs ++ sysmlRefs ++ cryptolRefs ++ sawRefs ++ bsvRefs ++ svRefs ++ cRefs
+    documents.getAllReferences
   }
 
   lazy val getNonRefinedReferences: Set[DocReference] = {
@@ -97,5 +92,15 @@ final case class ReportReference(
     referenced.toSet
   } //ensuring((refs: Set[DocReference]) => refs.subsetOf(getAllReferences.toSet), "All refined references must be in the set of all references")
 
-
+  def moveFiles(folder: String): ReportReference = {
+    val lando = documents.landoDocuments.map(d => d.moveFile(folder))
+    val lobot = documents.lobotDocuments.map(d => d.moveFile(folder))
+    val sysml = documents.sysmlDocuments.map(d => d.moveFile(folder))
+    val cryptol = documents.cryptolDocuments.map(d => d.moveFile(folder))
+    val saw = documents.sawDocuments.map(d => d.moveFile(folder))
+    val bsv = documents.bsvDocuments.map(d => d.moveFile(folder))
+    val sv = documents.svDocuments.map(d => d.moveFile(folder))
+    val c = documents.cDocuments.map(d => d.moveFile(folder))
+    copy(documents = Documents(lando, lobot, sysml, cryptol, saw, bsv, sv, c))
+  }
 }

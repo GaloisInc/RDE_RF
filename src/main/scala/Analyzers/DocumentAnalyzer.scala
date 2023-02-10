@@ -1,25 +1,19 @@
 package Analyzers
 
-import ConfigParser.RefinementModel
-import DocumentEnrichers._
+import ConfigParser.{FileDocRef, RefinementModel}
+import DocumentEnrichers.{DocumentEnricher, _}
 import Formatter.LatexFormatter
 import Referencer._
 import Report.ReportTypes.{Documents, ReportReference}
 import Specs.FileSpecs
 import Types.DocReference.DocReference
-import Types.DocumentInfos._
+import Types.DocumentInfos.{DocumentInfo, _}
 import Utils.{FileUtil, Matcher}
+
 import java.nio.file.Paths
 import scala.reflect.ClassTag
 
 object DocumentAnalyzer {
-  //Referencers
-  private val landoReferencer = new LandoReferencer()
-  private val sysMLReferencer = new SysMLReferencer()
-  private val cryptolReferencer = new CryptolReferencer()
-  private val bsvReferencer = new BlueSpecReferencer()
-  private val svReferencer = new SystemVerilogReferencer()
-
   val supportedTypes: Set[String] = AnalyzerSettings.supportedDocumentTypesString
 
   def generateReport(filesToAnalyze: Set[String],
@@ -36,29 +30,11 @@ object DocumentAnalyzer {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     require(FileSpecs.fileChecks(filesToAnalyze, supportedTypes), "Not all files exist or are of one of the supported types")
     val report: ReportReference = enrichFiles(filesToAnalyze, latexDocumentData, explicitRefinements)
-    val targetFolder = report.folder
-    report.copy(
-      landoDocuments = moveFiles[LandoDocumentInfo](report.landoDocuments, targetFolder, Types.DocumentType.Lando),
-      lobotDocuments = moveFiles[LobotDocumentInfo](report.lobotDocuments, targetFolder, Types.DocumentType.Lobot),
-      sysmlDocuments = moveFiles[SysMLDocumentInfo](report.sysmlDocuments, targetFolder, Types.DocumentType.SysML),
-      cryptolDocuments = moveFiles[CryptolDocumentInfo](report.cryptolDocuments, targetFolder, Types.DocumentType.Cryptol),
-      sawDocuments = moveFiles[SawDocumentInfo](report.sawDocuments, targetFolder, Types.DocumentType.Saw),
-      bsvDocuments = moveFiles[BSVDocumentInfo](report.bsvDocuments, targetFolder, Types.DocumentType.BSV),
-      svDocuments = moveFiles[SVDocumentInfo](report.svDocuments, targetFolder, Types.DocumentType.SV),
-      cDocuments = moveFiles[CDocumentInfo](report.cDocuments, targetFolder, Types.DocumentType.C)
-    )
+
+    report.moveFiles(report.folder)
   } //ensuring ((report: ReportReference) => FileSpecs.allFilesAnalyzed(filesToAnalyze, report))
 
-  private def moveFiles[A <: DocumentInfo[A]](filesToMove: Array[A], destination: String, documentType: Types.DocumentType.Value)
-                                             (implicit classTag: ClassTag[A]) = {
-    val destinationPath = Paths.get(destination, documentType.toString).toString
-    filesToMove.map(file => {
-      val filePath = FileUtil.moveRenameFile(file.filePath, destinationPath)
-      file.updateFilePath(filePath)
-    })
-  }
-
-  private def enrichFiles[T <: DocumentInfo[T]](filesToAnalyze: Set[String], latexDocumentData: LatexDocumentData, explicitReferences: Set[RefinementModel] = Set.empty[RefinementModel]): ReportReference = {
+  private def enrichFiles(filesToAnalyze: Set[String], latexDocumentData: LatexDocumentData, explicitReferences: Set[RefinementModel] = Set.empty[RefinementModel]): ReportReference = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     require(FileSpecs.fileChecks(filesToAnalyze, supportedTypes), "Not all files exist or are of one of the supported types")
     val formatter = latexDocumentData.latexFormatter
@@ -68,48 +44,48 @@ object DocumentAnalyzer {
       latexDocumentData.title,
       latexDocumentData.author,
       latexDocumentData.folder,
-      enrichedDocuments.landoDocuments,
-      enrichedDocuments.lobotDocuments,
-      enrichedDocuments.sysmlDocuments,
-      enrichedDocuments.cryptolDocuments,
-      enrichedDocuments.sawDocuments,
-      enrichedDocuments.bsvDocuments,
-      enrichedDocuments.svDocuments,
-      enrichedDocuments.cDocuments,
+      enrichedDocuments,
       latexDocumentData.layout
     )
-    val updatedReport = addExplicitRefinements(report, explicitReferences)
+    val updatedReport = report // addExplicitRefinements(report, explicitReferences)
 
     enrichReport(updatedReport, formatter)
   } ensuring ((res: ReportReference) => FileSpecs.allFilesAnalyzed(filesToAnalyze, res))
 
+  private def enricherPerDocumentType[T <: DocumentInfo[T], D <: DocumentEnricher[T]](formatter: LatexFormatter, doc: T): D = {
+    doc.documentType match {
+      case Types.DocumentType.Lando => new LandoDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.Lobot => new LobotDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.SysML => new SysMLDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.Cryptol => new CryptolDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.Saw => new SawDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.BSV => new BSVDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.SV => new SVDocumentEnricher(formatter).asInstanceOf[D]
+      case Types.DocumentType.C => new ACSLDocumentEnricher(formatter).asInstanceOf[D]
+    }
+  }
 
   private def enrichReport(reportReference: ReportReference, formatter: LatexFormatter): ReportReference = {
-    def decorateFiles[T <: DocumentInfo[T]](filesToDecorate: Array[T], enricher: DocumentEnricher[T])(implicit ct: ClassTag[T]): Array[T] = {
-      filesToDecorate.map(file => {
-        file.updateFilePath(enricher.decorateFile(file))
-      })
-    }
+    val lando = reportReference.documents.landoDocuments.map(doc => doc.decorate(enricherPerDocumentType[LandoDocumentInfo, LandoDocumentEnricher](formatter, doc)))
+    val lobot = reportReference.documents.lobotDocuments.map(doc => doc.decorate(enricherPerDocumentType[LobotDocumentInfo, LobotDocumentEnricher](formatter, doc)))
+    val sysML = reportReference.documents.sysmlDocuments.map(doc => doc.decorate(enricherPerDocumentType[SysMLDocumentInfo, SysMLDocumentEnricher](formatter, doc)))
+    val cryptol = reportReference.documents.cryptolDocuments.map(doc => doc.decorate(enricherPerDocumentType[CryptolDocumentInfo, CryptolDocumentEnricher](formatter, doc)))
+    val saw = reportReference.documents.sawDocuments.map(doc => doc.decorate(enricherPerDocumentType[SawDocumentInfo, SawDocumentEnricher](formatter, doc)))
+    val bsv = reportReference.documents.bsvDocuments.map(doc => doc.decorate(enricherPerDocumentType[BSVDocumentInfo, BSVDocumentEnricher](formatter, doc)))
+    val sv = reportReference.documents.svDocuments.map(doc => doc.decorate(enricherPerDocumentType[SVDocumentInfo, SVDocumentEnricher](formatter, doc)))
+    val c = reportReference.documents.cDocuments.map(doc => doc.decorate(enricherPerDocumentType[CDocumentInfo, ACSLDocumentEnricher](formatter, doc)))
 
-    reportReference.copy(
-      landoDocuments = decorateFiles(reportReference.landoDocuments, new LandoDocumentEnricher(formatter)),
-      lobotDocuments = decorateFiles(reportReference.lobotDocuments, new LobotDocumentEnricher(formatter)),
-      sysmlDocuments = decorateFiles(reportReference.sysmlDocuments, new SysMLDocumentEnricher(formatter)),
-      cryptolDocuments = decorateFiles(reportReference.cryptolDocuments, new CryptolDocumentEnricher(formatter)),
-      sawDocuments = decorateFiles(reportReference.sawDocuments, new SawDocumentEnricher(formatter)),
-      bsvDocuments = decorateFiles(reportReference.bsvDocuments, new BSVDocumentEnricher(formatter)),
-      svDocuments = decorateFiles(reportReference.svDocuments, new SVDocumentEnricher(formatter)),
-      cDocuments = decorateFiles(reportReference.cDocuments, new ACSLDocumentEnricher(formatter))
-    )
+    val updatedDocuments = Documents(lando, lobot, sysML, cryptol, saw, bsv, sv, c)
+    reportReference.copy(documents = updatedDocuments)
   }
 
 
   private def parseDocumentsOfType[T <: DocumentInfo[T], D <: DocumentEnricher[T]](
                                                                                     files: Array[String],
                                                                                     documentType: Types.DocumentType.Value,
-                                                                                    documentParser: D)(implicit classTag: ClassTag[T]): Array[T] = {
+                                                                                    parser: D)(implicit classTag: ClassTag[T]): Array[T] = {
     val filesOfType = files.filter(file => FileUtil.getFileType(file).compareToIgnoreCase(documentType.toString) == 0)
-    filesOfType.map(file => documentParser.parseDocument(file))
+    filesOfType.map(file => parser.parseDocument(file))
   }
 
   private def enrichDocuments(filesToAnalyze: Array[String], formatter: LatexFormatter): Documents = {
@@ -125,12 +101,13 @@ object DocumentAnalyzer {
     val svDocuments: Array[SVDocumentInfo] = parseDocumentsOfType[SVDocumentInfo, SVDocumentEnricher](filesToAnalyze, Types.DocumentType.SV, new SVDocumentEnricher(formatter))
     val cDocuments: Array[CDocumentInfo] = parseDocumentsOfType[CDocumentInfo, ACSLDocumentEnricher](filesToAnalyze, Types.DocumentType.C, new ACSLDocumentEnricher(formatter))
 
-    val enrichedCryptolDocuments = cryptolDocuments.map(doc => cryptolReferencer.addRefinementRelations(doc, sysMLDocuments, Array.empty[CryptolDocumentInfo]))
-    val enrichedSysMLDocuments = sysMLDocuments.map(doc => sysMLReferencer.addRefinementRelations(doc, landoDocuments, enrichedCryptolDocuments))
-    val enrichedLandoDocuments = landoDocuments.map(doc => landoReferencer.addRefinementRelations(doc, Array.empty[LandoDocumentInfo], enrichedSysMLDocuments))
-    val enrichedBSVDocuments = bsvDocuments.map(doc => bsvReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[BSVDocumentInfo]))
-    val enrichedSVDocuments = svDocuments.map(doc => svReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[SVDocumentInfo]))
+    val enrichedBSVDocuments = bsvDocuments.map(doc => BlueSpecReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[BSVDocumentInfo]))
+    val enrichedSVDocuments = svDocuments.map(doc => SystemVerilogReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[SVDocumentInfo]))
+    val enrichedCryptolDocuments = cryptolDocuments.map(doc => CryptolReferencer.addRefinementRelations(doc, sysMLDocuments, enrichedBSVDocuments))
+    val enrichedSysMLDocuments = sysMLDocuments.map(doc => SysMLReferencer.addRefinementRelations(doc, landoDocuments, enrichedCryptolDocuments))
+    val enrichedLandoDocuments = landoDocuments.map(doc => LandoReferencer.addRefinementRelations(doc, Array.empty[LandoDocumentInfo], enrichedSysMLDocuments))
 
+    /*
     def addInternalReferences[T <: DocumentInfo[T]](docs: Array[T]): Unit = {
       docs.foreach(doc => addReferences(doc, docs.flatMap(_.getAllReferences).toSet))
     }
@@ -140,6 +117,8 @@ object DocumentAnalyzer {
     addInternalReferences(enrichedCryptolDocuments)
     addInternalReferences(enrichedBSVDocuments)
     addInternalReferences(enrichedSVDocuments)
+
+     */
 
     Documents(
       enrichedLandoDocuments,
@@ -152,11 +131,21 @@ object DocumentAnalyzer {
       cDocuments
     )
   } //ensuring((res: Array[T]) => FileSpecs.allFilesAnalyzed(filesToAnalyze, res), "Not all files were analyzed")
+}
 
-  def addReferences[T <: DocumentInfo[T]](document: T, references: Set[DocReference]): Unit = {
+
+trait DocumentReferencer {
+  /*
+  def addReferences(documents: Documents): Documents = {
+    //addImplicitRefinements(documents.allDocuments)
+    //addExplicitRefinements(documents)
+  }
+   */
+
+  private def addImplicitReferences[T <: DocumentInfo[T]](document: T, references: Set[DocReference]): Unit = {
     val referencesToUpdate: Set[DocReference] = document.getAllReferences.filter(ref => ref.isReferencingAnything)
     referencesToUpdate.foreach(reference => {
-      val potentialReferences: Map[String, DocReference] =
+      val potentialReferences: Map[String, DocReference] = {
         references.flatMap(r => {
           reference.getStringReferences.get
             .map(ref => Matcher.getReferenceName(ref.name, r.getReferenceName))
@@ -164,27 +153,39 @@ object DocumentAnalyzer {
             .map(_.get)
             .map(ref => (ref, r))
         }).toMap
+      }
       potentialReferences.foreach(ref => reference.addReference(ref))
     })
   }
 
-  private def addExplicitRefinements(report: ReportReference, refinements: Set[RefinementModel]): ReportReference = {
+  private def addImplicitRefinements[T <: DocumentInfo[T]](docs: Array[T]): Array[T] = {
+    require(docs.nonEmpty, "No documents to analyze")
+    docs.foreach(doc => addImplicitReferences(doc, docs.flatMap(_.getAllReferences).toSet))
+    docs
+  } //ensuring((res: Array[T]) => FileSpecs.allFilesAnalyzed(filesToAnalyze, res), "Not all files were analyzed")
+
+
+  private def addExplicitRefinements(report: Documents, refinements: Set[RefinementModel]): Documents = {
     val allReferences: Map[String, Array[DocReference]] = report.getAllReferences.groupBy(ref => ref.documentName)
-    //Both ends of the refinement must be in the report source code
+
+    def getReference(ref: RefinementModel, ext: RefinementModel => FileDocRef): Array[DocReference] = {
+      allReferences(ext(ref).file).filter(_.getName.equalsIgnoreCase(ext(ref).ref))
+    }
+
+    //Both ends of the refinement must be in the report source code and must be valid references otherwise the refinement is ignored
     val allValidRefinements = refinements.filter(
       refinement => allReferences.keySet.contains(refinement.srcRef.file) &&
         allReferences.keySet.contains(refinement.trgRef.file) &&
-        allReferences(refinement.srcRef.file).exists(_.getName.equalsIgnoreCase(refinement.srcRef.ref)) &&
-        allReferences(refinement.trgRef.file).exists(_.getName.equalsIgnoreCase(refinement.trgRef.ref)))
+        getReference(refinement, _.srcRef).nonEmpty &&
+        getReference(refinement, _.trgRef).nonEmpty)
 
     allValidRefinements.foldLeft(report)((accReport, refinement) => {
-      val srcRef = allReferences(refinement.srcRef.file).filter(_.getName.equalsIgnoreCase(refinement.srcRef.ref)).head
-      val trgRef = allReferences(refinement.trgRef.file).filter(_.getName.equalsIgnoreCase(refinement.trgRef.ref)).head
+      val srcRef = getReference(refinement, _.srcRef).head
+      val trgRef = getReference(refinement, _.trgRef).head
       val updatedSrcRef = srcRef.addRefinement(trgRef)
       val updatedTargetRef = trgRef.addAbstraction(srcRef)
-      //accReport.updateDocumentByName(updatedSrcRef.documentName, updatedSrcRef)
-      //  .updateDocumentByName(updatedTargetRef.documentName, updatedTargetRef)
-      accReport
+      accReport.updateDocumentByName(updatedSrcRef.documentName, updatedSrcRef)
+        .updateDocumentByName(updatedTargetRef.documentName, updatedTargetRef)
     })
   }
 }

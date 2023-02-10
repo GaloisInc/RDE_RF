@@ -97,7 +97,8 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     val documentInfo = documentEnricher.parseDocument(file)
     val referencesWithReferences = documentInfo.getAllReferences.filter(_.isReferencingAnything)
     assert(referencesWithReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
-    DocumentAnalyzer.addReferences(documentInfo, documentInfo.getAllReferences)
+    //TODO: check that the reference is enriched
+    //DocumentAnalyzer.addReferences(documentInfo, documentInfo.getAllReferences)
     val referencesWithActualReferences = documentInfo.getAllReferences.filter(_.getReferences.nonEmpty)
     assert(referencesWithActualReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
 

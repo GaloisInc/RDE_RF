@@ -2,7 +2,7 @@ package Generators
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import ConfigParser.RefinementModel
-import Formatter.{InlineFormatter, MarginFomatter}
+import Formatter.{InlineFormatter, MarginFormatter}
 import Report.{Environment, LatexDocument, LatexElement, LatexGenerator, LatexSection, ListBlock, PaperLayout, Text}
 import Utils.FileUtil
 import org.scalatest.flatspec.AnyFlatSpec
@@ -150,7 +150,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers {
       directory.mkdir
     }
     val latexName = "Test_SourceReport_B4"
-    val latexDocumentData = LatexDocumentData(latexName, authorName, directory.getPath, PaperLayout.B4, new MarginFomatter())
+    val latexDocumentData = LatexDocumentData(latexName, authorName, directory.getPath, PaperLayout.B4, new MarginFormatter())
 
     generateReport(latexDocumentData)
   }

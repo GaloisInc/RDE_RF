@@ -48,14 +48,15 @@ object LatexGenerator extends Logging with CommandLineTool {
 
 
   def generateLatexReportOfSources(report: ReportReference): String = {
-    val landoSection = includeListings("Lando Models", report.landoDocuments, report.folder)
-    val lobotSection = includeListings("Lobot Specifications", report.lobotDocuments, report.folder)
-    val sysmlSection = includeListings("SysML Models", report.sysmlDocuments, report.folder)
-    val cryptolSection = includeListings("Cryptol Specifications", report.cryptolDocuments, report.folder)
-    val sawSection = includeListings("Saw Specifications", report.sawDocuments, report.folder)
-    val svSection = includeListings("SystemVerilog Implementations", report.svDocuments, report.folder)
-    val bsvSection = includeListings("BlueSpec Implementations", report.bsvDocuments, report.folder)
-    val cSection = includeListings("C Implementations", report.cDocuments, report.folder)
+    val documents = report.documents
+    val landoSection = includeListings("Lando Models", documents.landoDocuments, report.folder)
+    val lobotSection = includeListings("Lobot Specifications", documents.lobotDocuments, report.folder)
+    val sysmlSection = includeListings("SysML Models", documents.sysmlDocuments, report.folder)
+    val cryptolSection = includeListings("Cryptol Specifications", documents.cryptolDocuments, report.folder)
+    val sawSection = includeListings("Saw Specifications", documents.sawDocuments, report.folder)
+    val svSection = includeListings("SystemVerilog Implementations", documents.svDocuments, report.folder)
+    val bsvSection = includeListings("BlueSpec Implementations", documents.bsvDocuments, report.folder)
+    val cSection = includeListings("C Implementations", documents.cDocuments, report.folder)
 
     val sections = List(landoSection, lobotSection, sysmlSection, cryptolSection, sawSection, svSection, bsvSection, cSection)
     val listingFormatting = ListingFormatting.createDefault(report.folder)

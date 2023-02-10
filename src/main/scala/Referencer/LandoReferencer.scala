@@ -1,10 +1,5 @@
 package Referencer
 
 import Types.DocumentInfos.{LandoDocumentInfo, SysMLDocumentInfo}
-class LandoReferencer extends Referencer[LandoDocumentInfo, LandoDocumentInfo, SysMLDocumentInfo] {}
 
-
-
-
-
-
+object LandoReferencer extends Referencer[LandoDocumentInfo, LandoDocumentInfo, SysMLDocumentInfo] {}

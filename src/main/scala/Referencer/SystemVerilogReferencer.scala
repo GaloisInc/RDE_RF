@@ -2,4 +2,4 @@ package Referencer
 
 import Types.DocumentInfos.{CryptolDocumentInfo, SVDocumentInfo}
 
-class SystemVerilogReferencer extends Referencer[SVDocumentInfo, CryptolDocumentInfo, SVDocumentInfo] {}
+object SystemVerilogReferencer extends Referencer[SVDocumentInfo, CryptolDocumentInfo, SVDocumentInfo] {}

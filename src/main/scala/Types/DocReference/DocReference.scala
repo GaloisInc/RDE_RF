@@ -14,8 +14,6 @@ class DocReference(
                     abstractionOf: Option[Set[DocReference]] = None,
                     references: Option[Set[Ref]] = None,
                   ) extends DecorateableString with DocumentReference {
-
-
   def addAbstraction(abstraction: DocReference): DocReference = {
     getAbstractions match {
       case Some(abstractions) => this.copy(refinementOf = Some(abstractions + abstraction))
@@ -39,7 +37,7 @@ class DocReference(
 
   lazy val getName: String = if (referenceName.name.isEmpty) referenceName.acronym.get else referenceName.name
 
-  lazy val getShortName: String = if (referenceName.acronym.isDefined && referenceName.acronym.get.nonEmpty) referenceName.acronym.get else referenceName.name
+  lazy val shortName: String = if (referenceName.acronym.isDefined && referenceName.acronym.get.nonEmpty) referenceName.acronym.get else referenceName.name
 
   lazy val sanitizedName: String = LatexSanitizer.sanitizeName(getName)
 
@@ -52,7 +50,7 @@ class DocReference(
   }
 
   //A reference can be a refinement or an abstraction of another reference
-  var referencing: Map[String, DocReference] = Map.empty
+  private var referencing: Map[String, DocReference] = Map.empty
 
   def getStringReferences: Option[Set[Ref]] = references
 

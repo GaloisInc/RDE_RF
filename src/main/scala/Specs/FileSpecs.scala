@@ -24,12 +24,13 @@ object FileSpecs {
     allFilesExist(filesToAnalyze) && allFilesOfCorrectType(filesToAnalyze, supportedTypes)
   }
 
-  def allFilesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], reportReference: ReportReference): Boolean = {
-    filesAnalyzed(filesToAnalyze, reportReference.bsvDocuments, Types.DocumentType.BSV)
-    filesAnalyzed(filesToAnalyze, reportReference.cryptolDocuments, Types.DocumentType.Cryptol)
-    filesAnalyzed(filesToAnalyze, reportReference.landoDocuments, Types.DocumentType.Lando)
-    filesAnalyzed(filesToAnalyze, reportReference.svDocuments, Types.DocumentType.SV)
-    filesAnalyzed(filesToAnalyze, reportReference.sysmlDocuments, Types.DocumentType.SysML)
+  def allFilesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], report: ReportReference): Boolean = {
+    val documents = report.documents
+    filesAnalyzed(filesToAnalyze, documents.bsvDocuments, Types.DocumentType.BSV)
+    filesAnalyzed(filesToAnalyze, documents.cryptolDocuments, Types.DocumentType.Cryptol)
+    filesAnalyzed(filesToAnalyze, documents.landoDocuments, Types.DocumentType.Lando)
+    filesAnalyzed(filesToAnalyze, documents.svDocuments, Types.DocumentType.SV)
+    filesAnalyzed(filesToAnalyze, documents.sysmlDocuments, Types.DocumentType.SysML)
   }
 
   def allFilesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], documents: Array[T]): Boolean = {

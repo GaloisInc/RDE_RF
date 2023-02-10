@@ -1,9 +1,8 @@
 package Utils
 
-import DocumentEnrichers.{ACSLDocumentEnricher, BSVDocumentEnricher, CryptolDocumentEnricher, DocumentEnricher, LandoDocumentEnricher, LobotDocumentEnricher, SVDocumentEnricher, SysMLDocumentEnricher}
-import Types.DocumentInfos.{BSVDocumentInfo, CDocumentInfo, CryptolDocumentInfo, DocumentInfo, LandoDocumentInfo, LobotDocumentInfo, SVDocumentInfo, SysMLDocumentInfo}
+import DocumentEnrichers._
+import Types.DocumentInfos._
 import Types.{DocumentType, ReferenceType}
-import Utils.FileUtil
 
 trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
   def checkExtractReferences(fileName: String,

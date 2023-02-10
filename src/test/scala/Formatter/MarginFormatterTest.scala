@@ -4,7 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class MarginFormatterTest extends AnyFlatSpec with should.Matchers {
-  val marginFormatter = new MarginFomatter
+  val marginFormatter = new MarginFormatter
 
   "MarginFormatter" should "put in margin note 1" in {
     val input = "https://www.google.com/search?q=scala+test+underscore"

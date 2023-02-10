@@ -3,7 +3,7 @@ package Cli
 import Analyzers.{DocumentAnalyzer, LatexDocumentData, SourceVerifier}
 import ConfigParser.{ObjectConfigGenerator, RefinementLoader, RefinementModel}
 import EnvironmentChecker.EnvironmentChecker
-import Formatter.{InlineFormatter, LatexFormatter, MarginFomatter}
+import Formatter.{InlineFormatter, LatexFormatter, MarginFormatter}
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
 import Report.{LatexGenerator, PaperLayout}
@@ -196,7 +196,7 @@ object DocumentationEnhancerApp extends App with Logging {
   def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {
     layout.toLowerCase match {
       case "a4" => (PaperLayout.A4, new InlineFormatter())
-      case "b4" => (PaperLayout.B4, new MarginFomatter())
+      case "b4" => (PaperLayout.B4, new MarginFormatter())
       case _ => (PaperLayout.A4, new InlineFormatter())
     }
   }

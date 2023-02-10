@@ -58,7 +58,7 @@ class ReferenceFormatter(
           .toList
           .sortBy(_._1.length)
           .foldLeft(secondPart)((line, ref) => {
-            val label = ClickableLink(ref._2.getLabelText, ref._2.getShortName, LatexReferenceTypes.ConnectionArtifact, formatInsideListing).toLatex
+            val label = ClickableLink(ref._2.getLabelText, ref._2.shortName, LatexReferenceTypes.ConnectionArtifact, formatInsideListing).toLatex
             line.replace(ref._1, label)
           })
       val resultString = firstPart + " " + symbol + " " + enrichedSecondPart
@@ -98,7 +98,7 @@ class ReferenceFormatter(
                                  ): List[LatexElement] = {
     require(currentDocument.nonEmpty, "nameOfDocument must not be empty")
 
-    val link = ClickableLink(reference.getLabelText, reference.getShortName, referenceType, formatting)
+    val link = ClickableLink(reference.getLabelText, reference.shortName, referenceType, formatting)
     val formattedReference = if (reference.documentName.equals(currentDocument)) {
       LatexReference(reference.getLabelText, "cref", formatting)
     } else {

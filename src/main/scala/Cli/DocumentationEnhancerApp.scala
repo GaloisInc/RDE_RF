@@ -1,12 +1,12 @@
 package Cli
 
 import Analyzers.{DocumentAnalyzer, LatexDocumentData, SourceVerifier}
-import ConfigParser.{ObjectConfigGenerator, RefinementLoader, RefinementModel}
+import ConfigParser.{ConfigGenerator, RefinementLoader, RefinementModel}
 import EnvironmentChecker.EnvironmentChecker
 import Formatter.{InlineFormatter, LatexFormatter, MarginFormatter}
+import Report.PaperLayout
 import Report.PaperLayout.PaperLayout
 import Report.ReportTypes.ReportReference
-import Report.{LatexGenerator, PaperLayout}
 import Utils.FileUtil
 import Utils.FileUtil.createDirectory
 import org.apache.logging.log4j.scala.Logging
@@ -15,12 +15,11 @@ import scopt.OParser
 import java.io.File
 
 object DocumentationEnhancerApp extends App with Logging {
-  val fileTypesOfTypesOfInterest = Analyzers.AnalyzerSettings.supportedDocumentTypesString
-
-  val builder = OParser.builder[CLIConfig]
+  private val fileTypesOfTypesOfInterest = Analyzers.AnalyzerSettings.supportedDocumentTypesString
+  private val builder = OParser.builder[CLIConfig]
 
   val parser = {
-    //Command line GNU
+    //Command line GNU style parser
     import builder._
     OParser.sequence(
       programName("DocumentationEnhancer"),
@@ -95,17 +94,12 @@ object DocumentationEnhancerApp extends App with Logging {
       val explicitRefinements = config.refinementFile
       val refinementFile = new File(explicitRefinements)
       val layout = if (config.latexLayout.equalsIgnoreCase("b4") || config.latexLayout.equalsIgnoreCase("a4")) config.latexLayout else "a4"
-
-
       val files = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
-
       val excludedFolders = config.excludeFolders
-
       val filteredFiles = files.filterNot(file => excludedFolders.exists(folder => file.contains(folder)))
-
       println("Starting Documentation Enhancer")
 
-      if(config.deleteDecoratedFiles){
+      if (config.deleteDecoratedFiles) {
         println("Deleting decorated files")
         FileUtil.deleteRecursivelyDecoratedFiles(targetFolder)
       }
@@ -115,7 +109,7 @@ object DocumentationEnhancerApp extends App with Logging {
         System.exit(1)
       }
 
-      if(FileUtil.allFilesReadable(filteredFiles)) {
+      if (FileUtil.allFilesReadable(filteredFiles)) {
         println("All files are readable")
       } else {
         println("Not all files are readable")
@@ -136,14 +130,12 @@ object DocumentationEnhancerApp extends App with Logging {
         println("You have chosen to generate a LaTeX document. " +
           "The document will be generated in the folder " + targetFolder + ".")
 
-        println("The document will be build twice to ensure that all references are correct.")
-
-        LatexGenerator.generateLatexReportOfSources(documentReport)
+        documentReport.buildDocumentationReport
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
 
       }
       if (config.generateRefinementFile) {
-        ObjectConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")
+        ConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")
         println("The refinement overview has been generated in the folder " + targetFolder + ".")
       }
       println("Done!")
@@ -182,18 +174,16 @@ object DocumentationEnhancerApp extends App with Logging {
       true
     }), "File does not exist")
 
-    val documentReport = if (refinementFile.exists()) {
-      files.foreach(file => println("Processing file: " + file))
-      println("Loading explicit refinements from: " + refinementFile.getAbsolutePath)
-      val explicitRefinements = RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements
-      DocumentAnalyzer.generateReport(files.toSet, latexGenerationData, explicitRefinements.values.flatten.toSet)
-    } else {
-      DocumentAnalyzer.generateReport(files.toSet, latexGenerationData, Set.empty[RefinementModel])
-    }
+    files.foreach(file => println("Processing file: " + file))
+
+    val explicitRefinements = if (refinementFile.exists())
+      RefinementLoader.load(refinementFile.getAbsolutePath).explicit_refinements.values.flatten.toSet
+    else Set.empty[RefinementModel]
+    val documentReport = DocumentAnalyzer.generateReport(files.toSet, latexGenerationData, explicitRefinements)
     documentReport
   }
 
-  def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {
+  private def layoutStringToPaperSize(layout: String): (PaperLayout, LatexFormatter) = {
     layout.toLowerCase match {
       case "a4" => (PaperLayout.A4, new InlineFormatter())
       case "b4" => (PaperLayout.B4, new MarginFormatter())

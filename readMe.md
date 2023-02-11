@@ -10,6 +10,7 @@ The tool parses the source code and adds additional information to it and genera
 * Bluespec SystemVerilog
 * Cryptol
 * SysML
+* FRET (json format)
 
 ## Dependencies
 The tool requires the following dependencies to be installed and in path:
@@ -57,6 +58,7 @@ The following arguments are supported:
 
     * -i, --inputFolder <folder>    Required argument the directory returning the source code
     * -o, --outputFolder <folder>   Required argument the directory where the documentation should be generated
+    * -e, --exclude <folder>        The directory to exclude from the documentation generation (e.g. the build directory or generic library files that should not be part of the generated documentation)
     * -f  --configFile <file>       The path to the explicit refinement configuration file.
     * -g, --generateLatex           Whether to generate the Pdf from the generated LaTeX documentation
         * -d, --dimension <value>        The dimension of the generated pdf document. Possible values are a4, b4. Default is a4.

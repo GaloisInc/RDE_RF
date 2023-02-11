@@ -10,6 +10,8 @@ class SVDocumentInfo(
                     ) extends DocumentInfo[SVDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.SV
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System)
+  override val latexLanguageName = "Verilog"
 
   def copy(
             documentName: String = documentName,
@@ -31,18 +33,8 @@ class SVDocumentInfo(
     copy(filePath = newFilePath)
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System)
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
-    && ref.getDocumentName == documentName
-    && ref.getDocumentType == DocumentType.SV))
 
-  override lazy val getAllReferences: Set[DocReference] = {
-    modules
-  }
+  override lazy val getAllReferences: Set[DocReference] = modules
 
-  lazy val getRelations: Set[DocRelation] = Set.empty
-
-  override def getFileType: FileType.Value = {
-    FileType.ComponentFile
-  }
+  override def getFileType: FileType.Value = FileType.ComponentFile
 }

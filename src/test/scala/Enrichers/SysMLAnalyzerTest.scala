@@ -1,4 +1,5 @@
-import Analyzers.DocumentAnalyzer
+package Enrichers
+
 import DocumentEnrichers.SysMLDocumentEnricher
 import Formatter.{InlineFormatter, ReferenceFormatter}
 import Types.DocReference.DocReference
@@ -11,7 +12,6 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = new InlineFormatter()
   private val documentEnricher = new SysMLDocumentEnricher(formatterType)
   private val expectedDocumentType = DocumentType.SysML
-  private val resourceFolder = "../SysML"
 
 
   "SysMLReader" should "to extract DocReference" in {
@@ -63,32 +63,32 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
 
   "SysMLReader" should "to extract parts and items" in {
     val fileName = "RTS_Glossary"
-    TestUtilitySysml.checkExtractReferences("RTS_Glossary", documentEnricher, expectedDocumentType, resourceFolder, numberExpectedSystem = 1, numberOfSubSystem = 80, numberOfComponent = 66)
+    TestUtilitySysml.checkExtractReferences("RTS_Glossary", documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 80, numberOfComponent = 66)
   }
 
   "SysMLReader" should "to extract requirements" in {
     val fileName = "RTS_Requirements"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 4, 0, 0, 17)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 4, 0, 0, 17)
   }
 
   "SysMLReader" should "to extract packages" in {
     val fileName = "HARDENS"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 7)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 7)
   }
 
   "SysMLReader" should "to extract Scenarios" in {
     val fileName = "RTS_Scenarios"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, 4, 0, 1, numberOfScenarios = 39)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 4, 0, 1, numberOfScenarios = 39)
   }
 
   "SysMLReader" should "to extract Views" in {
     val fileName = "RTS_Viewpoints"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, numberExpectedSystem = 1, numberOfViews = 8)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfViews = 8)
   }
 
   "SysMLReader" should "to extract Actions" in {
     val fileName = "RTS_Actions"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, resourceFolder, numberExpectedSystem = 4, numberOfEvents = 20)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 4, numberOfEvents = 20)
   }
 
   "SysMLReader" should "to extract and Enrich Glossary" in {

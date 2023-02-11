@@ -5,7 +5,6 @@ import Types.DocReference.DocReference
 import Types.DocumentInfos.BSVDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
-
 import scala.util.matching.Regex
 
 class BSVDocumentEnricher(override val formatterType: LatexFormatter,
@@ -27,7 +26,6 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
     val packages = references.filter(_.getReferenceType == ReferenceType.System)
     val modules = references.filter(_.getReferenceType == ReferenceType.SubSystem)
-
     new BSVDocumentInfo(fileName, filePath, packages, modules)
   }
 

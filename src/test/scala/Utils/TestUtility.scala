@@ -8,7 +8,6 @@ trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
   def checkExtractReferences(fileName: String,
                              documentEnricher: T,
                              expectedDocumentType: DocumentType.Value,
-                             resourceFolderName: String,
                              numberExpectedSystem: Int = 0,
                              numberOfSubSystem: Int = 0,
                              numberOfComponent: Int = 0,
@@ -20,11 +19,9 @@ trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
                              numberOfTypes: Int = 0
                             ): Boolean = {
 
-    val documents = getClass.getResource(resourceFolderName).getPath
-    val filesToAnalyze = FileUtil.getFilesInDirectory(documents).toArray
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(expectedDocumentType))
     val documentOfInterest = filesToAnalyze.filter(path => FileUtil.getFileName(path) == fileName)
-
-    assert(documentOfInterest.length == 1)
+    assert(documentOfInterest.size == 1, "File not found")
     val filePath = documentOfInterest.head
 
     val analyzedDocument = documentEnricher.parseDocument(filePath)
@@ -47,11 +44,19 @@ trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
 }
 
 object TestUtilityLando extends TestUtility[LandoDocumentInfo, LandoDocumentEnricher]
+
 object TestUtilityLobot extends TestUtility[LobotDocumentInfo, LobotDocumentEnricher]
+
 object TestUtilitySysml extends TestUtility[SysMLDocumentInfo, SysMLDocumentEnricher]
+
 object TestUtilityCryptol extends TestUtility[CryptolDocumentInfo, CryptolDocumentEnricher]
+
+object TestUtilityFret extends TestUtility[FretDocument, FRETDocumentEnricher]
+
 object TestUtilitySV extends TestUtility[SVDocumentInfo, SVDocumentEnricher]
+
 object TestUtilityBSV extends TestUtility[BSVDocumentInfo, BSVDocumentEnricher]
+
 object TestUtilityACSL extends TestUtility[CDocumentInfo, ACSLDocumentEnricher]
 
 

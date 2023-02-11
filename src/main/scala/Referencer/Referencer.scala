@@ -1,7 +1,8 @@
 package Referencer
 
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{DocumentInfo, DocumentInfoCompare}
+import Types.DocumentInfos.DocumentInfo
+import Utils.DocumentInfoCompare
 import org.apache.logging.log4j.scala.Logging
 
 abstract class Referencer[T <: DocumentInfo[T], A <: DocumentInfo[A], R <: DocumentInfo[R]](hammingDistanceMeasure: Double = 0.15) extends Logging {
@@ -12,14 +13,14 @@ abstract class Referencer[T <: DocumentInfo[T], A <: DocumentInfo[A], R <: Docum
     addSpecializationsToDocument(documentToExtend, refinedDocuments)
   } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, documentToExtend))
 
-  def addSpecializationsToDocument(documentInfo: T, refinedDocuments: Array[R]): T = {
+  private def addSpecializationsToDocument(documentInfo: T, refinedDocuments: Array[R]): T = {
     logger.info("Adding specializations to " + documentInfo.documentName + " from " + refinedDocuments.map(_.documentName).mkString(", "))
     val refinedReferences = refinedDocuments.flatMap(doc => doc.getAllReferences.filter(_.getAbstractions.nonEmpty))
     val updatedReferences = documentInfo.getAllReferences.map(reference => addRefinements(reference, refinedReferences.toSet))
     documentInfo.updateReferences(updatedReferences)
   } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, documentInfo))
 
-  def addAbstractionsToDocument(refinedDocument: T, documentsBeingRefined: Array[A]): T = {
+  private def addAbstractionsToDocument(refinedDocument: T, documentsBeingRefined: Array[A]): T = {
     logger.info("Adding abstractions to " + refinedDocument.documentName + " from " + documentsBeingRefined.map(_.documentName).mkString(", "))
     val cryptolReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
     val updatedReferences = refinedDocument.getAllReferences.map(reference => findRefinementRelation(reference, cryptolReferences.toSet))

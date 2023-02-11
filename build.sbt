@@ -1,18 +1,27 @@
 ThisBuild / scalaVersion := "2.13.8"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.14" % "test"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.15"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 
 lazy val root = (project in file("."))
   .settings(
     name := "der",
-    version := "0.1.5",
+    version := "0.1.6",
     maintainer := "STH",
-    scalaVersion := "2.13.8",
+    scalaVersion := scalaVersion.value,
     organization := "org.Galois"
   )
 
-//wartremoverErrors ++= Warts.unsafe
+/*
+lazy val myproject = project.settings(
+  scalaVersion := scalaVersion.value,
+  semanticdbEnabled := true, // enable SemanticDB
+  semanticdbVersion := scalafixSemanticdb.revision, // only required for Scala 2.x
+  scalacOptions += "-Ywarn-unused-import" // Scala 2.x only, required by `RemoveUnused`
+)
+wartremoverErrors ++= Warts.unsafe
+ */
+
 
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
@@ -28,7 +37,7 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
 // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api-scala
 libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
 
-// JSON library
+// JSON library - needed to handle FRET's file format
 val circeVersion = "0.14.1"
 
 libraryDependencies ++= Seq(
@@ -47,6 +56,7 @@ docker / dockerfile := {
     from("openjdk:8-jre")
     //Install Latex - takes a while to download
     runRaw("apt-get update && apt-get install -y --no-install-recommends apt-utils")
+    //Install Texlive to compile the report
     runRaw("apt-get install texlive-full -y")
     runRaw("apt-get install -y cryptol")
     //Install Cabal
@@ -61,9 +71,22 @@ docker / dockerfile := {
     runRaw("apt-get install -y git")
     // install -y libtinfo5
     runRaw("apt-get install -y libtinfo5")
-
     // Install CMAKE
     runRaw("apt-get install -y cmake make")
+    //Install Z3
+    runRaw("apt-get install -y z3")
+    //Install Python3
+    runRaw("apt-get install -y python3")
+    //Install NodeJS
+    runRaw("apt-get install -y nodejs")
+    //Install NPM
+    runRaw("apt-get install -y npm")
+    //Install NuSMV
+    //runRaw("apt-get install -y nusmv")
+    //Install Kind2
+    //runRaw("apt-get install -y kind2")
+    //Install JKIND
+    //runRaw("apt-get install -y jkind")
 
     runRaw("mkdir /tools")
     //Install Bluespec Compiler
@@ -89,6 +112,17 @@ docker / dockerfile := {
     runRaw("mv saw-0.9-Linux-x86_64-with-solvers /tools/saw-0.9-Linux-x86_64-with-solvers")
     runRaw("rm saw-0.9-Linux-x86_64-with-solvers.tar.gz")
     env("PATH", "/tools/saw-0.9-Linux-x86_64-with-solvers/bin:$PATH")
+
+    // Install FRET
+    /*
+    runRaw("wget https://github.com/NASA-SW-VnV/fret/archive/refs/tags/v2.6.0.tar.gz")
+    runRaw("tar -xvf v2.6.0.tar.gz")
+    runRaw("mv v2.6.0 /tools/fret-2.6.0")
+    workDir("/tools/fret-2.6.0/fret-electron")
+    runRaw("npm run fret-install")
+    runRaw("rm v2.6.0.tar.gz")
+    env("PATH", "/tools/saw-0.9-Linux-x86_64-with-solvers/bin:$PATH")
+     */
 
     //Clone the Lando repo
     runRaw("git clone https://github.com/GaloisInc/BESSPIN-Lando.git /tools/lando")

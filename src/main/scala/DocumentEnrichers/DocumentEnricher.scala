@@ -1,9 +1,8 @@
 package DocumentEnrichers
 
 import Formatter.{LatexFormatter, ReferenceFormatter}
-import Specs.FileSpecs
-import Types.DocumentInfos.DocumentInfo
 import Types.DecorateableString
+import Types.DocumentInfos.DocumentInfo
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
@@ -14,8 +13,20 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
                                                       val skipTodos: Boolean = false) extends Logging {
   val latexFormatter = new ReferenceFormatter(formatterType)
 
+  /**
+   * Parses a document and returns a DocumentInfo
+   *
+   * @param fileString Path to the file
+   * @return DocumentInfo
+   */
   def parseDocument(fileString: String): T
 
+  /**
+   * Extracts the enriched text from a line
+   *
+   * @param line Line to be enriched
+   * @return Enriched text
+   */
   def formatLine(line: String, documentInfo: T): String
 
   /**
@@ -53,15 +64,6 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
     writer.close()
     decoratedFile.getPath
   }
-
-  def enrichDocuments(filesToAnalyze: Array[String]): Array[String] = {
-    FileSpecs.allFilesExist(filesToAnalyze.toSet)
-    filesToAnalyze.indices.map(idx => {
-      val currentFile = filesToAnalyze(idx)
-      val documentInfo = parseDocument(currentFile)
-      decorateFile(documentInfo)
-    }).toArray
-  } ensuring ((res: Array[String]) => res.length == filesToAnalyze.length)
 
   protected def extractEnrichedText[A <: DecorateableString](line: String, references: Set[A]): String = {
     val relevantRefs = references.filter(ref => ref.originalLine == line)

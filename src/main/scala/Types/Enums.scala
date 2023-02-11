@@ -1,8 +1,5 @@
 package Types
 
-import org.scalactic.Equality
-import org.scalactic.TypeCheckedTripleEquals.convertToCheckingEqualizer
-
 object ReferenceType extends Enumeration {
   type referenceType = Value
   val Component,
@@ -25,7 +22,7 @@ object RelationTypes extends Enumeration {
   val client, inherit, contains, Link = Value
 }
 
-object LatexReferenceTypes  extends Enumeration {
+object LatexReferenceTypes extends Enumeration {
   type latexReferenceType = Value
   val
   File,
@@ -36,9 +33,9 @@ object LatexReferenceTypes  extends Enumeration {
   ConnectionArtifact = Value
 }
 
-object DocumentType  extends Enumeration {
+object DocumentType extends Enumeration {
   type documentType = Value
-  val Lando, Lobot, SysML, Cryptol, Saw, SV, BSV, C = Value
+  val Lando, Lobot, SysML, Cryptol, Saw, SV, BSV, C, Fret = Value
 
   override def toString(): String = {
     this match {
@@ -50,17 +47,18 @@ object DocumentType  extends Enumeration {
       case SV => "sv"
       case BSV => "bsv"
       case C => "c"
+      case Fret => "json"
       case _ => throw new Exception("Unknown document type")
     }
   }
 }
 
-object LandoLineType  extends Enumeration {
+object LandoLineType extends Enumeration {
   type landoLineType = Value
   val EmptyLine, Comment, Requirement, Event, Scenario, Reference, Relation, LineToBeSkipped = Value
 }
 
-object FileType  extends Enumeration {
+object FileType extends Enumeration {
   type fileType = Value
   val RequirementFile, ScenarioFile, EventFile, ComponentFile, ViewFile = Value
 }

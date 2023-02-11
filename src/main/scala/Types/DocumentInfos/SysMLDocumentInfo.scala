@@ -19,6 +19,8 @@ class SysMLDocumentInfo(
                          attributes: Set[DocReference]) extends DocumentInfo[SysMLDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.SysML
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
+  override val latexLanguageName = "SysML"
 
   def copy(
             documentName: String = documentName,
@@ -49,9 +51,7 @@ class SysMLDocumentInfo(
       attributes)
   }
 
-  private val validRefenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
 
-  require(getAllReferences.forall(ref => validRefenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.SysML && ref.getDocumentName == documentName))
   require(parts.forall(_.getReferenceType == ReferenceType.SubSystem))
   require(connections.forall(_.getReferenceType == ReferenceType.Connection))
   require(packages.forall(_.getReferenceType == ReferenceType.System))

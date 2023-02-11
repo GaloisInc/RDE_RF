@@ -1,44 +1,30 @@
 import Analyzers.{DocumentAnalyzer, LatexDocumentData}
 import ConfigParser.{FileDocRef, RefinementLoader, RefinementModel}
 import Formatter.{InlineFormatter, ReferenceFormatter}
-import Report.{LatexGenerator, PaperLayout}
-import Utils.FileUtil
+import Report.PaperLayout
+import Types.DocumentType
+import Utils.{FileUtil, ResourceFiles}
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
-class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
+class DocumentAnalyzerSpec extends AnyFlatSpec with should.Matchers {
   private val authorName: String = "TestAuthor"
+  private val targetFolder = getClass.getResource("").getPath
+
 
   "CryptolReader" should "to enrich references across documents" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
-
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
-      FileUtil.getFilesInDirectory(landoDocuments) ++
-      FileUtil.getFilesInDirectory(cryptolDocuments)
-
-    val targetFolder = getClass.getResource("").getPath
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.Fret))
     val title = "Test"
-
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
-    DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
+    DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
   }
 
   "CryptolReader" should "to enrich SYSML references" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
-
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
-      FileUtil.getFilesInDirectory(landoDocuments) ++
-      FileUtil.getFilesInDirectory(cryptolDocuments)
-
-    val targetFolder = getClass.getResource("").getPath
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.Fret))
     val title = "Test"
 
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
-    val report = DocumentAnalyzer.enrichAndMoveFiles(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
+    val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, Set.empty[RefinementModel])
 
     val formatter = new ReferenceFormatter(new InlineFormatter())
 
@@ -63,19 +49,13 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   "DocumentAnalyzer" should "be able to add explicit References" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val references: Set[RefinementModel] = Set(
       RefinementModel(FileDocRef("acronyms", "Commercial Off The Shelf"), FileDocRef("RTS_Glossary", "ASIC")),
       RefinementModel(FileDocRef("acronyms", "Continuous Verification"), FileDocRef("RTS_Glossary", "Coq"))
     )
 
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
-      FileUtil.getFilesInDirectory(landoDocuments) ++
-      FileUtil.getFilesInDirectory(cryptolDocuments)
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.Fret))
 
-    val targetFolder = getClass.getResource("").getPath
     val title = "Test"
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
@@ -104,18 +84,12 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
 
 
   "DocumentAnalyzer" should "be able to add explicit References from file" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
 
     val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
 
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
-      FileUtil.getFilesInDirectory(landoDocuments) ++
-      FileUtil.getFilesInDirectory(cryptolDocuments)
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.Fret))
 
-    val targetFolder = getClass.getResource("").getPath
     val title = "Test"
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
@@ -129,14 +103,12 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
 
   "DocumentAnalyzer" should "be able to add explicit References from source directory" in {
     val sourceFolder = getClass.getResource("Source").getPath
-
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
     val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
-    val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv")
+    val fileTypesOfTypesOfInterest = Set("lando", "sysml", "cry", "bsv", "sv", "json")
 
     val filesToAnalyze = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
 
-    val targetFolder = getClass.getResource("").getPath
     val title = "Test_From_Source_Directory"
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.generateReport(filesToAnalyze.toSet, latexDocumentation, references)
@@ -149,24 +121,15 @@ class DocumentAnalyerSpec extends AnyFlatSpec with should.Matchers {
   }
 
 
-  "DocumentAnalyzer" should "be able to add explicit References from file and print Document" in {
-    val sysmlDocuments = getClass.getResource("SysML").getPath
-    val landoDocuments = getClass.getResource("Lando").getPath
-    val cryptolDocuments = getClass.getResource("Cryptol").getPath
+  "DocumentAnalyzer" should "be able to add explicit References from file and create Document with files" in {
     val conf = getClass.getResource("refinementExamples/ExplicitReferences.conf")
-
     val references = RefinementLoader.load(conf.getPath).explicit_refinements.values.flatten.toSet
+    val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.Fret))
 
-    val filesToAnalyze = FileUtil.getFilesInDirectory(sysmlDocuments) ++
-      FileUtil.getFilesInDirectory(landoDocuments) ++
-      FileUtil.getFilesInDirectory(cryptolDocuments)
-
-    val targetFolder = getClass.getResource("").getPath
     val title = "Test Enriched with Explicit References"
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
-
-    LatexGenerator.generateLatexReportOfSources(report)
+    report.buildDocumentationReport
   }
 }
 

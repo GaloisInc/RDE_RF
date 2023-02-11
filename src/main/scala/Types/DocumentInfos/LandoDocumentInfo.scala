@@ -15,6 +15,8 @@ class LandoDocumentInfo(
                        ) extends DocumentInfo[LandoDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.Lando
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
+  val latexLanguageName = "Lando"
 
   def copy(
             documentName: String = documentName,
@@ -57,12 +59,6 @@ class LandoDocumentInfo(
     copy(filePath = newFilePath)
   }
 
-
-  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
-
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
-    && ref.getDocumentName == documentName
-    && ref.getDocumentType == DocumentType.Lando))
   require(events.forall(_.getReferenceType == ReferenceType.Event), "All events must be of type Event")
   require(scenarios.forall(_.getReferenceType == ReferenceType.Scenario), "All scenarios must be of type Scenario")
   require(requirements.forall(_.getReferenceType == ReferenceType.Requirement), "All requirements must be of type Requirement")
@@ -71,13 +67,13 @@ class LandoDocumentInfo(
     references ++ events ++ requirements ++ scenarios
   }
 
-  lazy val getRelations: Set[DocRelation] = relations
+  override lazy val getRelations: Set[DocRelation] = relations
 
   override def getFileType: FileType.Value = {
     if (FileUtil.isOfFileType(filePath, "events")) FileType.EventFile
     else if (FileUtil.isOfFileType(filePath, "requirements")) FileType.RequirementFile
     else if (FileUtil.isOfFileType(filePath, "scenarios")) FileType.ScenarioFile
-    FileType.ComponentFile
+    else FileType.ComponentFile
   }
 }
 

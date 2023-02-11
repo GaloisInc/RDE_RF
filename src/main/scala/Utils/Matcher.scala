@@ -2,6 +2,9 @@ package Utils
 
 import Types.ReferenceName
 
+/**
+ * This object contains methods to match a name to a reference name.
+ */
 object Matcher {
   def referenceNameMatches(name: String, referenceName: ReferenceName): Boolean = {
     require(name.nonEmpty, "name must not be empty")
@@ -12,7 +15,7 @@ object Matcher {
       cleanName.equalsIgnoreCase(referenceName.name)
     }
   }
-  
+
   def getReferenceName(name: String, referenceName: ReferenceName): Option[String] = {
     require(name.nonEmpty, "name must not be empty")
     val cleanName = name.stripPrefix("'").stripSuffix("'").trim()

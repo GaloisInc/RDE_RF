@@ -8,8 +8,8 @@ final case class FRETRequirement(
                                   semantics: FRETSemantics,
                                 ) {
   require(reqid.nonEmpty, "reqid must not be empty")
-  require(parent_reqid.nonEmpty, "parent_reqid must not be empty")
-  require(rationale.nonEmpty, "rationale must not be empty")
+  //require(parent_reqid.nonEmpty, "parent_reqid must not be empty")
+  //require(rationale.nonEmpty, s"rationale must not be empty for requirement $reqid")
   require(fulltext.nonEmpty, "fulltext must not be empty")
   require(semantics.description.nonEmpty, "semantics must not be empty")
 }

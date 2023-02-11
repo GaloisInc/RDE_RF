@@ -13,23 +13,23 @@ object SourceVerifier extends Logging {
       fileExists
     }), "One or more source files do not exist")
     require(EnvironmentChecker.dependenciesInstalled, "Environment is not set up correctly - please install dependencies.")
-
     val filesWithCompilationError = sourceFiles.filterNot(file => isWellFormed(file)).toList
-
     filesWithCompilationError
   }
 
   def isWellFormed(filePath: String): Boolean = {
-    FileUtil.getFileType(filePath) match {
-      case "cry" => CryptolInterpreter.verifyProperties(filePath)
-      case ".icry" => CryptolInterpreter.runVerificationScript(filePath)
-      case "saw" => SawInterpreter.verifySawFile(filePath)
-      case "lando" => true //LandoInterpreter.verifyLandoFile(filePath)
-      case "lobot" => LobotInterpreter.verifyLobotFile(filePath)
-      case "sysml" => true //We don't have a sysml interpreter yet
-      case "bsv" => BlueSpecInterpreter.isWellFormed(filePath)
-      case "sv" => true //We don't have a sv interpreter yet
-      case _ => throw new IllegalArgumentException(s"File type not supported: $filePath")
+    require(FileUtil.fileExists(filePath), s"File $filePath does not exist")
+    require(EnvironmentChecker.dependenciesInstalled, "Environment is not set up correctly - please install dependencies.")
+    FileUtil.getDocumentType(filePath) match {
+      case Types.DocumentType.Lando => true //LandoInterpreter.verifyLandoFile(filePath)
+      case Types.DocumentType.Lobot => LobotInterpreter.verifyLobotFile(filePath)
+      case Types.DocumentType.SysML => true //We don't have a sysml interpreter yet
+      case Types.DocumentType.Cryptol => CryptolInterpreter.verifyProperties(filePath)
+      case Types.DocumentType.Saw => SawInterpreter.verifySawFile(filePath)
+      case Types.DocumentType.SV => true //We don't have a sv interpreter yet
+      case Types.DocumentType.BSV => BlueSpecInterpreter.isWellFormed(filePath)
+      case Types.DocumentType.C => true //We don't have a C interpreter yet
+      case Types.DocumentType.Fret => true //We don't have a Fret interpreter yet
     }
   }
 }

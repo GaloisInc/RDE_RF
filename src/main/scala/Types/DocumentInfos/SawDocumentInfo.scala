@@ -10,6 +10,8 @@ class SawDocumentInfo(
                      ) extends DocumentInfo[SawDocumentInfo] {
 
   require(FileUtil.getFileType(filePath) == "saw", "File path must be a Saw file")
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
+  override val latexLanguageName = "Saw"
   override val documentType: DocumentType.Value = DocumentType.Saw
 
   def copy(
@@ -29,19 +31,6 @@ class SawDocumentInfo(
     copy(filePath = newFilePath)
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
-
-  override lazy val getAllReferences: Set[DocReference] = {
-    Set.empty[DocReference]
-  }
-
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
-    && ref.getDocumentName == documentName
-    && ref.getDocumentType == DocumentType.Saw))
-
-  lazy val getRelations: Set[DocRelation] = Set.empty[DocRelation]
-
-  override def getFileType: FileType.Value = {
+  override def getFileType: FileType.Value =
     FileType.ComponentFile
-  }
 }

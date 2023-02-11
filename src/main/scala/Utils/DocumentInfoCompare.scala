@@ -1,5 +1,6 @@
-package Types.DocumentInfos
+package Utils
 
+import Types.DocumentInfos.DocumentInfo
 import Types.ReferenceType
 
 
@@ -18,8 +19,6 @@ object DocumentInfoCompare extends DocumentInfoCompare {
     assert(document1.getAllReferences.size <= document2.getAllReferences.size, "Number of references must be equal or less but are " + document1.getAllReferences.size + " and " + document2.getAllReferences.size)
     true
   }
-
-
 
   def compare[T <: DocumentInfo[T]](document1: T, document2: T): Boolean = {
     assert(document1.documentName == document2.documentName, "Document names must be equal but are " + document1.documentName + " and " + document2.documentName)

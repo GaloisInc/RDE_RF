@@ -1,16 +1,16 @@
 package Utils
 
-import Types.DocumentInfos.DocumentInfo
-import Types.DocumentType
 import org.apache.logging.log4j.scala.Logging
 
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
 import scala.io.{Codec, Source}
 import scala.language.existentials
-import scala.reflect.ClassTag
 import scala.reflect.io.Directory
 
+/**
+ * Utility class for file operations
+ */
 object FileUtil extends Logging {
   // Method to remove all decorated files from a directory
   def deleteRecursivelyDecoratedFiles(path: String): Unit = {
@@ -36,9 +36,7 @@ object FileUtil extends Logging {
     require(jsonString.nonEmpty, "jsonString must not be empty")
     val file = new File(filePath)
     val parentDir = file.getParentFile
-    if (!parentDir.exists()) {
-      parentDir.mkdirs()
-    }
+    if (!parentDir.exists()) parentDir.mkdirs()
     Files.write(Paths.get(filePath), jsonString.getBytes(Codec.UTF8.charSet))
   } ensuring (_ => new File(filePath).exists())
 
@@ -71,13 +69,8 @@ object FileUtil extends Logging {
     files.map(_.path)
   } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
 
-  def getDocumentsOfType[R : ClassTag, T <: DocumentInfo[T]](enrichedDocuments: Array[T], documentType: Types.DocumentType.Value): Array[R] = {
-    enrichedDocuments.filter(doc => doc.documentType == documentType).map(_.asInstanceOf[R])
-  } //ensuring ((docs: Array[R]) => docs.toSet.subsetOf(enrichedDocuments.toSet) && docs.forall(_.documentType == documentType))
-
   def getFileName(path: String): String = {
     require(path.nonEmpty, "Path is empty")
-
     val fileName = path.split("/").takeRight(1).head.takeWhile(c => c != '.')
     fileName
   } ensuring ((fileName: String) => !fileName.contains(".") && path.contains(fileName) && fileName.nonEmpty)
@@ -96,6 +89,21 @@ object FileUtil extends Logging {
     assert(path.contains(fileName), s"File type $fileName is not contained in path $path")
     true
   })
+
+  def getDocumentType(path: String): Types.DocumentType.Value = {
+    getFileType(path) match {
+      case "cry" => Types.DocumentType.Cryptol
+      case ".icry" => Types.DocumentType.Cryptol
+      case "saw" => Types.DocumentType.Saw
+      case "lando" => Types.DocumentType.Lando
+      case "lobot" => Types.DocumentType.Lobot
+      case "sysml" => Types.DocumentType.SysML
+      case "bsv" => Types.DocumentType.BSV
+      case "sv" => Types.DocumentType.SV
+      case "json" => Types.DocumentType.Fret
+      case filePath => throw new IllegalArgumentException(s"File type not supported: $filePath on file $path")
+    }
+  }
 
   def getDirectory(path: String): String = {
     require(path.nonEmpty)
@@ -146,6 +154,9 @@ object FileUtil extends Logging {
     }
   }
 
+  /**
+   * Creates a directory if it does not exist
+   */
   def createDirectory(dir: String): Unit = {
     require(dir.nonEmpty, "Directory name is empty")
     val d = new File(dir)

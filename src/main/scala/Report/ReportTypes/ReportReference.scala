@@ -1,11 +1,9 @@
 package Report.ReportTypes
 
-import DocumentEnrichers.DocumentEnricher
-import Report.PaperLayout
 import Report.PaperLayout.PaperLayout
+import Report.{DocumentationDocument, PaperLayout, RefinementDocument}
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
-
 
 final case class Documents(
                             landoDocuments: Array[LandoDocumentInfo],
@@ -16,8 +14,10 @@ final case class Documents(
                             bsvDocuments: Array[BSVDocumentInfo],
                             svDocuments: Array[SVDocumentInfo],
                             cDocuments: Array[CDocumentInfo],
+                            fretDocuments: Array[FretDocument],
                           ) {
 
+  lazy val numberOfDocuments: Int = landoDocuments.length + lobotDocuments.length + sysmlDocuments.length + cryptolDocuments.length + sawDocuments.length + bsvDocuments.length + svDocuments.length + cDocuments.length + fretDocuments.length
   lazy val documentNamesToPaths: Map[String, String] = {
     val allDocuments = landoDocuments ++ lobotDocuments ++ sysmlDocuments ++ cryptolDocuments ++ sawDocuments ++ bsvDocuments ++ svDocuments ++ cDocuments
     allDocuments.map(d => d.documentName -> d.filePath).toMap
@@ -40,21 +40,10 @@ final case class Documents(
         case Types.DocumentType.SV => copy(svDocuments = svDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
         case Types.DocumentType.BSV => copy(bsvDocuments = bsvDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
         case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case Types.DocumentType.Fret => copy(fretDocuments = fretDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
       }
       case None => throw new IllegalArgumentException(s"Document $documentName not found")
     }
-  }
-
-  def fromDocuments(documents: Array[DocumentInfo[_]]): Documents = {
-    val landoDocuments = documents.collect { case d: LandoDocumentInfo => d }
-    val lobotDocuments = documents.collect { case d: LobotDocumentInfo => d }
-    val sysmlDocuments = documents.collect { case d: SysMLDocumentInfo => d }
-    val cryptolDocuments = documents.collect { case d: CryptolDocumentInfo => d }
-    val sawDocuments = documents.collect { case d: SawDocumentInfo => d }
-    val bsvDocuments = documents.collect { case d: BSVDocumentInfo => d }
-    val svDocuments = documents.collect { case d: SVDocumentInfo => d }
-    val cDocuments = documents.collect { case d: CDocumentInfo => d }
-    Documents(landoDocuments, lobotDocuments, sysmlDocuments, cryptolDocuments, sawDocuments, bsvDocuments, svDocuments, cDocuments)
   }
 }
 
@@ -65,14 +54,11 @@ final case class ReportReference(
                                   documents: Documents,
                                   layout: PaperLayout = PaperLayout.A4,
                                 ) {
-
-
   require(title.nonEmpty, "title must not be empty")
   require(folder.nonEmpty, "folder must not be empty")
   require(author.nonEmpty, "author must not be empty")
-  //require(allDocuments.nonEmpty, "At least one document must be provided")
-  //require(FileSpecs.allFilesExist(allDocuments.map(_.filePath).toSet), "All documents must exist")
-  lazy val allDocumentNamesToPaths: Map[String, String] = {
+
+  private lazy val allDocumentNamesToPaths: Map[String, String] = {
     documents.documentNamesToPaths
   }
 
@@ -101,6 +87,36 @@ final case class ReportReference(
     val bsv = documents.bsvDocuments.map(d => d.moveFile(folder))
     val sv = documents.svDocuments.map(d => d.moveFile(folder))
     val c = documents.cDocuments.map(d => d.moveFile(folder))
-    copy(documents = Documents(lando, lobot, sysml, cryptol, saw, bsv, sv, c))
+    val fret = documents.fretDocuments.map(d => d.moveFile(folder))
+    copy(documents = Documents(lando, lobot, sysml, cryptol, saw, bsv, sv, c, fret))
+  }
+
+  def buildDocumentationReport: String = {
+    val document = DocumentationDocument(title,
+      author,
+      folder,
+      documents.landoDocuments,
+      documents.lobotDocuments,
+      documents.fretDocuments,
+      documents.sysmlDocuments,
+      documents.cryptolDocuments,
+      documents.sawDocuments,
+      documents.svDocuments,
+      documents.bsvDocuments,
+      documents.cDocuments,
+      layout)
+    document.compile
+  }
+
+  def buildRefinementReport: String = {
+    val document = RefinementDocument(title,
+      author,
+      layout,
+      folder,
+      getRefinedReferences,
+      getNonRefinedReferences,
+      allDocumentNamesToPaths
+    )
+    document.compile
   }
 }

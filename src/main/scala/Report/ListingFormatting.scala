@@ -11,21 +11,22 @@ object ListingFormatting {
     require(folderName.nonEmpty, "Folder name cannot be empty")
     val content =
       s"""
-        |${ListingFormatting.standardCommands}
-        |${ListingFormatting.basicFormatListing}
-        |${ListingFormatting.landoFormatting}
-        |${ListingFormatting.cryptolFormatting}
-        |${ListingFormatting.lobotFormatting}
-        |${ListingFormatting.sysmlFormatting}
-        |${ListingFormatting.sawFormatting}
-        |${ListingFormatting.Verilog}
-        |${ListingFormatting.cFormatting}
-        |% To hide weird characters in the listing environments
-        |\\lstset{showstringspaces=false}
-        |""".stripMargin
+         |${ListingFormatting.standardCommands}
+         |${ListingFormatting.basicFormatListing}
+         |${ListingFormatting.landoFormatting}
+         |${ListingFormatting.cryptolFormatting}
+         |${ListingFormatting.lobotFormatting}
+         |${ListingFormatting.sysmlFormatting}
+         |${ListingFormatting.sawFormatting}
+         |${ListingFormatting.Verilog}
+         |${ListingFormatting.cFormatting}
+         |${ListingFormatting.jsonFormatting}
+         |% To hide weird characters in the listing environments
+         |\\lstset{showstringspaces=false}
+         |""".stripMargin
 
     val filePath = Files.write(Paths.get(folderName, "languageCommands.tex"),
-      content.toString().getBytes(StandardCharsets.UTF_8))
+      content.getBytes(StandardCharsets.UTF_8))
 
     IncludedFile(filePath.toString)
   }
@@ -379,7 +380,7 @@ object ListingFormatting {
   }
 
   //Json Formatting to be used to include FRET documents in the documentation
-  lazy val jsonFormatting: String = {
+  private lazy val jsonFormatting: String = {
     """
       |\colorlet{punct}{red!60!black}
       |\definecolor{delim}{RGB}{20,105,176}

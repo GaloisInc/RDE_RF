@@ -12,6 +12,8 @@ class BSVDocumentInfo(
                      ) extends DocumentInfo[BSVDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.BSV
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
+  override val latexLanguageName = "Verilog"
 
   require(FileUtil.getFileType(filePath) == "bsv", "File path must be a BSV file")
   require(packages.intersect(modules).isEmpty, "Packages and modules cannot intersect")
@@ -40,19 +42,10 @@ class BSVDocumentInfo(
     copy(filePath = newFilePath)
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
 
   override lazy val getAllReferences: Set[DocReference] = {
     modules ++ packages
   }
 
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType)
-    && ref.getDocumentName == documentName
-    && ref.getDocumentType == DocumentType.BSV))
-
-  lazy val getRelations: Set[DocRelation] = Set.empty
-
-  override def getFileType: FileType.Value = {
-    FileType.ComponentFile
-  }
+  override def getFileType: FileType.Value = FileType.ComponentFile
 }

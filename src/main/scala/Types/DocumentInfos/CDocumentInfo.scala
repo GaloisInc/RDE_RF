@@ -10,9 +10,10 @@ class CDocumentInfo(
                    ) extends DocumentInfo[CDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.C
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set.empty[ReferenceType.Value]
+  override val latexLanguageName = "CStyle"
 
   require(FileUtil.getFileType(filePath) == "c", "File path must be a C file")
-  require(FileUtil.fileExists(filePath), "File path must exist")
 
   def copy(
             documentName: String = documentName,
@@ -30,12 +31,6 @@ class CDocumentInfo(
     require(FileUtil.fileExists(newFilePath), "File path must exist")
     copy(filePath = newFilePath)
   }
-
-  override lazy val getAllReferences: Set[DocReference] = {
-    Set.empty[DocReference]
-  }
-
-  lazy val getRelations: Set[DocRelation] = Set.empty[DocRelation]
 
   override def getFileType: FileType.Value = {
     FileType.ComponentFile

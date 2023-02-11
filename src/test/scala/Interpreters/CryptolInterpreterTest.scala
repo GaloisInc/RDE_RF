@@ -4,7 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class CryptolInterpreterTest extends AnyFlatSpec with should.Matchers {
-
   "Cryptol" should "be be in environment" in {
     CryptolInterpreter.toolInstalled should be(true)
   }

@@ -3,7 +3,7 @@ package Types.DocumentInfos
 import DocumentEnrichers.DocumentEnricher
 import Formatter.LatexSanitizer
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType}
+import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
 import java.nio.file.Paths
@@ -17,9 +17,11 @@ abstract class DocumentInfo[T <: DocumentInfo[T]] {
 
   def getFileType: FileType.Value
 
-  def getAllReferences: Set[DocReference]
+  def getAllReferences: Set[DocReference] = Set.empty[DocReference]
 
-  def getRelations: Set[DocRelation]
+  def getRelations: Set[DocRelation] = Set.empty[DocRelation]
+
+  def validReferenceTypesTypes: Set[ReferenceType.Value]
 
   require(documentName.nonEmpty, "Document name cannot be empty")
   require(filePath.nonEmpty, "File path cannot be empty")
@@ -27,22 +29,11 @@ abstract class DocumentInfo[T <: DocumentInfo[T]] {
   require(FileUtil.fileExists(filePath), s"File $filePath does not exist")
   require(getAllReferences.forall(_.getDocumentName == documentName), "All references must be to the same document")
 
-  def getLanguage: String = {
-    documentType match {
-      case DocumentType.Lando => "Lando"
-      case DocumentType.Lobot => "Lobot"
-      case DocumentType.SysML => "SysML"
-      case DocumentType.Cryptol => "Cryptol"
-      case DocumentType.Saw => "Saw"
-      case DocumentType.SV => "Verilog"
-      case DocumentType.BSV => "Verilog"
-      case DocumentType.C => "CStyle"
-    }
-  }
+  def latexLanguageName: String
 
   def getReferenceName: String = s"${documentType.toString}_$documentName"
 
-  def getCaption: String = s"$getLanguage Model of ${LatexSanitizer.sanitizeName(documentName)}"
+  def getCaption: String = s"$latexLanguageName Model of ${LatexSanitizer.sanitizeName(documentName)}"
 
   def updateReference(ref: DocReference): T
 

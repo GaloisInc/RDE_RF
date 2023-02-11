@@ -6,7 +6,7 @@ import Types.DocumentType
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
-object ObjectConfigGenerator {
+object ConfigGenerator {
   private def generateMapWithRefinements(references: Set[DocReference]): Map[String, List[String]] = {
     val documentMap = references.groupBy(_.documentName)
     documentMap.map(document => {

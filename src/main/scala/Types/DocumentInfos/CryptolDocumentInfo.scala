@@ -13,6 +13,8 @@ class CryptolDocumentInfo(
                          ) extends DocumentInfo[CryptolDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.Cryptol
+  val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
+  override val latexLanguageName = "Cryptol"
 
   def copy(
             documentName: String = documentName,
@@ -31,9 +33,7 @@ class CryptolDocumentInfo(
     )
   }
 
-  private val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
 
-  require(getAllReferences.forall(ref => validReferenceTypesTypes.contains(ref.getReferenceType) && ref.getDocumentType == DocumentType.Cryptol && ref.getDocumentName == documentName))
   require(functions.forall(ref => ref.getReferenceType == ReferenceType.Event && ref.getDocumentType == DocumentType.Cryptol), "All functions must be of type Event")
   require(imports.forall(ref => ref.getReferenceType == ReferenceType.Import && ref.getDocumentType == DocumentType.Cryptol), "All imports must be of type Import")
   require(types.forall(ref => ref.getReferenceType == ReferenceType.Type && ref.getDocumentType == DocumentType.Cryptol), "All types must be of type Type")
@@ -57,11 +57,7 @@ class CryptolDocumentInfo(
     copy(filePath = newFilePath)
   }
 
-  lazy val getRelations: Set[DocRelation] = Set.empty
-
-  override def getFileType: FileType.Value = {
-    FileType.ComponentFile
-  }
+  override def getFileType: FileType.Value = FileType.ComponentFile
 
   def getImports: Set[DocReference] = imports
 

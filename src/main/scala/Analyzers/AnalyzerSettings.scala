@@ -7,10 +7,10 @@ import Utils.CommandLineTool
 object AnalyzerSettings {
   val supportedTools : Set[CommandLineTool] = Set(CryptolInterpreter, LandoInterpreter, LobotInterpreter, LatexGenerator, BlueSpecInterpreter)
 
-  val supportedDocumentTypesString: Set[String] = Set("sv", "bsv", "lando", "lobot", "sysml", "cry", "saw", "c", "h")
+  val supportedDocumentTypesString: Set[String] = Set("sv", "bsv", "lando", "lobot", "sysml", "cry", "saw", "c", "h", "json")
 
   val supportedDocumentTypes: Set[Types.DocumentType.Value] = Set(Types.DocumentType.SV, Types.DocumentType.BSV, Types.DocumentType.Lando,
-    Types.DocumentType.Lobot, Types.DocumentType.SysML, Types.DocumentType.Cryptol, Types.DocumentType.Saw, Types.DocumentType.C)
+    Types.DocumentType.Lobot, Types.DocumentType.SysML, Types.DocumentType.Cryptol, Types.DocumentType.Saw, Types.DocumentType.C, Types.DocumentType.Fret)
 
   lazy val dependenciesSupported: installedDependencies = {
     installedDependencies(

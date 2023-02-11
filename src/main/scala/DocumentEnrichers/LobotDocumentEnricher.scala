@@ -1,13 +1,11 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
-import Types.DocumentInfos.{DocumentInfo, LobotDocumentInfo}
+import Types.DocumentInfos.LobotDocumentInfo
 import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
 class LobotDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher[LobotDocumentInfo](formatterType) with Logging {
-  // Reads a Document to create an object of the necessary information to enrich the document.
-
   def parseDocument(filePath: String): LobotDocumentInfo = {
     require(filePath.nonEmpty, "File path cannot be empty")
     require(FileUtil.getFileType(filePath) == "lobot", "File type must be Lobot")

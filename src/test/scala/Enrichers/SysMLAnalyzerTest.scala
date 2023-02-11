@@ -9,10 +9,8 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val documentEnricher = new SysMLDocumentEnricher(formatterType)
+  private val documentEnricher = new SysMLDocumentEnricher(new InlineFormatter())
   private val expectedDocumentType = DocumentType.SysML
-
 
   "SysMLReader" should "to extract DocReference" in {
     val fileName = "PartsAndItems"
@@ -93,7 +91,7 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
 
   "SysMLReader" should "to extract and Enrich Glossary" in {
     val fileName = "RTS_Glossary"
-    val file = getClass.getResource(s"SysML/$fileName.sysml").getFile
+    val file = getClass.getResource(s"../SysML/$fileName.sysml").getFile
     val documentInfo = documentEnricher.parseDocument(file)
     val referencesWithReferences = documentInfo.getAllReferences.filter(_.isReferencingAnything)
     assert(referencesWithReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")

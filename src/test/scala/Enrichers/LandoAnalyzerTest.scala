@@ -8,8 +8,7 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class LandoAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val landoDocumentEnricher = new LandoDocumentEnricher(formatterType)
+  private val landoDocumentEnricher = new LandoDocumentEnricher(new InlineFormatter())
   private val expectedDocumentType = DocumentType.Lando
 
   "LandoDocumentEnricher" should "be able to extract glossary" in {

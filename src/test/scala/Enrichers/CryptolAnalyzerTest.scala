@@ -8,8 +8,7 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class CryptolAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val documentAnalyser = new CryptolDocumentEnricher(formatterType)
+  private val documentAnalyser = new CryptolDocumentEnricher(new InlineFormatter())
   private val expectedDocumentType = DocumentType.Cryptol
 
   "CryptolDocumentEnricher" should "be able to extract types from ActuationUnit" in {

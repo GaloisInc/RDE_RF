@@ -8,8 +8,7 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class BSVAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val documentAnalyser: BSVDocumentEnricher = new BSVDocumentEnricher(formatterType)
+  private val documentAnalyser: BSVDocumentEnricher = new BSVDocumentEnricher(new InlineFormatter)
   private val expectedDocumentType = DocumentType.BSV
 
   "BSVDocumentEnricher" should "be able to extract modules from Actuation" in {

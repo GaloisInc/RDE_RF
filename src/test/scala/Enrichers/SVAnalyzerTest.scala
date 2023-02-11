@@ -8,10 +8,8 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class SVAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val documentAnalyser = new SVDocumentEnricher(formatterType)
+  private val documentAnalyser = new SVDocumentEnricher(new InlineFormatter())
   private val expectedDocumentType = DocumentType.SV
-
 
   "SVDocumentEnricher" should "be able to extract modules from ActuationUnit" in {
     val fileName = "actuation_unit_impl"

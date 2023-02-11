@@ -8,8 +8,7 @@ import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 class FretAnalyzerTest extends AnyFlatSpec with should.Matchers {
-  private val formatterType = new InlineFormatter()
-  private val documentAnalyser = new FRETDocumentEnricher(formatterType)
+  private val documentAnalyser = new FRETDocumentEnricher(new InlineFormatter())
   private val expectedDocumentType = DocumentType.Fret
 
   "FretEnricher" should "be able to extract types from RTS_Requirements" in {

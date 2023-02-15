@@ -13,7 +13,7 @@ class CDocumentInfo(
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set.empty[ReferenceType.Value]
   override val latexLanguageName = "CStyle"
 
-  require(FileUtil.getFileType(filePath) == "c", "File path must be a C file")
+  require(Set("c", "h").contains(FileUtil.getFileType(filePath)), "File path must be a C file")
 
   def copy(
             documentName: String = documentName,
@@ -27,8 +27,6 @@ class CDocumentInfo(
   }
 
   override def updateFilePath(newFilePath: String): CDocumentInfo = {
-    require(FileUtil.getFileType(newFilePath) == "c", "File path must be a C file")
-    require(FileUtil.fileExists(newFilePath), "File path must exist")
     copy(filePath = newFilePath)
   }
 

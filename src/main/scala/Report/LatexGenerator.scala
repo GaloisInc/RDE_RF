@@ -10,14 +10,16 @@ import java.io.File
  * It uses the latexmk tool to build the document.
  */
 object LatexGenerator extends Logging with CommandLineTool {
-  override val command = "latexmk -pdf -pdflatex='pdflatex -interaction=nonstopmode -synctex=1 -file-line-error -shell-escape' -use-make"
+  override val command = "latexmk"
   override val toolName = "Latex - latexmk (pdflatex)"
 
   def buildLatexFile(latexFile: File): Unit = {
     val filePath = latexFile.getAbsolutePath
     require(filePath.endsWith(".tex"), s"File $filePath is not a LaTeX file")
     logger.info(s"Building LaTeX file $filePath using $command")
-    val exitCode = runCommand(List(s"-output-directory=${latexFile.getParent}", filePath))
+    val exitCode = runCommand(List(
+      "-pdf", "-pdflatex='pdflatex -interaction=nonstopmode -synctex=1 -file-line-error -shell-escape', " +
+        "-use-make", s"-output-directory=${latexFile.getParent}", filePath))
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     // Clean up auxiliary files
     runCommand(List("-c", filePath))

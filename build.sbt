@@ -6,7 +6,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 lazy val root = (project in file("."))
   .settings(
     name := "der",
-    version := "0.1.6",
+    version := "0.1.7",
     maintainer := "STH",
     scalaVersion := scalaVersion.value,
     organization := "org.Galois"

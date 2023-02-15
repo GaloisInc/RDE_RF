@@ -3,7 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Specs.FileSpecs
 import Types.DocumentInfos.FretDocument
-import Types.FRET.{FRETRequirement, FRETSemantics}
+import Types.FRET.{FRETRequirement, FRETSemantics, FRETVariable}
 import Utils.FileUtil
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, HCursor, Json}
@@ -13,17 +13,17 @@ class FRETDocumentEnricher(override val formatterType: LatexFormatter) extends D
   def parseDocument(fileString: String): FretDocument = {
     require(FileSpecs.fileChecks(Set(fileString), Set("json")), "filePath must be a sysml file")
     logger.info(s"Parsing file $fileString")
+    val fileContent = FileUtil.readFile(fileString)
 
-    val fretRequirements = parseJsonToFretDocument(FileUtil.readFile(fileString))
+    val fretRequirements = parseRequirements(fileContent)
+    val variables = parseVariables(fileContent)
     val fileName = FileUtil.fileNameFromPath(fileString)
-
     logger.info("Finished parsing file " + fileString)
-
-    new FretDocument(fileName, fileString, fretRequirements)
+    new FretDocument(fileName, fileString, fretRequirements, variables)
   }
 
 
-  private implicit val FRETSemanticsEncoder: Encoder[FRETRequirement] = (a: FRETRequirement) => Json.obj(
+  private implicit val RequirementEncoder: Encoder[FRETRequirement] = (a: FRETRequirement) => Json.obj(
     ("reqid", Json.fromString(a.reqid)),
     ("parent_reqid", Json.fromString(a.parent_reqid)),
     ("rationale", Json.fromString(a.rationale)),
@@ -31,7 +31,19 @@ class FRETDocumentEnricher(override val formatterType: LatexFormatter) extends D
     ("description", Json.fromString(a.semantics.description))
   )
 
-  private implicit val FRETSemanticsDecoder: Decoder[FRETSemantics] = (c: HCursor) => for {
+  private implicit val VariableEncoder: Encoder[FRETVariable] = (a: FRETVariable) => Json.obj(
+    ("variable_name", Json.fromString(a.variable_name)),
+    ("dataType", Json.fromString(a.dataType)),
+    ("idType", Json.fromString(a.idType)),
+    ("completed", Json.fromBoolean(a.completed)),
+    ("modeldoc", Json.fromBoolean(a.modeldoc))
+  )
+
+  private implicit val SemanticsEncoder: Encoder[FRETSemantics] = (a: FRETSemantics) => Json.obj(
+    ("description", Json.fromString(a.description))
+  )
+
+  private implicit val SemanticsDecoder: Decoder[FRETSemantics] = (c: HCursor) => for {
     description <- c.downField("description").as[String]
   } yield {
     FRETSemantics(
@@ -39,13 +51,21 @@ class FRETDocumentEnricher(override val formatterType: LatexFormatter) extends D
     )
   }
 
-  private implicit val nestedDecoder: Decoder[FRETRequirement] = (c: HCursor) => for {
+  private implicit val RequirementDecoder: Decoder[FRETRequirement] = (c: HCursor) => for {
     reqid <- c.downField("reqid").as[String]
     parent_reqid <- c.downField("parent_reqid").as[String]
     rationale <- c.downField("rationale").as[String]
     fulltext <- c.downField("fulltext").as[String]
     semantics <- c.downField("semantics").as[FRETSemantics]
   } yield FRETRequirement(reqid, parent_reqid, rationale, fulltext, semantics)
+
+  private implicit val VariableDecoder: Decoder[FRETVariable] = (c: HCursor) => for {
+    variable_name <- c.downField("variable_name").as[String]
+    dataType <- c.downField("dataType").as[String]
+    idType <- c.downField("idType").as[String]
+    completed <- c.downField("completed").as[Boolean]
+    modeldoc <- c.downField("modeldoc").as[Boolean]
+  } yield FRETVariable(variable_name, dataType, idType, completed, modeldoc)
 
   override def decorateFile(document: FretDocument): String = {
     logger.info(s"Decorating file ${document.filePath}")
@@ -56,35 +76,20 @@ class FRETDocumentEnricher(override val formatterType: LatexFormatter) extends D
     decoratedFilePath
   }
 
-
-  /*
-def parseDocument(filePath: String): FRETDocumentInfo = {
-  require(filePath.nonEmpty, "filePath must not be empty")
-  require(FileUtil.getFileType(filePath) == "json", "filePath must be a json file")
-  require(FileUtil.fileExists(filePath), "filePath must exist")
-
-  implicit val nestedDecoder: Decoder[FRETRequirement] = deriveDecoder[FRETRequirement]
-  implicit val FRETSemanticsDecoder: Decoder[FRETSemantics] = deriveDecoder[FRETSemantics]
-  implicit val jsonDecoder: Decoder[FRETScope] = deriveDecoder[FRETScope]
-  implicit val decoder: Decoder[FretDocument] = deriveDecoder[FretDocument]
-
-  val fretDocument = io.circe.parser.decode[FretDocument](FileUtil.readFile(filePath))
-  fretDocument match {
-    case Left(error) => throw new Exception(error.getMessage)
-    case Right(fretDocument) => {
-      val fileName = FileUtil.getFileName(filePath)
-      val fretDocumentInfo = new FRETDocumentInfo(fileName, filePath, fretDocument)
-      fretDocumentInfo
-    }
-  }
-}
-*/
-
-  private def parseJsonToFretDocument(jsonString: String): List[FRETRequirement] = {
+  private def parseRequirements(jsonString: String): List[FRETRequirement] = {
     require(jsonString.nonEmpty, "jsonString must not be empty")
     val fretDocument = io.circe.parser.decode[List[FRETRequirement]](jsonString)
     fretDocument match {
-      case Left(error) => throw new Exception(error.getMessage)
+      case Left(_) => List.empty[FRETRequirement]
+      case Right(requirements) => requirements
+    }
+  }
+
+  private def parseVariables(jsonString: String): List[FRETVariable] = {
+    require(jsonString.nonEmpty, "jsonString must not be empty")
+    val fretDocument = io.circe.parser.decode[List[FRETVariable]](jsonString)
+    fretDocument match {
+      case Left(_) => List.empty[FRETVariable]
       case Right(fretDocument) => fretDocument
     }
   }

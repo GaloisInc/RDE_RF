@@ -16,14 +16,13 @@ object FileUtil extends Logging {
   def deleteRecursivelyDecoratedFiles(path: String): Unit = {
     require(path.nonEmpty, "path must not be empty")
     require(new File(path).exists(), "path must exist")
-
     val directory = new Directory(new File(path))
 
     val decoratedFiles = directory.deepFiles.withFilter(
       f =>
         // must be latex file and the title must contain the word "decorated"
         f.extension == ".tex"
-          && f.name.contains("decorated")
+          || f.name.contains("decorated")
     ).toArray
 
     decoratedFiles.foreach(f => f.delete())

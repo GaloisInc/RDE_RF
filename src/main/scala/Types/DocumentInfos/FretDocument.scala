@@ -1,13 +1,14 @@
 package Types.DocumentInfos
 
 import Types.DocReference.DocReference
-import Types.FRET.FRETRequirement
+import Types.FRET.{FRETRequirement, FRETVariable}
 import Types.{DocumentType, FileType, ReferenceType}
 
 class FretDocument(
                     override val documentName: String,
                     override val filePath: String,
-                    val requirements: List[FRETRequirement]
+                    val requirements: List[FRETRequirement],
+                    val variables: List[FRETVariable] = List.empty[FRETVariable]
                   ) extends DocumentInfo[FretDocument] {
 
   override val documentType: DocumentType.Value = DocumentType.Fret
@@ -17,15 +18,16 @@ class FretDocument(
   def copy(
             documentName: String = documentName,
             filePath: String = filePath,
-            requirements: List[FRETRequirement] = requirements
+            requirements: List[FRETRequirement] = requirements,
+            variables: List[FRETVariable] = variables
           ): FretDocument = {
     new FretDocument(
       documentName,
       filePath,
-      requirements
+      requirements,
+      variables
     )
   }
-
 
   override def updateReference(ref: DocReference): FretDocument = {
     ref.getReferenceType match {

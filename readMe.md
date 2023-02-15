@@ -66,8 +66,9 @@ The following arguments are supported:
     * -g, --generateLatex           Whether to generate the Pdf from the generated LaTeX documentation
         * -d, --dimension <value>        The dimension of the generated pdf document. Possible values are a4, b4. Default is a4.
         * -t, --title <value>            The title of the documentation
+        * -a, --author <value>           The author of the documentation
     * -R, --GenerateRefinementOverview  Whether to generate the refinement overview
-    * -A, --verifyAll         Whether to verify the source files by compilation all of them - it requires that the tools are installed and available in the path.  
+    * -V, --verifyAll         Whether to verify the source files by compilation all of them - it requires that the tools are installed and available in the path.
     * -v, --version           prints the version of the tool
     * -h, --help              prints this usage text
 

@@ -1,10 +1,12 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos.BSVDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
+
 import scala.util.matching.Regex
 
 class BSVDocumentEnricher(override val formatterType: LatexFormatter,
@@ -18,11 +20,9 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
   val interfaceRegex: Regex = """^interface\s+(\w+)\s*""".r
 
   def parseDocument(filePath: String): BSVDocumentInfo = {
-    require(filePath.nonEmpty, "filePath must not be empty")
-    require(FileUtil.getFileType(filePath) == "bsv", "filePath must be a BSV file")
-    require(FileUtil.fileExists(filePath), "filePath must exist")
+    require(FileSpecs.fileChecks(Set(filePath), Set("bsv")), "filePath must be a bsv file")
 
-    val fileName = FileUtil.getFileName(filePath)
+    val fileName = FileUtil.fileNameFromPath(filePath)
     val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
     val packages = references.filter(_.getReferenceType == ReferenceType.System)
     val modules = references.filter(_.getReferenceType == ReferenceType.SubSystem)

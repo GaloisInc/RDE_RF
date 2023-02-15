@@ -47,7 +47,8 @@ trait DocumentReferencer {
 
     //Both ends of the refinement must be in the report source code and must be valid references otherwise the refinement is ignored
     val allValidRefinements = refinements.filter(
-      refinement => allReferences.keySet.contains(refinement.srcRef.file) &&
+      refinement =>
+        allReferences.keySet.contains(refinement.srcRef.file) &&
         allReferences.keySet.contains(refinement.trgRef.file) &&
         getReference(refinement, _.srcRef).nonEmpty &&
         getReference(refinement, _.trgRef).nonEmpty)

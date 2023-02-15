@@ -72,6 +72,7 @@ object DocumentAnalyzer {
   private def parseDocuments(filesToAnalyze: Array[String], formatter: LatexFormatter): Documents = {
     require(filesToAnalyze.nonEmpty, "No files to analyze")
     require(FileSpecs.fileChecks(filesToAnalyze.toSet, supportedTypes), "Not all files exist or are of one of the supported types")
+
     // Parse files of a specific type into a specific document type
     def parseDocumentsOfType[T <: DocumentInfo[T], D <: DocumentEnricher[T]](
                                                                               files: Array[String],

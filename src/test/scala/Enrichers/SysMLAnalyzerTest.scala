@@ -14,7 +14,7 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
 
   "SysMLReader" should "to extract DocReference" in {
     val fileName = "PartsAndItems"
-    val line1 = "abstract item id BISL 'Behavioral Interface Specification Language';;"
+    val line1 = "abstract item id <BISL> 'Behavioral Interface Specification Language';;"
 
     val extractedReference1 = documentEnricher.transformReference(line1, fileName)
     val expectedReference1 = new DocReference(fileName, ReferenceName("Behavioral Interface Specification Language", Some("BISL")), ReferenceType.Component, DocumentType.SysML, line1)
@@ -27,14 +27,14 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     extractedReference2.isDefined should be(true)
     extractedReference2.get.getName should be(expectedReference2.getName)
 
-    val line3 = "package id Glossary 'Project Glossary' {"
+    val line3 = "package id <Glossary> 'Project Glossary' {"
     val expectedReference3 = new DocReference(fileName, ReferenceName("Project Glossary", Some("Glossary")), ReferenceType.System, DocumentType.SysML, line3)
     val extractedReference3 = documentEnricher.transformReference(line3, fileName)
     extractedReference3.isDefined should be(true)
     extractedReference3.get.getName should be(expectedReference3.getName)
 
 
-    val line4 = "abstract part def id SWImpl 'Hand-written Software Implementation'"
+    val line4 = "abstract part def id <SWImpl> 'Hand-written Software Implementation'"
     val expectedReference4 = new DocReference(fileName, ReferenceName("Hand-written Software Implementation", Some("SWImpl")), ReferenceType.Component, DocumentType.SysML, line4)
     val extractedReference4 = documentEnricher.transformReference(line4, fileName)
     extractedReference4.isDefined should be(true)
@@ -59,29 +59,10 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     extractedReference7.get.getReferenceType should be(expectedReference7.getReferenceType)
   }
 
-  "SysMLReader" should "to extract parts and items" in {
-    val fileName = "RTS_Glossary"
-    TestUtilitySysml.checkExtractReferences("RTS_Glossary", documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 80, numberOfComponent = 66)
-  }
-
-  "SysMLReader" should "to extract requirements" in {
-    val fileName = "RTS_Requirements"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 4, 0, 0, 17)
-  }
 
   "SysMLReader" should "to extract packages" in {
     val fileName = "HARDENS"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 7)
-  }
-
-  "SysMLReader" should "to extract Scenarios" in {
-    val fileName = "RTS_Scenarios"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 4, 0, 1, numberOfScenarios = 39)
-  }
-
-  "SysMLReader" should "to extract Views" in {
-    val fileName = "RTS_Viewpoints"
-    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfViews = 8)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 7)
   }
 
   "SysMLReader" should "to extract Actions" in {
@@ -89,19 +70,95 @@ class SysMLAnalyzerTest extends AnyFlatSpec with should.Matchers {
     TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 4, numberOfEvents = 20)
   }
 
+  "SysMLReader" should "to extract Scenarios from RTS_Characteristics" in {
+    val fileName = "RTS_Characteristics"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfRequirements = 8)
+  }
+
+  "SysMLReader" should "to parse RTS_Contexts" in {
+    val fileName = "RTS_Contexts"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 4)
+  }
+
+  "SysMLReader" should "to extract parts and items" in {
+    val fileName = "RTS_Glossary"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 81, numberOfComponent = 66)
+  }
+
+  "SysMLReader" should "to extract Scenarios from RTS_Hardware_Artifacts" in {
+    val fileName = "RTS_Hardware_Artifacts"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 33, numberOfComponent = 1)
+  }
+
+  "SysMLReader" should "to extract Scenarios from RTS_Implementation_Artifacts" in {
+    val fileName = "RTS_Implementation_Artifacts"
+    // TODO: check the number of components (They are all referenced as part of the system)
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 2, numberOfSubSystem = 9)
+  }
+
+  "SysMLReader" should "to extract Scenarios from RTS_Instrumentation_Physical_Architecture" in {
+    val fileName = "RTS_Instrumentation_Physical_Architecture"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 5, numberOfSubSystem = 23)
+  }
+
+  "SysMLReader" should "to extract Scenarios from RTS_Physical_Architecture" in {
+    val fileName = "RTS_Physical_Architecture"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, 1, 17)
+  }
+
+  "SysMLReader" should "to extract Scenarios from RTS_Properties" in {
+    val fileName = "RTS_Properties"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1)
+  }
+
+  "SysMLReader" should "to extract requirements" in {
+    val fileName = "RTS_Requirements"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 4, numberOfRequirements = 17)
+  }
+
+  "SysMLReader" should "to extract Scenarios" in {
+    val fileName = "RTS_Scenarios"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 5, numberOfComponent = 1, numberOfScenarios = 39)
+  }
+
+  "SysMLReader" should "to parse RTS_Simplified_System_Architecture" in {
+    val fileName = "RTS_Simplified_System_Architecture"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 10, numberOfSubSystem = 15)
+  }
+
+  "SysMLReader" should "to parse RTS_Stakeholders" in {
+    val fileName = "RTS_Stakeholders"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfSubSystem = 13)
+  }
+
+  "SysMLReader" should "to parse RTS_Static_Architecture" in {
+    val fileName = "RTS_Static_Architecture"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 8, numberOfSubSystem = 44)
+  }
+
+  "SysMLReader" should "to extract Views" in {
+    val fileName = "RTS_Viewpoints"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 1, numberOfViews = 8)
+  }
+
+  ignore should "to parse SemanticProperties" in {
+    val fileName = "SemanticProperties"
+    TestUtilitySysml.checkExtractReferences(fileName, documentEnricher, expectedDocumentType, numberExpectedSystem = 11, numberOfAttributes = 64)
+  }
+
+
   "SysMLReader" should "to extract and Enrich Glossary" in {
     val fileName = "RTS_Glossary"
     val file = getClass.getResource(s"../SysML/$fileName.sysml").getFile
     val documentInfo = documentEnricher.parseDocument(file)
     val referencesWithReferences = documentInfo.getAllReferences.filter(_.isReferencingAnything)
     assert(referencesWithReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
-    //TODO: check that the reference is enriched
     //DocumentAnalyzer.addReferences(documentInfo, documentInfo.getAllReferences)
     val referencesWithActualReferences = documentInfo.getAllReferences.filter(_.getReferences.nonEmpty)
     assert(referencesWithActualReferences.exists(ref => ref.getName.equalsIgnoreCase("Synthesizer")), "Synthesizer not found")
 
-    val formatter = new ReferenceFormatter(new InlineFormatter())
 
+    val formatter = new ReferenceFormatter(new InlineFormatter())
     val reference = referencesWithActualReferences.find(ref => ref.getName.equalsIgnoreCase("Synthesizer")).get
     val enrichedLineSynthesize = reference.enrich(formatter)
 

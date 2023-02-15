@@ -14,7 +14,7 @@ import java.nio.file.{Files, Paths}
 object RefinementLoader extends Logging {
   def load(file: String): MasterModel = {
     if (!Files.exists(Paths.get(file))) {
-      val msg = f"File not found: ${file}. Current working directory is: ${System.getProperty("user.dir")}."
+      val msg = f"File not found: $file. Current working directory is: ${System.getProperty("user.dir")}."
       logger.error(msg)
       throw new IllegalArgumentException(msg)
     }
@@ -25,7 +25,6 @@ object RefinementLoader extends Logging {
     parse(masterConfig)
   }
 
-
   def load(stream: InputStream): MasterModel = {
     val reader = new InputStreamReader(stream)
     try {
@@ -35,7 +34,7 @@ object RefinementLoader extends Logging {
       // This forces pure config to not tolerate unknown keys in the config file.
       // It gives errors when typos happen.
       // From https://pureconfig.github.io/docs/overriding-behavior-for-case-classes.html
-      implicit val hintMasterConfig = ProductHint[RefinementFileConfig](allowUnknownKeys = false)
+      implicit val hintMasterConfig: ProductHint[RefinementFileConfig] = ProductHint[RefinementFileConfig](allowUnknownKeys = false)
 
       val parsingResults = ConfigSource.fromConfig(conf).load[RefinementFileConfig]
       val masterConfig = extractMasterConfig(parsingResults)
@@ -48,25 +47,23 @@ object RefinementLoader extends Logging {
 
   def extractMasterConfig(parsingResults: Result[RefinementFileConfig]): RefinementFileConfig = {
     parsingResults match {
-      case Left(errors) => {
+      case Left(errors) =>
         logger.error("Errors during parsing.")
         for (e <- errors.toList) {
           //prettyPrintError(e)
         }
         throw new IllegalArgumentException(errors.toString())
-      }
-      case Right(master) => {
+      case Right(master) =>
         logger.info(f"Successfully parsed master configuration.")
         master
-      }
     }
   }
 
   def parse(config: RefinementFileConfig): MasterModel = {
     config match {
       case RefinementFileConfig(name, implicit_refinements, explicit_refinements) =>
-        val implicit_refinementModels = implicit_refinements.map(i => (i._1 -> i._2.map(parseRefinement)))
-        val explicit_refinementModels = explicit_refinements.map(e => (e._1 -> e._2.map(parseRefinement)))
+        val implicit_refinementModels = implicit_refinements.map(i => i._1 -> i._2.map(parseRefinement))
+        val explicit_refinementModels = explicit_refinements.map(e => e._1 -> e._2.map(parseRefinement))
         MasterModel(name, implicit_refinementModels, explicit_refinementModels)
       case _ =>
         logger.error("Could not parse config.")
@@ -74,7 +71,7 @@ object RefinementLoader extends Logging {
     }
   }
 
-  def parseRefinement(refinement: String): RefinementModel = {
+  private def parseRefinement(refinement: String): RefinementModel = {
     RefinementParserSingleton.parse(RefinementParserSingleton.refinement, refinement) match {
       case RefinementParserSingleton.Success(result, _) =>
         RefinementModel(srcRef = result.srcRef, trgRef = result.trgRef)

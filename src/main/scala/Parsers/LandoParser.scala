@@ -9,10 +9,10 @@ import scala.util.matching.Regex
 
 object LandoParser extends Parser {
   //Regex to match
-  val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
+  val relationRegex: Regex = """^relation\s*(.*?)\s+(contains|client|inherit)\s+(.*)""".r
   //All components, systems and subsystems are referenced by their name which start with a capital letter
   val componentRegex: Regex = """^component\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
-  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+(?:\((.*)\)))?""".r
+  val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val lineCommentsRegex: Regex = """^//.*""".r
   val multiLineCommentsRegex: Regex = """^/\*.*""".r
@@ -20,14 +20,14 @@ object LandoParser extends Parser {
 
   def parse(fileToAnalyze: String): ParsedDocument = {
     require(fileToAnalyze.nonEmpty, "File to analyze cannot be empty")
-    val fileName = FileUtil.getFileName(fileToAnalyze)
+    val fileName = FileUtil.fileNameFromPath(fileToAnalyze)
 
     val lines = Utils.Control.using(Source.fromFile(fileToAnalyze)(Codec.UTF8)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
 
     val parsedLines = lines.map(l => parseLine(l, fileName)).filter(_.isDefined).map(_.get)
-    val documentName = FileUtil.getFileName(fileToAnalyze)
+    val documentName = FileUtil.fileNameFromPath(fileToAnalyze)
 
     ParsedDocument(
       documentName,

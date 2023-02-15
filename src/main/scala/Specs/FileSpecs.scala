@@ -4,8 +4,11 @@ import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.DocumentInfo
 import Utils.FileUtil
 
+/**
+ * Trait that contains methods to check that files exist and are of the correct type
+ */
 object FileSpecs {
-  def allFilesExist(filesToAnalyze: Set[String]): Boolean = {
+  private def allFilesExist(filesToAnalyze: Set[String]): Boolean = {
     filesToAnalyze.forall(file => {
       assert(FileUtil.fileExists(file), s"File $file does not exist")
       true
@@ -18,7 +21,6 @@ object FileSpecs {
       true
     })
   }
-
 
   def fileChecks(filesToAnalyze: Set[String], supportedTypes: Set[String]): Boolean = {
     allFilesExist(filesToAnalyze) && allFilesOfCorrectType(filesToAnalyze, supportedTypes)
@@ -62,6 +64,4 @@ object FileSpecs {
     })
     true
   }
-
-
 }

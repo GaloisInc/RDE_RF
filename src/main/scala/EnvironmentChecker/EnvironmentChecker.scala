@@ -11,5 +11,4 @@ object EnvironmentChecker extends Logging {
     })
     AnalyzerSettings.supportedTools.forall(_.toolInstalled)
   }
-
 }

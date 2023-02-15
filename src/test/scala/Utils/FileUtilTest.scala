@@ -8,9 +8,9 @@ class FileUtilTest extends AnyFlatSpec with should.Matchers {
     val filePath1 = "src/test/resources/test1.txt"
     val filePath2 = "src/test/resources/test2.txt"
     val filePath3 = "src/test/KAS/resources/test3.txt"
-    FileUtil.getFileName(filePath1) should be("test1")
-    FileUtil.getFileName(filePath2) should be("test2")
-    FileUtil.getFileName(filePath3) should be("test3")
+    FileUtil.fileNameFromPath(filePath1) should be("test1")
+    FileUtil.fileNameFromPath(filePath2) should be("test2")
+    FileUtil.fileNameFromPath(filePath3) should be("test3")
   }
 
   it should "be able to extract file type" in {

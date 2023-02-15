@@ -11,5 +11,4 @@ case class CLIConfig(
                       generateRefinementFile: Boolean = false,
                       verifySourceFiles: Boolean = false,
                       deleteDecoratedFiles: Boolean = false
-                      //gitRepo: String = ""
                     )

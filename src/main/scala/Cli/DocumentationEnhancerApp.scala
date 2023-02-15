@@ -12,6 +12,7 @@ import Utils.FileUtil.createDirectory
 import org.apache.logging.log4j.scala.Logging
 import scopt.OParser
 
+import java.awt.Desktop
 import java.io.File
 
 object DocumentationEnhancerApp extends App with Logging {
@@ -109,30 +110,26 @@ object DocumentationEnhancerApp extends App with Logging {
         System.exit(1)
       }
 
-      if (FileUtil.allFilesReadable(filteredFiles)) {
-        println("All files are readable")
-      } else {
-        println("Not all files are readable")
-        println("The following files are not readable:" + FileUtil.getNonReadableFiles(filteredFiles).mkString(","))
-        filteredFiles.foreach(f => new File(f).setReadable(true))
-      }
+      FileUtil.allFilesReadable(filteredFiles)
 
       verifySourceFiles(config, filteredFiles)
 
       val latexDimensions = layoutStringToPaperSize(layout)
 
       val latexGenerationData = LatexDocumentData(latexTitle, "Refinement Finder by Galois, Inc", targetFolder, latexDimensions._1, latexDimensions._2)
-
       val documentReport: ReportReference = generateReport(refinementFile, filteredFiles, latexGenerationData)
 
       println("The files have been enriched and sorted into different folders in the folder " + targetFolder + ".")
       if (config.generateLatex) {
         println("You have chosen to generate a LaTeX document. " +
           "The document will be generated in the folder " + targetFolder + ".")
-
-        documentReport.buildDocumentationReport
+        val filePath = documentReport.buildDocumentationReport
+        val pdfFile = new File(filePath.replace(".tex", ".pdf"))
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
-
+        // Open the pdf file
+        if (Desktop.isDesktopSupported) {
+          Desktop.getDesktop.open(pdfFile)
+        }
       }
       if (config.generateRefinementFile) {
         ConfigGenerator.generateRefinementConfigFile(documentReport, "refinementOverview")

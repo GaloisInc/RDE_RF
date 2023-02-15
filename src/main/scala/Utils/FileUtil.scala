@@ -48,7 +48,6 @@ object FileUtil extends Logging {
     content
   }
 
-
   def fileExists(file: String): Boolean = {
     require(file.nonEmpty, "file must not be empty")
     val path = Paths.get(file)
@@ -69,9 +68,9 @@ object FileUtil extends Logging {
     files.map(_.path)
   } ensuring ((files: Array[String]) => files.forall(file => fileTypesOfTypesOfInterest.contains(getFileType(file)) && file.nonEmpty && FileUtil.fileExists(file)))
 
-  def getFileName(path: String): String = {
+  def fileNameFromPath(path: String): String = {
     require(path.nonEmpty, "Path is empty")
-    val fileName = path.split("/").takeRight(1).head.takeWhile(c => c != '.')
+    val fileName = Paths.get(path).getFileName.toString.takeWhile(c => c != '.')
     fileName
   } ensuring ((fileName: String) => !fileName.contains(".") && path.contains(fileName) && fileName.nonEmpty)
 
@@ -101,14 +100,15 @@ object FileUtil extends Logging {
       case "bsv" => Types.DocumentType.BSV
       case "sv" => Types.DocumentType.SV
       case "json" => Types.DocumentType.Fret
+      case "c" => Types.DocumentType.C
+      case "h" => Types.DocumentType.C
       case filePath => throw new IllegalArgumentException(s"File type not supported: $filePath on file $path")
     }
   }
 
   def getDirectory(path: String): String = {
-    require(path.nonEmpty)
-    //require(Files.exists(Paths.get(path)))
-    val directory = path.split('/').dropRight(1).mkString("/")
+    require(path.nonEmpty, "Path is empty")
+    val directory = Paths.get(path).getParent.toString
     directory
   } ensuring ((directory: String) => path.startsWith(directory) && path.length > directory.length)
 
@@ -116,10 +116,10 @@ object FileUtil extends Logging {
     require(path.nonEmpty, "Path is empty")
     require(FileUtil.fileExists(path), "File does not exist at path" + path)
     val directory = getDirectory(path)
-    val decoratedFileName = getFileName(path) + "_decorated." + getFileType(path)
+    val decoratedFileName = fileNameFromPath(path) + "_decorated." + getFileType(path)
     val decoratedFilePath = Paths.get(directory, decoratedFileName)
     decoratedFilePath.toString
-  } ensuring ((resPath: String) => resPath.contains("_decorated") && getFileType(resPath) == getFileType(path) && resPath.contains(getFileName(path)))
+  } ensuring ((resPath: String) => resPath.contains("_decorated") && getFileType(resPath) == getFileType(path) && resPath.contains(fileNameFromPath(path)))
 
   def isOfFileType(path: String, filetype: String): Boolean = {
     require(path.nonEmpty, "Path is empty")
@@ -134,12 +134,11 @@ object FileUtil extends Logging {
 
   def allFilesReadable(files: Array[String]): Boolean = {
     require(files.nonEmpty, "Files is empty")
-    files.forall(file => new File(file).canRead)
-  }
-
-  def getNonReadableFiles(files: Array[String]): Array[String] = {
-    require(files.nonEmpty, "Files is empty")
-    files.filter(file => !new File(file).canRead)
+    require(files.forall(file => {
+      assert(new File(file).canRead, s"File $file is not readable")
+      true
+    }), "Not all files are readable")
+    true
   }
 
   def getFilesInDirectory(dir: String): Set[String] = {

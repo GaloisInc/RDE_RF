@@ -107,7 +107,7 @@ object CryptolInterpreter extends Logging with CommandLineTool {
     val newTypes = "Newtypes"
     val properties = "Properties"
     val functions = "Symbols"
-    val fileName = FileUtil.getFileName(filePath)
+    val fileName = FileUtil.fileNameFromPath(filePath)
 
     val lines = interpretedResult.split("""\n""").map(_.trim)
     val typesStart = lines.dropWhile(!_.contains(types)).takeWhile(!_.contains(primitiveTypes))

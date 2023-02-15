@@ -13,13 +13,14 @@ The tool parses the source code and adds additional information to it and genera
 * FRET (json format)
 
 ## Dependencies
+
 The tool requires the following dependencies to be installed and in path:
 
 * Cryptol
-* Sbt
+* Sbt (v 1.7)
 * Latex
-* Java
-* Scala
+* Java (> v 8)
+* Scala (> v 2.13)
 * BlueSpec Compiler
 * Lobot
 * Lando
@@ -32,27 +33,29 @@ The tool is written in Scala. To run and build it, you need to have Java 8, Scal
 
 ## Usage Docker
 
-To ease the usage of the tool, we provide a docker image. To run the tool, you need to have docker installed on your machine.
+To ease the usage of the tool, we provide a docker image. To run the tool, you need to have docker installed on your
+machine.
 To run the docker image, you need to pull the docker image and run it with the following command:
 
 ```bash
 docker pull simonthrane/document_enricher:latest
 
-docker run -v <path to the directory containing the documentation>:<srcFiles> simonthrane/document_enricher:latest -i <srcFiles> -o <srcFiles>  <OptionalArguments>
+docker run -v <path to the directory containing the documentation>:<srcFiles> simonthrane/document_enricher:latest -i <srcFiles> -o <srcFiles> <OptionalArguments>
 ```
 
 Note that the docker image is large and might take a while to download.
 
-Example of a command that compiles the latex document into an a4 pdf document and generate an overview of the refinements in the project:
+Example of a command that compiles the latex document into an a4 pdf document and generate an overview of the
+refinements in the project:
 
 ```bash
-
-docker run -v /home/user/Documents/Project/SourceFiles:/data simonthrane/document_enricher:latest -i /data -o /data -g -d=a4
+    docker run -v /home/user/Documents/Project/SourceFiles:/data simonthrane/document_enricher:latest -i /data -o /data -g -d=a4
 ```
 
-Note that the docker image generates the documentation from the source code. 
+Note that the docker image generates the documentation from the source code.
 Therefore, you need to have the source code available in the local directory/volume that the docker image has access to.
-
+This is the reason why we mount the local directory containing the source code into the docker image (using the -v option).
+The docker image will then generate the documentation from the source code and put it into the same directory.
 
 The following arguments are supported:
 
@@ -70,14 +73,14 @@ The following arguments are supported:
 
 ## Building the Docker Image
 
-To build the docker image, you need to have docker installed on your machine.
-To build the docker image, you need to run the following command:
+To build the docker image, you need to have docker and sbt installed on your machine.
+Then, you can build the docker image by running the following command:
 
 ```bash
     sbt docker 
 ```
 
-## Short-term Backlog 
+## Short-term Backlog
 
 * Add more elaborate support of languages (e.g. C, Lobot, Saw)
 * Add support for verification of SAW specifications
@@ -94,4 +97,4 @@ To build the docker image, you need to run the following command:
 * Add support for AADL specifications.
 * Add support for graphical representation of the refinement hierarchy (e.g. using GraphViz).
 
-Copyright (c) 2022 Galois, Inc.
+Copyright (c) 2022-2023 Galois, Inc.

@@ -20,7 +20,7 @@ trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
                             ): Boolean = {
 
     val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(expectedDocumentType))
-    val documentOfInterest = filesToAnalyze.filter(path => FileUtil.getFileName(path) == fileName)
+    val documentOfInterest = filesToAnalyze.filter(path => FileUtil.fileNameFromPath(path) == fileName)
     assert(documentOfInterest.size == 1, "File not found")
     val filePath = documentOfInterest.head
 
@@ -36,7 +36,6 @@ trait TestUtility[D <: DocumentInfo[D], T <: DocumentEnricher[D]] {
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Attribute) == numberOfAttributes, "Number of attribute references is not correct. Expected: " + numberOfAttributes + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Attribute))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.View) == numberOfViews, "Number of view references is not correct. Expected: " + numberOfViews + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.View))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Event) == numberOfEvents, "Number of event references is not correct. Expected: " + numberOfEvents + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Event))
-    assert(extractedReferences.count(_.getReferenceType == ReferenceType.Attribute) == numberOfAttributes, "Number of attribute references is not correct. Expected: " + numberOfAttributes + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Attribute))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Type) == numberOfTypes, "Number of type references is not correct. Expected: " + numberOfTypes + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Type))
     assert(extractedReferences.count(_.getReferenceType == ReferenceType.Scenario) == numberOfScenarios, "Number of scenario references is not correct. Expected: " + numberOfScenarios + " Actual: " + extractedReferences.count(_.getReferenceType == ReferenceType.Scenario))
     true

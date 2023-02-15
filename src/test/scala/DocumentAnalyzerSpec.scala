@@ -95,8 +95,9 @@ class DocumentAnalyzerSpec extends AnyFlatSpec with should.Matchers {
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
 
     val testScenario = report.documents.landoDocuments.find(_.documentName.equalsIgnoreCase("test_scenarios")).get
+    val references_testScenario = testScenario.getAllReferences
 
-    val testScenarioRef = testScenario.getAllReferences.find(ref => ref.getName.equalsIgnoreCase("Exceptional Behavior 2a - Cause Temperature Sensor 1 to Fail")).get
+    val testScenarioRef = references_testScenario.find(ref => ref.getName.equalsIgnoreCase("Exceptional Behavior 2a - Cause Temperature Sensor 1 to Fail")).get
     testScenarioRef.getRefinements.nonEmpty should be(true)
     testScenarioRef.getRefinements.get.exists(ref => ref.getName.equalsIgnoreCase("2a - Cause Temperature Sensor 1 to Fail")) should be(true)
   }

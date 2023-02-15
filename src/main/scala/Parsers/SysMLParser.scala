@@ -9,15 +9,15 @@ import scala.util.matching.Regex
 
 object SysMLParser extends Parser {
   //Regex to match
-  val systemRegex: Regex = """^(?:package)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r
-  val componentRegex: Regex = """^(?:abstract)?\s*(?:item)\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
+  val systemRegex: Regex = """^package\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?""".r
+  val componentRegex: Regex = """^(?:abstract)?\s*item\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val subsystemRegex: Regex = """^(?:abstract)?\s*part\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val attributeRegex: Regex = """^(?:abstract)?\s*attribute\s*(?:def)?\s*(?:id)?\s*(?=.)\s*(\w*)?\s*(?:'(.*?)')?(?:\s*(:>|:)\s*(.*))?""".r
   val requirementRegex: Regex = """^requirement\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
   val usecaseRegex: Regex = """^use case\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(?:(:>|:)?\s*(.*))?""".r
   val actionRegex: Regex = """^action\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*(?:'(.*?)')?\s*(:>|:)?\s*(.*)""".r
   val importRegex: Regex = """^import\s*(?:def)?\s*(?:id)?\s*(\w*)?\s*('(.*?)')?""".r
-  val viewRegex: Regex = """^view\s*(?:def)?\s*(?:id)?\s*(?:'(.*?)')(?:\s*:\s*(?:'(.*)'))?""".r
+  val viewRegex: Regex = """^view\s*(?:def)?\s*(?:id)?\s*'(.*?)'(?:\s*:\s*(?:'(.*)'))?""".r
   val viewPointRegex: Regex = """^viewpoint\s*(?:def)?\s*(?:id)?\s*'(.*?)'""".r
   val connectionRegex: Regex = """^connect\s*(\.*)\s=to\s+(.*?)""".r
   val lineCommentsRegex: Regex = """^//.*""".r
@@ -26,14 +26,14 @@ object SysMLParser extends Parser {
 
   def parse(fileToAnalyze: String): ParsedDocument = {
     require(fileToAnalyze.nonEmpty, "File to analyze cannot be empty")
-    val fileName = FileUtil.getFileName(fileToAnalyze)
+    val fileName = FileUtil.fileNameFromPath(fileToAnalyze)
 
     val lines = Utils.Control.using(Source.fromFile(fileToAnalyze)(Codec.UTF8)) {
       source => (for (line <- source.getLines()) yield line).toList
     }
 
     val parsedLines = lines.map(l => parseLine(l, fileName)).filter(_.isDefined).map(_.get)
-    val documentName = FileUtil.getFileName(fileToAnalyze)
+    val documentName = FileUtil.fileNameFromPath(fileToAnalyze)
 
     ParsedDocument(
       documentName,

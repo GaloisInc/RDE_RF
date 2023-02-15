@@ -1,6 +1,7 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
 import Types._
@@ -15,16 +16,14 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
                             override val skipTodos: Boolean = true) extends DocumentEnricher[LandoDocumentInfo](formatterType, skipTodos) with Logging {
 
 
-  val relationRegex: Regex = """^relation\s*(?:(.*?)\s+(contains|client|inherit))\s+(.*)""".r
+  val relationRegex: Regex = """^relation\s*(.*?)\s+(contains|client|inherit)\s+(.*)""".r
   //All components, systems and subsystems are referenced by their name which start with a capital letter
   val componentRegex: Regex = """^component\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val systemRegex: Regex = """^system\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
   val subsystemRegex: Regex = """^subsystem\s+([A-Z].*?)(?:\s+\((.*)\))?""".r
 
   def parseDocument(filePath: String): LandoDocumentInfo = {
-    require(filePath.nonEmpty, "filePath must not be empty")
-    require(FileUtil.getFileType(filePath) == "lando", "filePath must be a lando file")
-    require(FileUtil.fileExists(filePath), "filePath must exist")
+    require(FileSpecs.fileChecks(Set(filePath), Set("lando")), "filePath must be a sysml file")
 
     logger.info(s"Start parsing lando file $filePath")
     val references: Set[DocReference] = extractReferences(filePath, FileType.ComponentFile)
@@ -33,7 +32,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     val scenarios: Set[DocReference] = extractReferences(filePath, FileType.ScenarioFile)
     val events: Set[DocReference] = extractReferences(filePath, FileType.EventFile)
 
-    val fileName = FileUtil.getFileName(filePath)
+    val fileName = FileUtil.fileNameFromPath(filePath)
     val enrichedRelations = enrichRelations(relations, references, fileName)
 
     logger.info(s"Finished parsing lando file $filePath")
@@ -41,7 +40,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   } ensuring ((landoDoc: LandoDocumentInfo) =>
     landoDoc.documentType == DocumentType.Lando
       && landoDoc.filePath == filePath
-      && landoDoc.documentName == FileUtil.getFileName(filePath))
+      && landoDoc.documentName == FileUtil.fileNameFromPath(filePath))
 
   override def formatLine(line: String, documentInfo: LandoDocumentInfo): String = {
     val references = documentInfo.getAllReferences
@@ -192,9 +191,9 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
 
   def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType.Value) => A): Set[A] = {
     require(filePath.nonEmpty, "The file path should not be empty")
-    val fileName = FileUtil.getFileName(filePath)
+    val fileName = FileUtil.fileNameFromPath(filePath)
     val fileType = getFileType(filePath)
-    Control.using(Source.fromFile(filePath)((Codec.UTF8))) { source => {
+    Control.using(Source.fromFile(filePath)(Codec.UTF8)) { source => {
       val lines = source.getLines().toArray
       lines
         .indices.filter(idx => {

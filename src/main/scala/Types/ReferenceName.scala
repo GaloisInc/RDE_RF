@@ -11,5 +11,5 @@ final case class ReferenceName(name: String, acronym: Option[String] = None) {
     }
   } ensuring(_.nonEmpty, "Reference name must not be empty")
 
-  def getName: String = if (name.isEmpty) acronym.get else name
+  def getName: String = if (name.isEmpty && acronym.isDefined) acronym.get else name
 }

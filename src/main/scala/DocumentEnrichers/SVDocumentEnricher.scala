@@ -1,6 +1,7 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos.{DocumentInfo, LobotDocumentInfo, SVDocumentInfo, SawDocumentInfo}
 import Types.{DocumentType, ReferenceName, ReferenceType}
@@ -14,13 +15,11 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
   val subsystemRegex: Regex = """^module\s+(\w+)\s*""".r
 
   def parseDocument(filePath: String): SVDocumentInfo = {
-    require(filePath.nonEmpty, "File path cannot be empty")
-    require(FileUtil.getFileType(filePath) == "sv", "File type must be SystemVerilog")
-    require(FileUtil.fileExists(filePath), "filePath must exist")
+    require(FileSpecs.fileChecks(Set(filePath), Set("sv")), "filePath must be a sysml file")
 
     logger.info(s"Parsing file $filePath")
 
-    val fileName = FileUtil.getFileName(filePath)
+    val fileName = FileUtil.fileNameFromPath(filePath)
     val modules: Set[DocReference] = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
 
     logger.info("Finished parsing file " + filePath)

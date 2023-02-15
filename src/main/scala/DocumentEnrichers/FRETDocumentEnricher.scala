@@ -1,6 +1,7 @@
 package DocumentEnrichers
 
 import Formatter.LatexFormatter
+import Specs.FileSpecs
 import Types.DocumentInfos.FretDocument
 import Types.FRET.{FRETRequirement, FRETSemantics}
 import Utils.FileUtil
@@ -10,13 +11,11 @@ import org.apache.logging.log4j.scala.Logging
 
 class FRETDocumentEnricher(override val formatterType: LatexFormatter) extends DocumentEnricher[FretDocument](formatterType) with Logging {
   def parseDocument(fileString: String): FretDocument = {
-    require(fileString.nonEmpty, "File path cannot be empty")
-    require(FileUtil.getFileType(fileString) == "json", "File type must be FRET")
-    require(FileUtil.fileExists(fileString), "filePath must exist")
+    require(FileSpecs.fileChecks(Set(fileString), Set("json")), "filePath must be a sysml file")
     logger.info(s"Parsing file $fileString")
 
     val fretRequirements = parseJsonToFretDocument(FileUtil.readFile(fileString))
-    val fileName = FileUtil.getFileName(fileString)
+    val fileName = FileUtil.fileNameFromPath(fileString)
 
     logger.info("Finished parsing file " + fileString)
 

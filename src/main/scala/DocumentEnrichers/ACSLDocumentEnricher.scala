@@ -17,13 +17,4 @@ class ACSLDocumentEnricher(override val formatterType: LatexFormatter,
 
     new CDocumentInfo(fileName, filePath)
   }
-
-
-  def formatLine(line: String, documentInfo: CDocumentInfo): String = {
-    val references = documentInfo.getAllReferences
-    line match {
-      case _ => line
-    }
-  }
-
 }

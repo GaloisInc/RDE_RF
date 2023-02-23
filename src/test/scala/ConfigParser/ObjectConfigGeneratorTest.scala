@@ -36,6 +36,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers  {
     file.delete()
   }
 
+  //Test is ignored because there is a problem with the test file
   ignore should "generate a config file from documents" in {
     val filesToAnalyze = ResourceFiles.getFilesOfTypes(Set(DocumentType.SysML, DocumentType.Lando, DocumentType.Cryptol, DocumentType.BSV, DocumentType.SV))
 
@@ -51,7 +52,6 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers  {
     reportFilePath should not be null
     val file = new File(reportFilePath)
     file.exists() should be(true)
-
 
     val loadedFile = RefinementLoader.load(reportFilePath)
     loadedFile.name should be(reportName)

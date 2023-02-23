@@ -5,11 +5,11 @@ import Report.LatexProcessLogger
 import scala.sys.process.Process
 
 trait CommandLineTool {
-  def command : String
-  def toolName : String
+  def command: String
+  def toolName: String
 
-//  require(command.nonEmpty, "command must not be empty")
-//  require(toolName.nonEmpty, "toolName must not be empty")
+  //require(command.nonEmpty, "command must not be empty")
+  //require(toolName.nonEmpty, "toolName must not be empty")
 
   def toolInstalled: Boolean = {
     val path = System.getenv("PATH")

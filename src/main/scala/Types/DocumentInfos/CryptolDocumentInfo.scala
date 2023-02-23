@@ -45,10 +45,10 @@ class CryptolDocumentInfo(
 
   override def updateReference(ref: DocReference): CryptolDocumentInfo = {
     ref.getReferenceType match {
-      case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
-      case ReferenceType.Type => copy(types = types.map(_.updateDocReference(ref)))
-      case ReferenceType.Requirement => copy(properties = properties.map(_.updateDocReference(ref)))
-      case ReferenceType.Event => copy(functions = functions.map(_.updateDocReference(ref)))
+      case ReferenceType.Import => copy(imports = imports.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref)
+      case ReferenceType.Type => copy(types = types.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref)
+      case ReferenceType.Requirement => copy(properties = properties.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref)
+      case ReferenceType.Event => copy(functions = functions.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref)
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
   }

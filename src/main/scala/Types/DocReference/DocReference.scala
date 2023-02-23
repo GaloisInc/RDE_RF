@@ -33,7 +33,7 @@ class DocReference(
   require(getName.nonEmpty, "" +
     "referenceName must not be empty (documentName: " + documentName + ") and line: " + originalLine)
 
-  lazy val getLabelText: String = s"${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(getName)}"
+  lazy val getLabelText: String = s"${documentType.toString}_${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(getName)}"
 
   lazy val getName: String = if (referenceName.name.isEmpty) referenceName.acronym.get else referenceName.name
 
@@ -41,13 +41,8 @@ class DocReference(
 
   lazy val sanitizedName: String = LatexSanitizer.sanitizeName(getName)
 
-  def updateDocReference(ref: DocReference): DocReference = {
-    if(ref.documentName == documentName && ref.getName == getName) {
-      ref
-    } else {
-      this
-    }
-  }
+  def updateDocReference(ref: DocReference): DocReference =
+    if (ref.originalLine == originalLine) ref else this
 
   //A reference can be a refinement or an abstraction of another reference
   private var referencing: Map[String, DocReference] = Map.empty
@@ -62,8 +57,9 @@ class DocReference(
     require(!referencing.contains(ref._1), "ref must not be already referenced!")
     require(references.get.exists(r => r.getCleanName.equalsIgnoreCase(ref._1)), "ref must be in the references of this reference! But was: " + ref._1)
     referencing = referencing + ref
-  } ensuring(referencing.contains(ref._1) && referencing.nonEmpty
-    && referencing.size <= references.get.size, "ref must be added to the referencing references for ref " + ref._1)
+  } ensuring(referencing.contains(ref._1) &&
+    referencing.nonEmpty &&
+    referencing.size <= references.get.size, "ref must be added to the referencing references for ref " + ref._1)
 
   def getReferences: Map[String, DocReference] = referencing
 
@@ -103,7 +99,8 @@ class DocReference(
     references,
   )
 
-  def isInRefinementChain: Boolean = (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
+  def isInRefinementChain: Boolean =
+    (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
 
   override def enrich(formatter: ReferenceFormatter): String = {
     val refinementOfString = getAbstractions match {
@@ -117,7 +114,6 @@ class DocReference(
     }
 
     //If the original line contains a reference to another reference, we highlight it by making a clickable link
-
     val highlightedLine = references match {
       case Some(reference) => formatter.highlightLineWithReferences(originalLine, reference.head.symbol, getReferences)
       case None => originalLine

@@ -2,7 +2,6 @@ package Report
 
 import Report.ReportTypes.{BlockComment, LanguageFormatting, Literate}
 import Types.DocumentType
-
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
@@ -58,6 +57,11 @@ object ListingFormatting {
       |    else,
       |    end,
       |    endcase,
+      |    assert,
+      |    reg,
+      |    wire,
+      |    Bit,
+      |    always,
       |    function,
       |    endfunction,
       |    endinterface,
@@ -120,12 +124,16 @@ object ListingFormatting {
       |    output_clock,
       |    output_reset,
       |    input_clock,
+      |    output,
+      |    input,
       |    input_reset,
       |    same_family,
       |    Action,
       |    ActionValue,
       |    Integer,
       |    Nat,
+      |    assign,
+      |    genvar,
       |    Bit,
       |    UInt,
       |    Int,
@@ -144,6 +152,7 @@ object ListingFormatting {
       |    Reg,
       |    RWire, Wire, BypassWire, PulseWire,
       |    RegFile,
+      |    endmodule,
       |    Vector,
       |    FIFO, FIFOF,
       |    Bits, Eq, Ord, Bounded,

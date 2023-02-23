@@ -16,10 +16,4 @@ class LobotDocumentEnricher(override val formatterType: LatexFormatter) extends 
 
     new LobotDocumentInfo(fileName, filePath, Set(), Set(), Set(), Set(), Set())
   }
-
-  def formatLine(line: String, documentInfo: LobotDocumentInfo): String = {
-    line match {
-      case _ => line
-    }
-  }
 }

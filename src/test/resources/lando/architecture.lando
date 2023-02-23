@@ -61,12 +61,6 @@ component Lattice ECP-5 FGPA Development Board
 subsystem Actuators
 @todo kiniry Add an explanation.
 
-component Actuator 1
-@todo kiniry Add an explanation.
-
-component Actuator 2
-@todo kiniry Add an explanation.
-
 subsystem Sensors
 @todo kiniry Add an explanation.
 

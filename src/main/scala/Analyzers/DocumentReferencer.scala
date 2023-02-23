@@ -16,7 +16,10 @@ trait DocumentReferencer {
    */
   def addReferences(documents: Documents, explicitReferences: Set[RefinementModel]): Documents
 
-  private def addImplicitReferences[T <: DocumentInfo[T]](document: T, references: Set[DocReference]): Unit = {
+  /**
+   * This method adds references between documents of the same type
+   */
+  private def addInternalReferences[T <: DocumentInfo[T]](document: T, references: Set[DocReference]): Unit = {
     val referencesToUpdate: Set[DocReference] = document.getAllReferences.filter(ref => ref.isReferencingAnything)
     referencesToUpdate.foreach(reference => {
       val potentialReferences: Map[String, DocReference] = {
@@ -32,8 +35,11 @@ trait DocumentReferencer {
     })
   }
 
+  /**
+   * This method is a helper method that adds references between documents of different types
+   */
   protected def addImplicitRefinements[T <: DocumentInfo[T]](docs: Array[T]): Array[T] = {
-    docs.foreach(doc => addImplicitReferences(doc, docs.flatMap(_.getAllReferences).toSet))
+    docs.foreach(doc => addInternalReferences(doc, docs.flatMap(_.getAllReferences).toSet))
     docs
   } //ensuring((res: Array[T]) => FileSpecs.allFilesAnalyzed(docs, res), "Not all files were analyzed")
 
@@ -49,9 +55,9 @@ trait DocumentReferencer {
     val allValidRefinements = refinements.filter(
       refinement =>
         allReferences.keySet.contains(refinement.srcRef.file) &&
-        allReferences.keySet.contains(refinement.trgRef.file) &&
-        getReference(refinement, _.srcRef).nonEmpty &&
-        getReference(refinement, _.trgRef).nonEmpty)
+          allReferences.keySet.contains(refinement.trgRef.file) &&
+          getReference(refinement, _.srcRef).nonEmpty &&
+          getReference(refinement, _.trgRef).nonEmpty)
 
     allValidRefinements.foldLeft(report)((accReport, refinement) => {
       val srcRef = getReference(refinement, _.srcRef).head
@@ -65,13 +71,28 @@ trait DocumentReferencer {
 }
 
 object DocumentReferencer extends DocumentReferencer {
-
   def addReferences(documents: Documents, explicitReferences: Set[RefinementModel]): Documents = {
-    val enrichedBSVDocuments = documents.bsvDocuments.map(doc => BlueSpecReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[BSVDocumentInfo]))
-    val enrichedSVDocuments = documents.svDocuments.map(doc => SystemVerilogReferencer.addRefinementRelations(doc, Array.empty[CryptolDocumentInfo], Array.empty[SVDocumentInfo]))
-    val enrichedCryptolDocuments = documents.cryptolDocuments.map(doc => CryptolReferencer.addRefinementRelations(doc, documents.sysmlDocuments, enrichedBSVDocuments))
+    val enrichedBSVDocuments = documents.bsvDocuments.map(doc => BlueSpecReferencer.addRefinementRelations(doc, documents.cryptolDocuments, Array.empty[BSVDocumentInfo]))
+    val enrichedSVDocuments = documents.svDocuments.map(doc => SystemVerilogReferencer.addRefinementRelations(doc, documents.cryptolDocuments, Array.empty[SVDocumentInfo]))
+
+    val enrichedCryptolDocuments = documents.cryptolDocuments.map(doc => {
+      val enrichedWithBSV = CryptolBSVReferencer.addRefinementRelations(doc, documents.sysmlDocuments, enrichedBSVDocuments)
+      val enrichedWithSV = CryptolSVReferencer.addRefinementRelations(enrichedWithBSV, documents.fretDocuments, enrichedSVDocuments)
+      enrichedWithSV
+    })
+
     val enrichedSysMLDocuments = documents.sysmlDocuments.map(doc => SysMLReferencer.addRefinementRelations(doc, documents.landoDocuments, enrichedCryptolDocuments))
-    val enrichedLandoDocuments = documents.landoDocuments.map(doc => LandoReferencer.addRefinementRelations(doc, Array.empty[LandoDocumentInfo], enrichedSysMLDocuments))
+    val enrichedFretDocuments = documents.fretDocuments.map(doc => {
+      val enrichedWithSysml = FretSysMLReferencer.addRefinementRelations(doc, documents.landoDocuments, enrichedSysMLDocuments)
+      val enrichedWithCryptol = FretCryptolReferencer.addRefinementRelations(enrichedWithSysml, documents.landoDocuments, enrichedCryptolDocuments)
+      enrichedWithCryptol
+    })
+
+    val enrichedLandoDocuments = documents.landoDocuments.map(doc => {
+      val enrichedWithFret = LandoFretReferencer.addRefinementRelations(doc, Array.empty[LandoDocumentInfo], enrichedFretDocuments)
+      val enrichedWithSysML = LandoSysMLReferencer.addRefinementRelations(enrichedWithFret, Array.empty[LandoDocumentInfo], enrichedSysMLDocuments)
+      enrichedWithSysML
+    })
 
     val landoDocuments: Array[LandoDocumentInfo] = addImplicitRefinements(enrichedLandoDocuments)
     val lobotDocuments: Array[LobotDocumentInfo] = addImplicitRefinements(documents.lobotDocuments)
@@ -80,8 +101,8 @@ object DocumentReferencer extends DocumentReferencer {
     val sawDocuments: Array[SawDocumentInfo] = addImplicitRefinements(documents.sawDocuments)
     val svDocuments: Array[SVDocumentInfo] = addImplicitRefinements(enrichedSVDocuments)
     val bsvDocuments: Array[BSVDocumentInfo] = addImplicitRefinements(enrichedBSVDocuments)
-    val cDocuments = addImplicitRefinements(documents.cDocuments)
-    val fretDocuments = addImplicitRefinements(documents.fretDocuments)
+    val cDocuments: Array[CDocumentInfo] = addImplicitRefinements(documents.cDocuments)
+    val fretDocuments: Array[FretDocument] = addImplicitRefinements(enrichedFretDocuments)
     val extendedDocuments = Documents(landoDocuments, lobotDocuments, sysmlDocuments, cryptolDocuments, sawDocuments, bsvDocuments, svDocuments, cDocuments, fretDocuments)
     addExplicitRefinements(extendedDocuments, explicitReferences)
   }

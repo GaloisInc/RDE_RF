@@ -1,5 +1,6 @@
 package Interpreters
 
+import Specs.FileSpecs
 import Types.DocReference.DocReference
 import Types.DocumentInfos.CryptolDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
@@ -9,14 +10,12 @@ import org.apache.logging.log4j.scala.Logging
 import scala.sys.process._
 
 object CryptolInterpreter extends Logging with CommandLineTool {
-  override val command: String = "cryptol"
-  override val toolName: String = "Cryptol"
+  def command: String = "cryptol"
+  def toolName: String = "Cryptol"
 
   private def check(filePath: String): Unit = {
-    require(filePath.nonEmpty, "Filename is not specified.")
-    require(filePath.endsWith(".cry"), "The file is not a cryptol file.")
+    require(FileSpecs.fileChecks(Set(filePath), Set("cry", "icry")), "The file is not a cryptol file.")
     require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(filePath), "The file does not exist.")
   }
 
   private def typeCmd(nameOfModule: String): String = {
@@ -30,29 +29,18 @@ object CryptolInterpreter extends Logging with CommandLineTool {
   }
 
   private def verificationScriptCmd(nameOfScript: String): String = {
-    require(nameOfScript.endsWith(".icry"), "The file is not a cryptol file.")
-    require(nameOfScript.nonEmpty, "Filename is not specified.")
-    require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(nameOfScript), "The file does not exist.")
-
+    check(nameOfScript)
     s"-b $nameOfScript"
   }
 
   private def wellformednessCmd(nameOfModule: String): String = {
-    require(nameOfModule.nonEmpty, "Filename is not specified.")
-    require(nameOfModule.endsWith(".cry"), "The file is not a cryptol file.")
-    require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(nameOfModule), "The file does not exist.")
-
+    check(nameOfModule)
     val result = s"-c :b $nameOfModule"
     result
   }
 
   def interpret(fileToCryptolModule: String): CryptolDocumentInfo = {
-    require(fileToCryptolModule.nonEmpty, "Filename is not specified.")
-    require(fileToCryptolModule.endsWith(".cry"), "The file is not a cryptol file.")
-    require(toolInstalled, "Cryptol is not in the path.")
-    require(FileUtil.fileExists(fileToCryptolModule), "The file does not exist.")
+    check(fileToCryptolModule)
 
     val interpreterCmd = s"$command ${typeCmd(fileToCryptolModule)}"
     val result = interpreterCmd.!!

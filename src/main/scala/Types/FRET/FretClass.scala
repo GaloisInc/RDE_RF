@@ -4,7 +4,7 @@ final case class FRETRequirement(
                                   reqid: String,
                                   parent_reqid: String,
                                   rationale: String,
-                                  fulltext: String,
+                                  fulltext: List[String],
                                   semantics: FRETSemantics,
                                 ) {
   require(reqid.nonEmpty, "reqid must not be empty")
@@ -25,4 +25,4 @@ final case class FRETVariable(
 }
 
 
-final case class FRETSemantics(description: String)
+final case class FRETSemantics(description: List[String])

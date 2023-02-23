@@ -40,20 +40,30 @@ class LandoDocumentInfo(
   override def updateReference(ref: DocReference): LandoDocumentInfo = {
     ref.getReferenceType match {
       case Types.ReferenceType.Component | Types.ReferenceType.System | Types.ReferenceType.SubSystem =>
-        val newReferences = references.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        val newReferences = references.filterNot(_.getLabelText == ref.getLabelText) + ref
+        assert(newReferences.size == references.size,
+          "The number of references must not change after updating a reference " + newReferences.size + " != " + references.size +
+            "for file " + documentName + " with path " + filePath)
         copy(references = newReferences)
       case Types.ReferenceType.Scenario =>
-        val newScenarios = scenarios.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        val newScenarios = scenarios.filterNot(_.getLabelText == ref.getLabelText) + ref
+        assert(newScenarios.size == scenarios.size,
+          "The number of scenarios must not change after updating a reference " + newScenarios.size + " != " + scenarios.size)
         copy(scenarios = newScenarios)
       case Types.ReferenceType.Requirement =>
-        val newRequirements = requirements.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        val newRequirements = requirements.filterNot(_.getLabelText == ref.getLabelText) + ref
+        assert(newRequirements.size == requirements.size,
+          "The number of requirements must not change after updating a reference " + newRequirements.size + " != " + requirements.size)
         copy(requirements = newRequirements)
       case Types.ReferenceType.Event =>
-        val newEvents = events.filterNot(_.getName.equalsIgnoreCase(ref.getName)) + ref
+        val newEvents = events.filterNot(_.getLabelText == ref.getLabelText) + ref
+        assert(newEvents.size == events.size,
+          "The number of events must not change after updating a reference " + newEvents.size + " != " + events.size)
         copy(events = newEvents)
       case _ => throw new Exception("Unknown reference type")
     }
-  }
+  } ensuring((res: LandoDocumentInfo) =>
+    res.getAllReferences.size == getAllReferences.size, "The number of references must not change after updating a reference")
 
   override def updateFilePath(newFilePath: String): LandoDocumentInfo = {
     copy(filePath = newFilePath)

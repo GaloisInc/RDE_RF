@@ -49,7 +49,7 @@ trait LatexCompilationTester {
                             sortFiles: Boolean,
                             folder: String = reportPath
                            ): Boolean = {
-    compileLatexFile(Set(Types.DocumentType.SysML, Types.DocumentType.Lando, Types.DocumentType.Cryptol, Types.DocumentType.Fret),
+    compileLatexFile(filesTypes,
       reportName,
       paperLayout,
       formatter,

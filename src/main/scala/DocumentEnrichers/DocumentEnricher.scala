@@ -27,7 +27,7 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
    * @param line Line to be enriched
    * @return Enriched text
    */
-  def formatLine(line: String, documentInfo: T): String
+  def formatLine(line: String, documentInfo: T): String = line
 
   /**
    * Decorates a file with the enriched text

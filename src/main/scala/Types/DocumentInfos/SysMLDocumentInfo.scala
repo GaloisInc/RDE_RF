@@ -68,19 +68,19 @@ class SysMLDocumentInfo(
 
   override def updateReference(ref: DocReference): SysMLDocumentInfo = {
     ref.getReferenceType match {
-      case ReferenceType.Import => copy(imports = imports.map(_.updateDocReference(ref)))
-      case ReferenceType.System => copy(packages = packages.map(_.updateDocReference(ref)))
-      case ReferenceType.SubSystem => copy(parts = parts.map(_.updateDocReference(ref)))
-      case ReferenceType.Connection => copy(connections = connections.map(_.updateDocReference(ref)))
-      case ReferenceType.Scenario => copy(usecases = usecases.map(_.updateDocReference(ref)))
-      case ReferenceType.Requirement => copy(requirements = requirements.map(_.updateDocReference(ref)))
-      case ReferenceType.Event => copy(actions = actions.map(_.updateDocReference(ref)))
-      case ReferenceType.View => copy(views = views.map(_.updateDocReference(ref)))
-      case ReferenceType.Component => copy(items = items.map(_.updateDocReference(ref)))
-      case ReferenceType.Attribute => copy(attributes = attributes.map(_.updateDocReference(ref)))
+      case ReferenceType.Import => copy(imports = imports.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.System => copy(packages = packages.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.SubSystem => copy(parts = parts.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Connection => copy(connections = connections.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Scenario => copy(usecases = usecases.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Requirement => copy(requirements = requirements.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Event => copy(actions = actions.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.View => copy(views = views.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Component => copy(items = items.filterNot(_.originalLine == ref.originalLine) + ref)
+      case ReferenceType.Attribute => copy(attributes = attributes.filterNot(_.originalLine == ref.originalLine) + ref)
       case _ => throw new IllegalArgumentException("Invalid reference type")
     }
-  }
+  } ensuring((newDoc: SysMLDocumentInfo) => newDoc.getAllReferences.size == getAllReferences.size, "The number of references must not change")
 
   override def updateFilePath(newFilePath: String): SysMLDocumentInfo = {
     copy(filePath = newFilePath)

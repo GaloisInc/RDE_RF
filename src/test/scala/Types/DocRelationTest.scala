@@ -51,6 +51,6 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     )
 
     val enrichedLine = docRelation.enrich(formatter)
-    enrichedLine should be("relation (@\\hyperref[documentName_Requirement_sourceRef]{sourceRef}@) (@\\cref{documentName_Requirement_sourceRef}@) client (@\\hyperref[documentName_Requirement_targetRef]{targetRef}@) (@\\cref{documentName_Requirement_targetRef}@)")
+    enrichedLine should be("relation (@\\hyperref[Lando_documentName_Requirement_sourceRef]{sourceRef}@) (@\\cref{Lando_documentName_Requirement_sourceRef}@) client (@\\hyperref[Lando_documentName_Requirement_targetRef]{targetRef}@) (@\\cref{Lando_documentName_Requirement_targetRef}@)")
   }
 }

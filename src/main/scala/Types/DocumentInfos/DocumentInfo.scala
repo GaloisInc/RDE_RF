@@ -33,13 +33,19 @@ abstract class DocumentInfo[T <: DocumentInfo[T]] {
 
   def getReferenceName: String = s"${documentType.toString}_$documentName"
 
-  def getCaption: String = s"$latexLanguageName Model of ${LatexSanitizer.sanitizeName(documentName)}"
+  def getCaption: String = s"model of ${LatexSanitizer.sanitizeName(documentName)}"
 
   def updateReference(ref: DocReference): T
 
   def updateReferences(refs: Set[DocReference]): T = {
-    refs.foldLeft(this.asInstanceOf[T])((doc, ref) => doc.updateReference(ref))
-  }
+    val document = refs.foldLeft(this.asInstanceOf[T])((doc, ref) => doc.updateReference(ref))
+    document
+  } ensuring((doc: T) =>
+    doc.documentName == documentName &&
+      doc.filePath == filePath &&
+      doc.getAllReferences.size == getAllReferences.size,
+    "Document must not change for updateReferences " + documentName + " " + filePath +
+      " had original " + getAllReferences.size + " references.")
 
   def moveFile(destination: String): T = {
     val destinationPath = Paths.get(destination, documentType.toString).toString

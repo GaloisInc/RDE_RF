@@ -8,38 +8,42 @@ import org.apache.logging.log4j.scala.Logging
 abstract class Referencer[T <: DocumentInfo[T], A <: DocumentInfo[A], R <: DocumentInfo[R]](hammingDistanceMeasure: Double = 0.15) extends Logging {
   def addRefinementRelations(documentToExtend: T, abstractDocuments: Array[A], refinedDocuments: Array[R]): T = {
     logger.info("Adding refinement relations to " + documentToExtend.documentName + " from " + abstractDocuments.map(_.documentName).mkString(", "))
-    addAbstractionsToDocument(documentToExtend, abstractDocuments)
+    val documentWithAbstractions = addAbstractionsToDocument(documentToExtend, abstractDocuments)
     logger.info("Adding specializations to " + documentToExtend.documentName + " from " + refinedDocuments.map(_.documentName).mkString(", "))
-    addSpecializationsToDocument(documentToExtend, refinedDocuments)
+    addSpecializationsToDocument(documentWithAbstractions, refinedDocuments)
   } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, documentToExtend))
 
-  private def addSpecializationsToDocument(documentInfo: T, refinedDocuments: Array[R]): T = {
-    logger.info("Adding specializations to " + documentInfo.documentName + " from " + refinedDocuments.map(_.documentName).mkString(", "))
+  private def addSpecializationsToDocument(document: T, refinedDocuments: Array[R]): T = {
+    logger.info("Adding specializations to " + document.documentName + " from " + refinedDocuments.map(_.documentName).mkString(", "))
     val refinedReferences = refinedDocuments.flatMap(doc => doc.getAllReferences.filter(_.getAbstractions.nonEmpty))
-    val updatedReferences = documentInfo.getAllReferences.map(reference => addRefinements(reference, refinedReferences.toSet))
-    documentInfo.updateReferences(updatedReferences)
-  } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, documentInfo))
+    val updatedReferences = document.getAllReferences.map(reference => addRefinements(reference, refinedReferences.toSet))
+    val doc = document.updateReferences(updatedReferences)
+    doc
+  } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, document))
 
-  private def addAbstractionsToDocument(refinedDocument: T, documentsBeingRefined: Array[A]): T = {
-    logger.info("Adding abstractions to " + refinedDocument.documentName + " from " + documentsBeingRefined.map(_.documentName).mkString(", "))
-    val cryptolReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
-    val updatedReferences = refinedDocument.getAllReferences.map(reference => findRefinementRelation(reference, cryptolReferences.toSet))
-    refinedDocument.updateReferences(updatedReferences)
-  } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, refinedDocument))
+  private def addAbstractionsToDocument(document: T, documentsBeingRefined: Array[A]): T = {
+    logger.info("Adding abstractions to " + document.documentName + " from " + documentsBeingRefined.map(_.documentName).mkString(", "))
+    val abstractReferences = documentsBeingRefined.flatMap(doc => doc.getAllReferences)
+    val updatedReferences = document.getAllReferences.map(reference => findRefinementRelation(reference, abstractReferences.toSet))
+    val doc = document.updateReferences(updatedReferences)
+    doc
+  } ensuring ((resDoc: T) => DocumentInfoCompare.compareAddedReferences(resDoc, document))
 
-   private def findRefinementRelation(refiningReference: DocReference, referenceBeingRefined: Set[DocReference]): DocReference = {
-    val abstractions = referenceBeingRefined.filter(isSpecialization(refiningReference, _))
+  private def findRefinementRelation(reference: DocReference, abstractReferences: Set[DocReference]): DocReference = {
+    // Find all references that are abstractions of the reference
+    val abstractions = abstractReferences.filter(isSpecialization(reference, _))
     if (abstractions.nonEmpty)
-      referenceRefines(refiningReference, abstractions)
+      referenceRefines(reference, abstractions)
     else
-      refiningReference
+      reference
   } ensuring ((ref: DocReference) =>
-    ref.getReferenceType == refiningReference.getReferenceType
-      && ref.getDocumentName == refiningReference.getDocumentName
-      && ref.getDocumentType == refiningReference.getDocumentType
-      && ref.getName == refiningReference.getName
-      && ref.getReferenceType == refiningReference.getReferenceType
-      && ref.getRefinements == refiningReference.getRefinements)
+    ref.getReferenceType == reference.getReferenceType
+      && ref.getDocumentName == reference.getDocumentName
+      && ref.getDocumentType == reference.getDocumentType
+      && ref.getName == reference.getName
+      && ref.getReferenceType == reference.getReferenceType
+      && ref.getRefinements == reference.getRefinements
+      && ref.getAbstractions.size >= reference.getAbstractions.size)
 
   private def addRefinements(reference: DocReference, specializedReferences: Set[DocReference]): DocReference = {
     require(reference.getRefinements.isEmpty, "Reference should not have any specializations yet")
@@ -55,7 +59,8 @@ abstract class Referencer[T <: DocumentInfo[T], A <: DocumentInfo[A], R <: Docum
       && ref.getDocumentType == reference.getDocumentType
       && ref.getName == reference.getName
       && ref.getReferenceType == reference.getReferenceType
-      && ref.getAbstractions == reference.getAbstractions)
+      && ref.getAbstractions == reference.getAbstractions
+      && ref.getRefinements.size >= reference.getRefinements.size)
 
   def isSpecialization(AbstractReference: DocReference, ref: DocReference): Boolean = {
     val nameOfAbstractReference = AbstractReference.getName

@@ -29,7 +29,7 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     new BSVDocumentInfo(fileName, filePath, packages, modules)
   }
 
-  def formatLine(line: String, documentInfo: BSVDocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: BSVDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     cleanLine(line) match {
       case systemRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))

@@ -34,9 +34,9 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     docReference.getAcronym should be(None)
     docReference.getAbstractions should be(None)
     docReference.getRefinements should be(None)
-    docReference.getLabelText should be("documentName_Requirement_referenceName")
+    docReference.getLabelText should be("Lando_documentName_Requirement_referenceName")
 
-    docReference.enrich(formatter) should be("originalLine(@\\label{documentName_Requirement_referenceName}@)")
+    docReference.enrich(formatter) should be("originalLine(@\\label{Lando_documentName_Requirement_referenceName}@)")
   }
 
 
@@ -58,7 +58,7 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     docReference.getAcronym should be(None)
     docReference.getAbstractions should be(Some(Set(abstraction)))
     docReference.getRefinements should be(None)
-    docReference.getLabelText should be("documentName_Requirement_referenceName")
+    docReference.getLabelText should be("Lando_documentName_Requirement_referenceName")
 
     docReference.enrich(formatter) should be(s"originalLine(@\\label{${docReference.getLabelText}}@)(@($$\\sqsupseteq$$\\abstractionLink{${abstraction.getLabelText}}{${abstraction.getName}} \\cref{${abstraction.getLabelText}})@)")
   }

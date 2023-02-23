@@ -99,19 +99,19 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
 
-  def formatLine(line: String, documentInfo: SysMLDocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: SysMLDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     cleanString(line) match {
-      case systemRegex(_, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
-      case componentRegex(_, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Component))
+      case systemRegex(_, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))
+      case componentRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Component))
+      case subsystemRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.SubSystem))
       case attributeRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Attribute))
       case requirementRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Requirement))
-      case usecaseRegex(_, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
-      case actionRegex(_, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
+      case actionRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Event))
+      case usecaseRegex(_, _, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Scenario))
       case importRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.Import))
-      case viewRegex(_, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.View))
+      case viewRegex(_, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.View))
       case viewPointRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.ViewPoint))
-      case subsystemRegex(_, _, _, _) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.SubSystem))
       case _ => line
     }
   }

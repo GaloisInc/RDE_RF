@@ -20,7 +20,7 @@ class SawDocumentEnricher(override val formatterType: LatexFormatter) extends Do
     new SawDocumentInfo(fileName, filePath)
   }
 
-  def formatLine(line: String, documentInfo: SawDocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: SawDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     line match {
       case _ => line

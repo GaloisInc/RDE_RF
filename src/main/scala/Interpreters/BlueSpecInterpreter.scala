@@ -1,13 +1,12 @@
 package Interpreters
 
+import Specs.FileSpecs
 import Utils.{CommandLineTool, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
-import scala.sys.process._
-
 object BlueSpecInterpreter extends Logging with CommandLineTool {
-  override val command: String = "bsc"
-  override val toolName: String = "BlueSpecVerilog"
+  def command: String = "bsc"
+  def toolName: String = "BlueSpecVerilog"
 
   def isWellFormed(filePath: String): Boolean = {
     bscCheck(filePath)
@@ -21,10 +20,8 @@ object BlueSpecInterpreter extends Logging with CommandLineTool {
     }
   }
 
-  def bscCheck(filePath: String): Unit = {
-    require(filePath.nonEmpty, "Filename is not specified.")
-    require(filePath.endsWith(".bsv"), "The file is not a cryptol file.")
-    require(toolInstalled, "BlueSpec is not in the path.")
+  private def bscCheck(filePath: String): Unit = {
+    require(FileSpecs.fileChecks(Set(filePath), Set("bsv")), "The file is not a BlueSpec file.")
     require(FileUtil.fileExists(filePath), "The file does not exist.")
   }
 

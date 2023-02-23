@@ -35,7 +35,7 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-  def formatLine(line: String, documentInfo: CryptolDocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: CryptolDocumentInfo): String = {
     val references = documentInfo.getAllReferences
 
     val relevantReferences = cleanString(line) match {

@@ -3,9 +3,8 @@ package Report
 import Analyzers.ReportAnalyzer
 import Formatter.LatexSanitizer
 import Report.PaperLayout.PaperLayout
-import Report.ReportTypes.ReportReference
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{BSVDocumentInfo, CDocumentInfo, CryptolDocumentInfo, DocumentInfo, FretDocument, LandoDocumentInfo, LobotDocumentInfo, SVDocumentInfo, SawDocumentInfo, SysMLDocumentInfo}
+import Types.DocumentInfos._
 import Types.LatexReferenceTypes
 
 import java.io.File
@@ -19,7 +18,6 @@ sealed trait LatexElement {
   require(toLatex.nonEmpty, "The latex string cannot be empty")
 
   protected def formatInsideListing(content: String): String = content
-
 }
 
 sealed trait referencable {
@@ -137,12 +135,14 @@ final case class DocumentationDocument(
     require(folder.nonEmpty, "File path must not be empty")
     require(sectionName.nonEmpty, "Section name must not be empty")
 
-    val codeBlocks = documents.map(m => CodeBlock(m, m.latexLanguageName, m.getReferenceName))
-    val section = LatexSection(sectionName, sectionName, codeBlocks.toList)
+    val codeBlockSections = documents.sortBy(_.documentName).map(m => Subsection(sectionName + " " + m.documentName, m.documentName, List(CodeBlock(m, m.latexLanguageName, m.getReferenceName))))
+    val section = LatexSection(sectionName, sectionName, codeBlockSections.toList)
+
+    val sectionLatex = section.toLatex
 
     val sanitizedSectionName = LatexSanitizer.sanitizeReferenceName(sectionName)
     val filePath = Files.write(Paths.get(folder, s"$sanitizedSectionName.tex"),
-      section.toLatex.getBytes(StandardCharsets.UTF_8))
+      sectionLatex.getBytes(StandardCharsets.UTF_8))
     IncludedFile(filePath.toString)
   }
 }
@@ -157,8 +157,6 @@ final case class RefinementDocument(
                                      documentNameToFilePath: Map[String, String],
                                      refinementSymbol: String = "|-",
                                    ) extends LatexDocument {
-
-
   def packages: List[String] = List("listings", "url", "alltt", "amssymb", "amsthm", "xspace")
 
   def dependencyFiles: List[IncludedFile] = List.empty[IncludedFile]
@@ -261,7 +259,7 @@ final case class Subsection(title: String,
 
   def getLabel: String = LatexSanitizer.sanitizeReferenceName(label)
 
-  def getTitle: String = LatexSanitizer.sanitizeName(title)
+  private def getTitle: String = LatexSanitizer.sanitizeName(title)
 }
 
 
@@ -295,7 +293,7 @@ final case class CodeBlock[T <: DocumentInfo[T]](documentInfo: T,
     s"""
        |\\lstinputlisting[${listingStyle(documentInfo.documentType)}=${documentInfo.latexLanguageName},
        |label={lst:${documentInfo.getReferenceName}},
-       |caption={Listing ${documentInfo.getCaption}.}]
+       |caption={Listing of ${documentInfo.getCaption}.}]
        |{${documentInfo.filePath}}""".stripMargin
 
   private def listingStyle(documentType: Types.DocumentType.Value): String = {

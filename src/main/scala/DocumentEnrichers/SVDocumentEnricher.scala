@@ -3,7 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Specs.FileSpecs
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{DocumentInfo, LobotDocumentInfo, SVDocumentInfo, SawDocumentInfo}
+import Types.DocumentInfos.SVDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
@@ -27,7 +27,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     new SVDocumentInfo(fileName, filePath, modules)
   }
 
-  def formatLine(line: String, documentInfo: SVDocumentInfo): String = {
+  override def formatLine(line: String, documentInfo: SVDocumentInfo): String = {
     val references = documentInfo.getAllReferences
     line match {
       case subsystemRegex(_) => extractEnrichedText(line, references.filter(_.getReferenceType == ReferenceType.System))

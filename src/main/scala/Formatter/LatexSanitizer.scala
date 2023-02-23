@@ -18,5 +18,13 @@ object LatexSanitizer {
 
   def sanitizeWebLink(url: String): String = {
     url.replaceAll("_", Regex quoteReplacement """\_""")
+      .replaceAll("%", Regex quoteReplacement """\%""")
+      .replaceAll("&", Regex quoteReplacement """\&""")
+      .replaceAll("\\$", Regex quoteReplacement """\$""")
+      .replaceAll("\\{", Regex quoteReplacement """\{""")
+      .replaceAll("\\}", Regex quoteReplacement """\}""")
+      .replaceAll("\\^", Regex quoteReplacement """\^""")
+      .replaceAll("~", Regex quoteReplacement """\~""")
+
   }
 }

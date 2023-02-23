@@ -1,17 +1,16 @@
 package Interpreters
 
-import Utils.{CommandLineTool, FileUtil}
+import Specs.FileSpecs
+import Utils.CommandLineTool
 import org.apache.logging.log4j.scala.Logging
 
 object LandoInterpreter extends Logging with CommandLineTool {
-  override val command: String = "lando.sh"
-  override def toolName: String = "Lando"
+  def command: String = "lando.sh"
+  def toolName: String = "Lando"
 
   // Run Lando on a given file
   def verifyLandoFile(filePath: String): Boolean = {
-    require(filePath.nonEmpty, "filePath must not be empty")
-    require(FileUtil.fileExists(filePath), "filePath must exist")
-    require(filePath.endsWith(".lando"), "filePath must end with .lando")
+    require(FileSpecs.fileChecks(Set(filePath), Set("lando")), "The file is not a lando file.")
     require(toolInstalled, "Lando executable must be in path")
 
     val result = runCommand(List(filePath))

@@ -4,6 +4,10 @@ import Utils.FileUtil.createDirectory
 import scopt.OParser
 import java.io.File
 
+/**
+ * This class is responsible for parsing the command line arguments.
+ * It uses the scopt library to parse the command line arguments.
+ */
 object CommandLineParser {
   private val builder = OParser.builder[CLIConfig]
 

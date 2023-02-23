@@ -1,17 +1,16 @@
 package Interpreters
 
+import Specs.FileSpecs
 import Utils.{CommandLineTool, FileUtil}
 import org.apache.logging.log4j.scala.Logging
 
 object SawInterpreter extends Logging with CommandLineTool {
-  override val command: String = "saw"
-  override val toolName: String = "Saw"
+  override def command: String = "saw"
+  override def toolName: String = "Saw"
 
   // Run Lando on a given file
   def verifySawFile(filePath: String): Boolean = {
-    require(filePath.nonEmpty, "filePath must not be empty")
-    require(FileUtil.fileExists(filePath), "filePath must exist")
-    require(filePath.endsWith(".saw"), "filePath must end with .saw")
+    require(FileSpecs.fileChecks(Set(filePath), Set("saw")), "The file is not a Saw file.")
     require(toolInstalled, "saw must be installed")
 
     logger.info("Saw checking file " + filePath)

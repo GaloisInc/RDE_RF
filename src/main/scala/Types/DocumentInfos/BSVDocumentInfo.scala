@@ -31,10 +31,12 @@ class BSVDocumentInfo(
 
   override def updateReference(ref: DocReference): BSVDocumentInfo = {
     require(ref.getDocumentType == documentType && ref.documentName == documentName, "Can only update references to the same document")
-    val newPackages = packages.map(_.updateDocReference(ref))
-    val newModules = modules.map(_.updateDocReference(ref))
-    copy(packages = newPackages, modules = newModules)
-  }
+    ref.getReferenceType match {
+      case ReferenceType.System => copy(packages = packages.filterNot(_.getOriginalLine.equalsIgnoreCase(ref.getOriginalLine)) + ref)
+      case ReferenceType.SubSystem => copy(modules = modules.filterNot(_.getOriginalLine.equalsIgnoreCase(ref.getOriginalLine)) + ref)
+      case _ => throw new IllegalArgumentException("Invalid reference type")
+    }
+  } ensuring((newDoc: BSVDocumentInfo) => newDoc.getAllReferences.size == getAllReferences.size, "Number of references should not change")
 
   override def updateFilePath(newFilePath: String): BSVDocumentInfo = {
     require(FileUtil.getFileType(newFilePath) == "bsv", "File path must be a BSV file")

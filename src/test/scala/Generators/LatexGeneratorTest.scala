@@ -11,8 +11,6 @@ import java.io.File
 import java.nio.file.Files
 
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers with LatexCompilationTester {
-  private val authorName: String = "TestAuthor"
-
   "Latex" should "be in Path" in {
     LatexGenerator.toolInstalled should be(true)
   }

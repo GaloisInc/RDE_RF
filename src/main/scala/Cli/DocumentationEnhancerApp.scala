@@ -55,6 +55,7 @@ object DocumentationEnhancerApp extends App with Logging {
         val filePath = documentReport.buildDocumentationReport
         val pdfFile = new File(filePath.replace(".tex", ".pdf"))
         println("The LaTeX files have been generated and compiled in the folder " + targetFolder + ".")
+        println("The source file (tex) is located at the same location as the pdf file and can be edited there.")
         // Open the pdf file
         if (Desktop.isDesktopSupported) {
           Desktop.getDesktop.open(pdfFile)

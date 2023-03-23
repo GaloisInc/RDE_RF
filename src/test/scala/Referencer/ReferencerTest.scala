@@ -4,14 +4,9 @@ import DocumentEnrichers.{LandoDocumentEnricher, SysMLDocumentEnricher}
 import Formatter.InlineFormatter
 import Types.DocReference.DocReference
 import Types.{DocumentType, ReferenceName, ReferenceType}
-import Utils.{Control, FileUtil}
-import org.scalatest._
+import Utils.FileUtil
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
-
-import java.nio.file.Path
-import scala.collection.mutable
-import scala.io.Source
 
 class ReferencerTest extends AnyFlatSpec with should.Matchers {
   private val formatterType = new InlineFormatter()
@@ -24,6 +19,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
 
     val referenceBeingDiscovered =
       new DocReference("DocumentName",
+        10,
         ReferenceName("Coq"),
         ReferenceType.Component,
         DocumentType.Lando,
@@ -31,6 +27,7 @@ class ReferencerTest extends AnyFlatSpec with should.Matchers {
       )
     val refinementBeingDiscovered =
       new DocReference("DocumentName",
+        10,
         ReferenceName("Coq"),
         ReferenceType.Component,
         DocumentType.SysML,

@@ -17,8 +17,9 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val sourceRef = new DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
-    val targetRef = new DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
+    val lineNo = 10
+    val sourceRef = new DocReference(documentName, lineNo, sourceReferenceName, referenceType, documentType, originalLine)
+    val targetRef = new DocReference(documentName, lineNo, targetReferenceName, referenceType, documentType, originalLine)
     val relationType = RelationTypes.client
     val docRelation = new DocRelation(
       documentName,
@@ -38,8 +39,9 @@ class DocRelationTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val sourceRef = new DocReference(documentName, sourceReferenceName, referenceType, documentType, originalLine)
-    val targetRef = new DocReference(documentName, targetReferenceName, referenceType, documentType, originalLine)
+    val lineNo = 10
+    val sourceRef = new DocReference(documentName, lineNo, sourceReferenceName, referenceType, documentType, originalLine)
+    val targetRef = new DocReference(documentName, lineNo, targetReferenceName, referenceType, documentType, originalLine)
 
     val docRelation = new DocRelation(
       documentName,

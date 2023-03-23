@@ -20,7 +20,7 @@ object LatexGenerator extends Logging with CommandLineTool {
     val exitCode = runCommand(List(s"-output-directory=${latexFile.getParent}", filePath))
     assert(exitCode == 0, s"LaTeX build failed with exit code $exitCode")
     // Clean up auxiliary files
-    runCommand(List("-c", filePath))
+    runCommand("latexmk", List("-c", filePath))
     logger.info(s"LaTeX build successful")
   }
 }

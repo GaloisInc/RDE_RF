@@ -88,7 +88,7 @@ object CryptolInterpreter extends Logging with CommandLineTool {
   }
 
 
-  def extractDocumentFromString(interpretedResult: String, filePath: String): CryptolDocumentInfo = {
+  private def extractDocumentFromString(interpretedResult: String, filePath: String): CryptolDocumentInfo = {
     // Should skip everything from the base library
     val types = "Type Synonyms"
     val primitiveTypes = "Primitive Types"
@@ -116,20 +116,22 @@ object CryptolInterpreter extends Logging with CommandLineTool {
     val functionRegex = """^(\w*) :.*""".r
     val functionsOfModule = extractRegexFromList(functionsStart, fileName, functionRegex.toString())
 
-    new CryptolDocumentInfo(
+    val lineNo = 0
+
+    CryptolDocumentInfo(
       fileName,
       filePath,
       Set.empty,
       typesOfModule.map {
-        case line@typeRegex(name) => new DocReference(fileName, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line)
+        case line@typeRegex(name) => new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line)
         case _ => throw new Exception("Regex did not match")
       }.toSet,
       functionsOfModule.map {
-        case line@functionRegex(name) => new DocReference(fileName, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line)
+        case line@functionRegex(name) => new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line)
         case _ => throw new Exception("Could not parse function")
       }.toSet,
       propertiesOfModule.map {
-        case line@propertyRegex(name) => new DocReference(fileName, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line)
+        case line@propertyRegex(name) => new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line)
         case _ => throw new Exception("Could not parse property")
       }.toSet,
     )

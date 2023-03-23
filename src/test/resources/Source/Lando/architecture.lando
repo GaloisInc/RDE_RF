@@ -31,12 +31,6 @@ component Voting 1
 component Voting 2
 @todo kiniry Add an explanation.
 
-component Actuator 1
-@todo kiniry Add an explanation.
-
-component Actuator 2
-@todo kiniry Add an explanation.
-
 subsystem Computation
 @todo kiniry Add an explanation.
 

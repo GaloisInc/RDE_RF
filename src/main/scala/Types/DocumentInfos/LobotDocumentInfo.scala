@@ -2,38 +2,19 @@ package Types.DocumentInfos
 
 import Parsers.LobotParser.Analyzer.DocReferencePosition
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
+import Types.{DocumentType, FileType, ReferenceType}
 
-class LobotDocumentInfo(
-                         override val documentName: String,
-                         override val filePath: String,
-                         checkDecl: Set[DocReferencePosition],
-                         kindDecl: Set[DocReferencePosition],
-                         typeDecl: Set[DocReferencePosition],
-                         abstTypeDecl: Set[DocReferencePosition],
-                         abstFunctionDecl: Set[DocReferencePosition],
-                       ) extends DocumentInfo[LobotDocumentInfo] {
+case class LobotDocumentInfo(
+                              override val documentName: String,
+                              override val filePath: String,
+                              checkDecl: Set[DocReferencePosition],
+                              kindDecl: Set[DocReferencePosition],
+                              typeDecl: Set[DocReferencePosition],
+                              abstTypeDecl: Set[DocReferencePosition],
+                              abstFunctionDecl: Set[DocReferencePosition],
+                            ) extends DocumentInfo[LobotDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.Lobot
-
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-            checkDecl: Set[DocReferencePosition] = checkDecl,
-            kindDecl: Set[DocReferencePosition] = kindDecl,
-            typeDecl: Set[DocReferencePosition] = typeDecl,
-            abstTypeDecl: Set[DocReferencePosition] = abstTypeDecl,
-            abstFunctionDecl: Set[DocReferencePosition] = abstFunctionDecl,
-          ): LobotDocumentInfo = {
-    new LobotDocumentInfo(
-      documentName,
-      filePath,
-      checkDecl,
-      kindDecl,
-      typeDecl,
-      abstTypeDecl,
-      abstFunctionDecl)
-  }
 
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
   override val latexLanguageName = "Lobot"

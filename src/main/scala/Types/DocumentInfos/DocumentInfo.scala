@@ -28,7 +28,13 @@ abstract class DocumentInfo[T <: DocumentInfo[T]] {
   require(filePath.contains(documentName), "File path must contain document name")
   require(FileUtil.fileExists(filePath), s"File $filePath does not exist")
   require(getAllReferences.forall(_.getDocumentName == documentName), "All references must be to the same document")
-
+  // Todo check if this is still necessary
+  /*
+  require(getAllReferences.forall(ref1 => getAllReferences.forall(ref2 => ref1.originalLine != ref2.originalLine || ref1 == ref2)),
+    "All references must be unique. The following references are not unique: " +
+      getAllReferences.groupBy(_.originalLine).filter(_._2.size > 1).values.flatten.map(_.originalLine).mkString(", ") +
+    " in file " + filePath)
+   */
   def latexLanguageName: String
 
   def getReferenceName: String = s"${documentType.toString}_$documentName"
@@ -48,9 +54,12 @@ abstract class DocumentInfo[T <: DocumentInfo[T]] {
       " had original " + getAllReferences.size + " references.")
 
   def moveFile(destination: String): T = {
+    val oldFile = Paths.get(filePath)
     val destinationPath = Paths.get(destination, documentType.toString).toString
     val newFilePath = FileUtil.moveRenameFile(filePath, destinationPath)
-    updateFilePath(newFilePath)
+    val updatedDocument = updateFilePath(newFilePath)
+    oldFile.toFile.delete()
+    updatedDocument
   }
 
   def updateFilePath(newFilePath: String): T

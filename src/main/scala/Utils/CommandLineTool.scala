@@ -1,11 +1,12 @@
 package Utils
 
 import Report.LatexProcessLogger
-
+import org.apache.logging.log4j.scala.Logging
 import scala.sys.process.Process
 
-trait CommandLineTool {
+trait CommandLineTool extends Logging {
   def command: String
+
   def toolName: String
 
   //require(command.nonEmpty, "command must not be empty")
@@ -18,12 +19,18 @@ trait CommandLineTool {
   }
 
   def runCommand(args: List[String]): Int = {
-    val cmd = command :: args
+    runCommand(command, args)
+  }
+
+  def runCommand(requested_command : String, args: List[String]): Int = {
+    val cmd = requested_command :: args
     val cmdString = cmd.mkString(" ")
-    val logger = new LatexProcessLogger
-    val status = Process(cmdString).!(logger)
+    logger.info(s"Running $toolName with command: $cmdString")
+    val processLogger = new LatexProcessLogger
+    val status = Process(cmdString).!(processLogger)
     if (status != 0) {
-      println(logger.output)
+      logger.error(s"Command $cmdString failed with exit code $status")
+      println(processLogger.output)
     }
     status
   }

@@ -20,7 +20,7 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     logger.info(s"Parsing file $filePath")
 
     val fileName = FileUtil.fileNameFromPath(filePath)
-    val modules: Set[DocReference] = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
+    val modules: Set[DocReference] = Control.extractReferences(filePath, (l: String, lineNo: Int) => transformReference(l, lineNo, fileName))
 
     logger.info("Finished parsing file " + filePath)
 
@@ -35,10 +35,10 @@ class SVDocumentEnricher(override val formatterType: LatexFormatter) extends Doc
     }
   }
 
-  def transformReference(line: String, fileName: String): Option[DocReference] = {
+  def transformReference(line: String, lineNo: Int, fileName: String): Option[DocReference] = {
     cleanString(line) match {
       case subsystemRegex(systemName)
-      => Some(new DocReference(fileName, ReferenceName(systemName, None), ReferenceType.System, DocumentType.SV, line))
+      => Some(new DocReference(fileName, lineNo, ReferenceName(systemName, None), ReferenceType.System, DocumentType.SV, line))
       case _ => None
     }
   }

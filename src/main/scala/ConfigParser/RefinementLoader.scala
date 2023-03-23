@@ -2,10 +2,9 @@ package ConfigParser
 
 import com.typesafe.config.ConfigFactory
 import org.apache.logging.log4j.scala.Logging
-import pureconfig.ConfigConvert.fromReaderAndWriter
 import pureconfig.ConfigReader.Result
+import pureconfig.ConfigSource
 import pureconfig.generic.ProductHint
-import pureconfig.{ConfigReader, ConfigSource}
 import pureconfig.generic.auto._
 
 import java.io.{File, InputStream, InputStreamReader}

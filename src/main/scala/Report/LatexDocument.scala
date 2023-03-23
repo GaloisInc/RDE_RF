@@ -46,7 +46,7 @@ trait LatexDocument extends LatexElement {
     Files.write(Paths.get(latexFile.getAbsolutePath), toLatex.getBytes(StandardCharsets.UTF_8))
     LatexGenerator.buildLatexFile(latexFile)
     latexFile.getAbsolutePath
-  }
+  } ensuring ((res: String) => new File(res).exists() && new File(res).isFile)
 
   require(title.nonEmpty, "Document title cannot be empty")
   require(author.nonEmpty, "Document author cannot be empty")
@@ -87,6 +87,9 @@ trait LatexDocument extends LatexElement {
       case PaperLayout.B4 =>
         s"""
            |\\usepackage[b4paper, marginparwidth=8cm, marginparsep=3mm, includemp, heightrounded, outer=1cm]{geometry}""".stripMargin
+      case _ =>
+        s"""
+           |\\usepackage[a4paper, margin=1in]{geometry}""".stripMargin
     }
   }
 }
@@ -387,6 +390,7 @@ final case class ClickableLink(reference: String,
       case LatexReferenceTypes.Link => s"\\link{$reference}{$sanitizedReference}"
       case LatexReferenceTypes.CryptolProperty => s"\\script{$reference}{$sanitizedReference}"
       case LatexReferenceTypes.ConnectionArtifact => s"\\hyperref[$reference]{$sanitizedReference}"
+      case _ => s"\\href{$reference}{$sanitizedReference}"
     }
     formatting(latex)
   } ensuring(_.nonEmpty, "Latex must not be empty")
@@ -396,7 +400,8 @@ final case class ClickableLink(reference: String,
   }
 }
 
-final case class LatexReference(reference: String, referenceType: String,
+final case class LatexReference(reference: String,
+                                referenceType: String,
                                 formatting: String => String = (s: String) => s) extends LatexElement {
   require(reference.nonEmpty, "Reference must not be empty")
   require(reference.matches("^[a-zA-Z0-9_/]*$"), "Reference must only contain alphanumeric characters and underscores but was " + reference)

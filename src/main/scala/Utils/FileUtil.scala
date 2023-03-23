@@ -5,13 +5,20 @@ import org.apache.logging.log4j.scala.Logging
 import java.io.File
 import java.nio.file.{Files, Paths, StandardCopyOption}
 import scala.io.{Codec, Source}
-import scala.language.existentials
 import scala.reflect.io.Directory
 
 /**
  * Utility class for file operations
  */
 object FileUtil extends Logging {
+  def createFolder(targetFolder: String): Unit = {
+    require(targetFolder.nonEmpty, "targetFolder must not be empty")
+    val folder = new File(targetFolder)
+    if (!folder.exists()) {
+      folder.mkdirs()
+    }
+  }
+
   // Method to remove all decorated files from a directory
   def deleteRecursivelyDecoratedFiles(path: String): Unit = {
     require(path.nonEmpty, "path must not be empty")

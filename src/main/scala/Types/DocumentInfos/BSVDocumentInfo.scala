@@ -1,15 +1,15 @@
 package Types.DocumentInfos
 
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
+import Types.{DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
-class BSVDocumentInfo(
-                       override val documentName: String,
-                       override val filePath: String,
-                       packages: Set[DocReference],
-                       modules: Set[DocReference]
-                     ) extends DocumentInfo[BSVDocumentInfo] {
+case class BSVDocumentInfo(
+                            override val documentName: String,
+                            override val filePath: String,
+                            packages: Set[DocReference],
+                            modules: Set[DocReference]
+                          ) extends DocumentInfo[BSVDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.BSV
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
@@ -19,15 +19,6 @@ class BSVDocumentInfo(
   require(packages.intersect(modules).isEmpty, "Packages and modules cannot intersect")
   require(packages.forall(_.getReferenceType == ReferenceType.System))
   require(modules.forall(_.getReferenceType == ReferenceType.SubSystem))
-
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-            packages: Set[DocReference] = packages,
-            modules: Set[DocReference] = modules,
-          ): BSVDocumentInfo = {
-    new BSVDocumentInfo(documentName, filePath, packages, modules)
-  }
 
   override def updateReference(ref: DocReference): BSVDocumentInfo = {
     require(ref.getDocumentType == documentType && ref.documentName == documentName, "Can only update references to the same document")

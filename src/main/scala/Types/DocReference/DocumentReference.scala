@@ -1,12 +1,101 @@
 package Types.DocReference
 
-import Formatter.{LatexSanitizer, ReferenceFormatter}
-import Types.Reference.Ref
-import Types._
+trait DocumentReference {
+  def documentName: String
+}
+/*
+sealed trait DocReferenceType extends DocumentReference with DecorateableString {
+  def name: String
+
+  def originalLine: String
+
+  def documentName: String
+
+  def documentType: Types.DocumentType.Value
+
+  // Line number of the reference in the document
+  def lineNumber: Int
+
+
+  def label: String = {
+    s"${documentType.toString}_${documentName}_${getReferenceType.toString}_${LatexSanitizer.sanitizeReferenceName(name)}"
+  }
+
+
+  //A reference can be a refinement or an abstraction of another reference
+  def refinements: Option[Set[DocReference]]
+
+  //A reference can be a refinement or an abstraction of another reference
+  def abstractions: Option[Set[DocReference]]
+
+  // A reference can have a relation to another reference in the same document
+  def relations: Option[Set[DocReference]]
+
+
+  def isInRefinementChain: Boolean =
+    (abstractions.isDefined && abstractions.nonEmpty) || (refinements.isDefined && refinements.nonEmpty)
+
+  require(originalLine.nonEmpty, "originalLine must not be empty")
+  require(documentName.nonEmpty, "documentName must not be empty")
+
+  override def enrich(formatter: ReferenceFormatter): String = {
+    def stringOfReference(references: Option[Set[DocReference]], formatting: (Set[DocReference], String) => String): String =
+      references match {
+        case Some(abstracts) => formatting(abstracts, documentName)
+        case None => ""
+      }
+
+    val abstractionOfString = stringOfReference(refinements, formatter.addSpecializations)
+    val refinementOfString = stringOfReference(abstractions, formatter.addAbstractions)
+
+    //If the original line contains a reference to another reference, we highlight it by making a clickable link
+    val highlightedLine = relations match {
+      case Some(reference) => formatter.highlightLineWithReferences(originalLine, reference.head.symbol, getReferences)
+      case None => originalLine
+    }
+
+    val lineWithLabel = formatter.enrichLineWithLabel(highlightedLine, getLabelText)
+    if (isInRefinementChain) {
+      lineWithLabel + refinementOfString + abstractionOfString
+    } else {
+      lineWithLabel
+    }
+  }
+
+}
+
+final case class LandoDocReference(
+                                    referenceName: ReferenceName,
+                                    override val documentName: String,
+                                    override val originalLine: String,
+                                    override val lineNumber: Int,
+                                    override val refinements: Option[Set[DocReference]] = None,
+                                    override val relations: Option[Set[DocReference]] = None,
+                                  ) extends DocReferenceType {
+  val documentType: Types.DocumentType.Value = Types.DocumentType.Lando
+
+  // Lando can not have abstractions
+  val abstractions: Option[Set[DocReference]] = None
+
+  override def name: String = referenceName.name
+}
+
+final case class LobotReference(
+                                 referenceName: ReferenceName,
+                                 override val documentName: String,
+                                 override val originalLine: String,
+                                 override val lineNumber: Int,
+                                 override val refinements: Option[Set[DocReference]] = None,
+                                 override val abstractions: Option[Set[DocReference]] = None,
+                                 override val relations: Option[Set[DocReference]] = None,
+                               ) extends DocReferenceType {
+  val documentType: Types.DocumentType.Value = Types.DocumentType.Lobot
+
+  override def name: String = referenceName.name
+}
 
 class DocReference(
                     override val documentName: String,
-                    lineNumber: Int,
                     referenceName: ReferenceName,
                     referenceType: ReferenceType.Value,
                     documentType: DocumentType.Value,
@@ -15,16 +104,12 @@ class DocReference(
                     abstractionOf: Option[Set[DocReference]] = None,
                     references: Option[Set[Ref]] = None,
                   ) extends DecorateableString with DocumentReference {
-
-  def getLineNumber: Int = lineNumber
-
   def addAbstraction(abstraction: DocReference): DocReference = {
     getAbstractions match {
       case Some(abstractions) => this.copy(refinementOf = Some(abstractions + abstraction))
       case None => this.copy(refinementOf = Some(Set(abstraction)))
     }
   }
-
 
   def addRefinement(refinement: DocReference): DocReference = {
     getRefinements match {
@@ -86,7 +171,6 @@ class DocReference(
 
   def copy(
             documentName: String = documentName,
-            lineNumber: Int = lineNumber,
             referenceName: ReferenceName = referenceName,
             referenceType: ReferenceType.Value = referenceType,
             documentType: DocumentType.Value = documentType,
@@ -96,7 +180,6 @@ class DocReference(
             references: Option[Set[Ref]] = references,
           ): DocReference = new DocReference(
     documentName,
-    lineNumber,
     referenceName,
     referenceType,
     documentType,
@@ -106,8 +189,6 @@ class DocReference(
     references,
   )
 
-  def isInRefinementChain: Boolean =
-    (abstractionOf.isDefined && abstractionOf.nonEmpty) || (refinementOf.isDefined && refinementOf.nonEmpty)
 
   override def enrich(formatter: ReferenceFormatter): String = {
     val refinementOfString = getAbstractions match {
@@ -133,9 +214,5 @@ class DocReference(
       lineWithLabel
     }
   }
-
 }
-
-
-
-
+*/

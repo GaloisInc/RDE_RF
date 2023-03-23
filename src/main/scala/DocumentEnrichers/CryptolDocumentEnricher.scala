@@ -4,7 +4,7 @@ import Formatter.LatexFormatter
 import Interpreters.CryptolInterpreter
 import Specs.FileSpecs
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{CryptolDocumentInfo, DocumentInfo}
+import Types.DocumentInfos.CryptolDocumentInfo
 import Types.{DocumentType, ReferenceName, ReferenceType}
 import Utils.{Control, FileUtil}
 
@@ -26,12 +26,12 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
       CryptolInterpreter.interpret(filePath)
     } else {
       val fileName = FileUtil.fileNameFromPath(filePath)
-      val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
+      val references = Control.extractReferences(filePath, (l: String, lineNo: Int) => transformReference(l, lineNo, fileName))
       val types: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.Type)
       val properties: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.Requirement)
       val functions: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.Event)
       val imports: Set[DocReference] = Set.empty[DocReference]
-      new CryptolDocumentInfo(fileName, filePath, imports, types, functions, properties)
+      CryptolDocumentInfo(fileName, filePath, imports, types, functions, properties)
     }
   }
 
@@ -51,12 +51,12 @@ class CryptolDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-  def transformReference(line: String, fileName: String): Option[DocReference] = {
+  def transformReference(line: String, lineNo: Int, fileName: String): Option[DocReference] = {
     cleanString(line) match {
-      case typeRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line))
-      case propertyRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line))
-      case eventRegex(name) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line))
-      case importRegex(name, _) => Some(new DocReference(fileName, ReferenceName(name), ReferenceType.Import, DocumentType.Cryptol, line))
+      case typeRegex(name) => Some(new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Type, DocumentType.Cryptol, line))
+      case propertyRegex(name) => Some(new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Requirement, DocumentType.Cryptol, line))
+      case eventRegex(name) => Some(new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Event, DocumentType.Cryptol, line))
+      case importRegex(name, _) => Some(new DocReference(fileName, lineNo, ReferenceName(name), ReferenceType.Import, DocumentType.Cryptol, line))
       case _ => None
     }
   }

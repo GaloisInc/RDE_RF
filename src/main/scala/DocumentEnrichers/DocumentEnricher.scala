@@ -5,7 +5,6 @@ import Types.DecorateableString
 import Types.DocumentInfos.DocumentInfo
 import Utils.{Control, FileUtil}
 import org.apache.logging.log4j.scala.Logging
-
 import java.io.{File, PrintWriter}
 import scala.io.{Codec, Source}
 
@@ -27,7 +26,7 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
    * @param line Line to be enriched
    * @return Enriched text
    */
-  def formatLine(line: String, documentInfo: T): String = line
+  protected def formatLine(line: String, documentInfo: T): String = line
 
   /**
    * Decorates a file with the enriched text
@@ -54,6 +53,7 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
         // To Remove Multiple empty lines
         if (line.isEmpty && lastLine.isEmpty) lastLine = line
         else {
+          // Ensure that links are highlighted
           val highLighted = highlightURLLinks(line)
           writer.println(highLighted)
           lastLine = line
@@ -75,6 +75,12 @@ abstract class DocumentEnricher[T <: DocumentInfo[T]](val formatterType: LatexFo
       }
   }
 
+  /**
+   * Highlights links in a string
+   *
+   * @param str String that may contain links to be highlighted
+   * @return Highlighted string
+   */
   private def highlightURLLinks(str: String): String = {
     val urlRegex = """https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)""".r
     val urls = urlRegex findAllIn str

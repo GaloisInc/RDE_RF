@@ -2,7 +2,7 @@ package DocumentEnrichers
 
 import Formatter.LatexFormatter
 import Specs.FileSpecs
-import Types.DocumentInfos.{CDocumentInfo, DocumentInfo}
+import Types.DocumentInfos.CDocumentInfo
 import Utils.FileUtil
 import org.apache.logging.log4j.scala.Logging
 
@@ -15,6 +15,6 @@ class ACSLDocumentEnricher(override val formatterType: LatexFormatter,
     val fileName = FileUtil.fileNameFromPath(filePath)
     logger.info(s"Parsing file $filePath")
 
-    new CDocumentInfo(fileName, filePath)
+    CDocumentInfo(fileName, filePath)
   }
 }

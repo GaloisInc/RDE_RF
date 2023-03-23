@@ -1,6 +1,6 @@
 package ConfigParser
 
-trait SerializableConfig {
+sealed trait SerializableConfig {
   def serialize(indentationLevel: Int): String
 
   protected def computeIndentation(indentationLevel: Int): String = {

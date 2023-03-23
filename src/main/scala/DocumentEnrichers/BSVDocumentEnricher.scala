@@ -23,10 +23,10 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     require(FileSpecs.fileChecks(Set(filePath), Set("bsv")), "filePath must be a bsv file")
 
     val fileName = FileUtil.fileNameFromPath(filePath)
-    val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
+    val references = Control.extractReferences(filePath, (l: String, lineNo: Int) => transformReference(l, lineNo, fileName))
     val packages = references.filter(_.getReferenceType == ReferenceType.System)
     val modules = references.filter(_.getReferenceType == ReferenceType.SubSystem)
-    new BSVDocumentInfo(fileName, filePath, packages, modules)
+    BSVDocumentInfo(fileName, filePath, packages, modules)
   }
 
   override def formatLine(line: String, documentInfo: BSVDocumentInfo): String = {
@@ -38,10 +38,10 @@ class BSVDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-  def transformReference(line: String, fileName: String): Option[DocReference] = {
+  def transformReference(line: String, lineNo: Int, fileName: String): Option[DocReference] = {
     cleanLine(line) match {
-      case systemRegex(systemName) => Some(new DocReference(fileName, ReferenceName(systemName), ReferenceType.System, DocumentType.BSV, line))
-      case subsystemRegex(subsystemName, _) => Some(new DocReference(fileName, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
+      case systemRegex(systemName) => Some(new DocReference(fileName, lineNo, ReferenceName(systemName), ReferenceType.System, DocumentType.BSV, line))
+      case subsystemRegex(subsystemName, _) => Some(new DocReference(fileName, lineNo, ReferenceName(subsystemName), ReferenceType.SubSystem, DocumentType.BSV, line))
       case _ => None
     }
   }

@@ -14,7 +14,8 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine)
+    val lineNo = 10
+    val docReference = new DocReference(documentName, lineNo, referenceName, referenceType, documentType, originalLine)
     docReference should not be null
   }
 
@@ -24,7 +25,8 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
-    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine)
+    val lineNo = 10
+    val docReference = new DocReference(documentName, lineNo, referenceName, referenceType, documentType, originalLine)
 
     docReference.getDocumentName should be(documentName)
     docReference.getReferenceName should be(referenceName)
@@ -46,10 +48,11 @@ class DocReferenceTest extends AnyFlatSpec with should.Matchers {
     val referenceType = ReferenceType.Requirement
     val documentType = DocumentType.Lando
     val originalLine = "originalLine"
+    val lineNo = 10
 
     val referenceNameOfAbstraction = ReferenceName("abstractName")
-    val abstraction = new DocReference(documentName, referenceNameOfAbstraction, referenceType, documentType, originalLine)
-    val docReference = new DocReference(documentName, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
+    val abstraction = new DocReference(documentName, lineNo, referenceName, referenceType, documentType, originalLine)
+    val docReference = new DocReference(documentName, lineNo, referenceName, referenceType, documentType, originalLine, refinementOf = Some(Set(abstraction)))
     docReference.getDocumentName should be(documentName)
     docReference.getReferenceName should be(referenceName)
     docReference.getReferenceType should be(referenceType)

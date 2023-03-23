@@ -56,6 +56,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers  {
     val loadedFile = RefinementLoader.load(reportFilePath)
     loadedFile.name should be(reportName)
     loadedFile.explicit_refinements.values.size should be(1)
+    file.delete()
   }
 
   "ObjectConfigGenerator" should "generate a config file with none refined references from documents" in {
@@ -72,6 +73,7 @@ class ObjectConfigGeneratorTest extends AnyFlatSpec with should.Matchers  {
     reportFilePath should not be null
     val file = new File(reportFilePath)
     file.exists() should be(true)
+    file.delete()
   }
 
 }

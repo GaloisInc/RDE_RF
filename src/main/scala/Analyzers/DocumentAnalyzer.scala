@@ -1,5 +1,6 @@
 package Analyzers
 
+import scala.collection.parallel.CollectionConverters._
 import ConfigParser.RefinementModel
 import DocumentEnrichers._
 import Formatter.LatexFormatter
@@ -7,7 +8,6 @@ import Report.ReportTypes.{Documents, ReportReference}
 import Specs.FileSpecs
 import Types.DocumentInfos._
 import Utils.FileUtil
-
 import scala.reflect.ClassTag
 
 object DocumentAnalyzer {
@@ -29,7 +29,9 @@ object DocumentAnalyzer {
     require(FileSpecs.fileChecks(filesToAnalyze, supportedTypes), "Not all files exist or are of one of the supported types")
     val formatter = latexDocumentData.latexFormatter
     val documents = parseDocuments(filesToAnalyze.toArray, formatter)
+    println("Starting to add references")
     val documentsWithReference = DocumentReferencer.addReferences(documents, explicitReferences)
+    println("Finished adding references")
     val decoratedSourceFiles = decorateSourceFiles(documentsWithReference, formatter)
 
     ReportReference(
@@ -52,20 +54,21 @@ object DocumentAnalyzer {
       case Types.DocumentType.SV => new SVDocumentEnricher(formatter).asInstanceOf[D]
       case Types.DocumentType.C => new ACSLDocumentEnricher(formatter).asInstanceOf[D]
       case Types.DocumentType.Fret => new FRETDocumentEnricher(formatter).asInstanceOf[D]
+      case _ => throw new IllegalArgumentException("Document type not supported")
     }
   }
 
   private def decorateSourceFiles(documents: Documents, formatter: LatexFormatter): Documents = {
-    val lando = documents.landoDocuments.map(doc => doc.decorate(enricherPerDocumentType[LandoDocumentInfo, LandoDocumentEnricher](formatter, doc)))
-    val lobot = documents.lobotDocuments.map(doc => doc.decorate(enricherPerDocumentType[LobotDocumentInfo, LobotDocumentEnricher](formatter, doc)))
-    val sysML = documents.sysmlDocuments.map(doc => doc.decorate(enricherPerDocumentType[SysMLDocumentInfo, SysMLDocumentEnricher](formatter, doc)))
-    val cryptol = documents.cryptolDocuments.map(doc => doc.decorate(enricherPerDocumentType[CryptolDocumentInfo, CryptolDocumentEnricher](formatter, doc)))
-    val fret = documents.fretDocuments.map(doc => doc.decorate(enricherPerDocumentType[FretDocument, FRETDocumentEnricher](formatter, doc)))
-    val saw = documents.sawDocuments.map(doc => doc.decorate(enricherPerDocumentType[SawDocumentInfo, SawDocumentEnricher](formatter, doc)))
-    val bsv = documents.bsvDocuments.map(doc => doc.decorate(enricherPerDocumentType[BSVDocumentInfo, BSVDocumentEnricher](formatter, doc)))
-    val sv = documents.svDocuments.map(doc => doc.decorate(enricherPerDocumentType[SVDocumentInfo, SVDocumentEnricher](formatter, doc)))
-    val c = documents.cDocuments.map(doc => doc.decorate(enricherPerDocumentType[CDocumentInfo, ACSLDocumentEnricher](formatter, doc)))
-    Documents(lando, lobot, sysML, cryptol, saw, bsv, sv, c, fret)
+    val lando = documents.landoDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[LandoDocumentInfo, LandoDocumentEnricher](formatter, doc)))
+    val lobot = documents.lobotDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[LobotDocumentInfo, LobotDocumentEnricher](formatter, doc)))
+    val sysML = documents.sysmlDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[SysMLDocumentInfo, SysMLDocumentEnricher](formatter, doc)))
+    val cryptol = documents.cryptolDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[CryptolDocumentInfo, CryptolDocumentEnricher](formatter, doc)))
+    val fret = documents.fretDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[FretDocument, FRETDocumentEnricher](formatter, doc)))
+    val saw = documents.sawDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[SawDocumentInfo, SawDocumentEnricher](formatter, doc)))
+    val bsv = documents.bsvDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[BSVDocumentInfo, BSVDocumentEnricher](formatter, doc)))
+    val sv = documents.svDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[SVDocumentInfo, SVDocumentEnricher](formatter, doc)))
+    val c = documents.cDocuments.par.map(doc => doc.decorate(enricherPerDocumentType[CDocumentInfo, ACSLDocumentEnricher](formatter, doc)))
+    Documents(lando.toArray, lobot.toArray, sysML.toArray, cryptol.toArray, saw.toArray, bsv.toArray, sv.toArray, c.toArray, fret.toArray)
   } // TODO: add postcondition
 
 
@@ -78,8 +81,8 @@ object DocumentAnalyzer {
                                                                               files: Array[String],
                                                                               documentType: Types.DocumentType.documentType,
                                                                               parser: D)(implicit classTag: ClassTag[T]): Array[T] = {
-      val filesOfType = files.filter(file => FileUtil.getDocumentType(file) == documentType)
-      filesOfType.map(file => parser.parseDocument(file))
+      val filesOfType = files.filter(file => FileUtil.getDocumentType(file) == documentType).par
+      filesOfType.map(file => parser.parseDocument(file)).toArray
     }
 
     // Parse all files
@@ -92,7 +95,7 @@ object DocumentAnalyzer {
     val svDocuments: Array[SVDocumentInfo] = parseDocumentsOfType[SVDocumentInfo, SVDocumentEnricher](filesToAnalyze, Types.DocumentType.SV, new SVDocumentEnricher(formatter))
     val cDocuments: Array[CDocumentInfo] = parseDocumentsOfType[CDocumentInfo, ACSLDocumentEnricher](filesToAnalyze, Types.DocumentType.C, new ACSLDocumentEnricher(formatter))
     val fretDocuments: Array[FretDocument] = parseDocumentsOfType[FretDocument, FRETDocumentEnricher](filesToAnalyze, Types.DocumentType.Fret, new FRETDocumentEnricher(formatter))
-
+    println("Parsed all files")
     Documents(landoDocuments, lobotDocuments, sysMLDocuments, cryptolDocuments, sawDocuments, bsvDocuments, svDocuments, cDocuments, fretDocuments)
   } ensuring((res: Documents) => res.numberOfDocuments == filesToAnalyze.length, "Not all files were parsed")
 }

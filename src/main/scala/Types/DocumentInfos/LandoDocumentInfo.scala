@@ -4,7 +4,7 @@ import Types.DocReference.DocReference
 import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
-class LandoDocumentInfo(
+case class LandoDocumentInfo(
                          override val documentName: String,
                          override val filePath: String,
                          references: Set[DocReference],
@@ -18,35 +18,16 @@ class LandoDocumentInfo(
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Event, ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.System, ReferenceType.SubSystem, ReferenceType.Component)
   val latexLanguageName = "Lando"
 
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-            references: Set[DocReference] = references,
-            relations: Set[DocRelation] = relations,
-            events: Set[DocReference] = events,
-            requirements: Set[DocReference] = requirements,
-            scenarios: Set[DocReference] = scenarios,
-          ): LandoDocumentInfo = {
-    new LandoDocumentInfo(
-      documentName,
-      filePath,
-      references,
-      relations,
-      events,
-      requirements,
-      scenarios)
-  }
-
   override def updateReference(ref: DocReference): LandoDocumentInfo = {
     ref.getReferenceType match {
       case Types.ReferenceType.Component | Types.ReferenceType.System | Types.ReferenceType.SubSystem =>
-        val newReferences = references.filterNot(_.getLabelText == ref.getLabelText) + ref
+        val newReferences = references.filterNot(_.getLineNumber == ref.getLineNumber) + ref
         assert(newReferences.size == references.size,
           "The number of references must not change after updating a reference " + newReferences.size + " != " + references.size +
-            "for file " + documentName + " with path " + filePath)
+            " for file " + documentName + " with path " + filePath + " happened for reference " + ref.originalLine)
         copy(references = newReferences)
       case Types.ReferenceType.Scenario =>
-        val newScenarios = scenarios.filterNot(_.getLabelText == ref.getLabelText) + ref
+        val newScenarios = scenarios.filterNot(_.originalLine == ref.originalLine) + ref
         assert(newScenarios.size == scenarios.size,
           "The number of scenarios must not change after updating a reference " + newScenarios.size + " != " + scenarios.size)
         copy(scenarios = newScenarios)

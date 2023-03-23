@@ -3,7 +3,7 @@ package DocumentEnrichers
 import Formatter.LatexFormatter
 import Specs.FileSpecs
 import Types.DocReference.DocReference
-import Types.DocumentInfos.{DocumentInfo, LandoDocumentInfo}
+import Types.DocumentInfos.LandoDocumentInfo
 import Types._
 import Utils.Matcher.referenceNameMatches
 import Utils.{Control, FileUtil}
@@ -87,12 +87,12 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     }
   }
 
-  private def transformReference(line: String, fileName: String, fileType: FileType.Value): DocReference = {
+  private def transformReference(line: String, lineNo: Int, fileName: String, fileType: FileType.Value): DocReference = {
     val referenceOption = getReferenceTypeBasedOnFileType(line, fileType)
     val getReferenceType = referenceOption.get
     val referenceName = extractReferenceName(line)
     new DocReference(
-      fileName, referenceName, getReferenceType, DocumentType.Lando, line
+      fileName, lineNo, referenceName, getReferenceType, DocumentType.Lando, line
     )
   }
 
@@ -167,7 +167,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
   }
 
   def extractRelations(filePath: String): Set[DocRelation] = {
-    def transformRelation(line: String, fileName: String, fileType: FileType.Value): DocRelation = {
+    def transformRelation(line: String, lineNo: Int, fileName: String, fileType: FileType.Value): DocRelation = {
       line match {
         case relationRegex(source, symbol, target) =>
           new DocRelation(
@@ -189,7 +189,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
     FileType.ComponentFile
   }
 
-  def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, String, FileType.Value) => A): Set[A] = {
+  private def extract[A](filePath: String, filter: (String, String) => Boolean, transformer: (String, Int, String, FileType.Value) => A): Set[A] = {
     require(filePath.nonEmpty, "The file path should not be empty")
     val fileName = FileUtil.fileNameFromPath(filePath)
     val fileType = getFileType(filePath)
@@ -203,7 +203,7 @@ class LandoDocumentEnricher(override val formatterType: LatexFormatter,
         filter(line, previousLine)
       }).map(idx => {
         val line = lines(idx)
-        transformer(line, fileName, fileType)
+        transformer(line, idx, fileName, fileType)
       }).toSet
     }
     }

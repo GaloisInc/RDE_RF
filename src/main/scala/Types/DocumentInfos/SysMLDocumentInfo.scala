@@ -4,53 +4,23 @@ import Types.{DocRelation, DocumentType, FileType, ReferenceType}
 import Types.DocReference.DocReference
 import Utils.FileUtil
 
-class SysMLDocumentInfo(
-                         override val documentName: String,
-                         override val filePath: String,
-                         packages: Set[DocReference],
-                         parts: Set[DocReference],
-                         connections: Set[DocReference],
-                         usecases: Set[DocReference],
-                         requirements: Set[DocReference],
-                         actions: Set[DocReference],
-                         imports: Set[DocReference],
-                         views: Set[DocReference],
-                         items: Set[DocReference],
-                         attributes: Set[DocReference]) extends DocumentInfo[SysMLDocumentInfo] {
+case class SysMLDocumentInfo(
+                              override val documentName: String,
+                              override val filePath: String,
+                              packages: Set[DocReference],
+                              parts: Set[DocReference],
+                              connections: Set[DocReference],
+                              usecases: Set[DocReference],
+                              requirements: Set[DocReference],
+                              actions: Set[DocReference],
+                              imports: Set[DocReference],
+                              views: Set[DocReference],
+                              items: Set[DocReference],
+                              attributes: Set[DocReference]) extends DocumentInfo[SysMLDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.SysML
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Scenario, ReferenceType.Requirement, ReferenceType.Event, ReferenceType.System, ReferenceType.Scenario, ReferenceType.SubSystem, ReferenceType.Connection, ReferenceType.Import, ReferenceType.View, ReferenceType.ViewPoint, ReferenceType.Component, ReferenceType.Attribute)
   override val latexLanguageName = "SysML"
-
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-            packages: Set[DocReference] = packages,
-            parts: Set[DocReference] = parts,
-            connections: Set[DocReference] = connections,
-            usecases: Set[DocReference] = usecases,
-            requirements: Set[DocReference] = requirements,
-            actions: Set[DocReference] = actions,
-            imports: Set[DocReference] = imports,
-            views: Set[DocReference] = views,
-            items: Set[DocReference] = items,
-            attributes: Set[DocReference] = attributes
-          ): SysMLDocumentInfo = {
-    new SysMLDocumentInfo(
-      documentName,
-      filePath,
-      packages,
-      parts,
-      connections,
-      usecases,
-      requirements,
-      actions,
-      imports,
-      views,
-      items,
-      attributes)
-  }
-
 
   require(parts.forall(_.getReferenceType == ReferenceType.SubSystem))
   require(connections.forall(_.getReferenceType == ReferenceType.Connection))

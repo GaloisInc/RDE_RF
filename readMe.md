@@ -20,7 +20,7 @@ The tool requires the following dependencies to be installed and in path:
 * Sbt (v 1.7)
 * Latex
 * Java (> v 8)
-* Scala (> v 2.13)
+* Scala (>= v 2.13 && < v 3.0)
 * BlueSpec Compiler
 * Lobot
 * Lando
@@ -29,7 +29,7 @@ Alternatively, you can use the docker image (simonthrane/document_enricher:lates
 
 ## Usage
 
-The tool is written in Scala. To run and build it, you need to have Java 8, Scala and SBT installed on your machine.
+The tool is written in Scala. To run and build it, you need to have Java 8, Scala (2.13.6) and SBT installed on your machine.
 
 ## Usage Docker
 
@@ -80,6 +80,17 @@ Then, you can build the docker image by running the following command:
 ```bash
     sbt docker 
 ```
+
+## Publishing the Docker Image
+
+The docker image is published on docker hub. To publish the docker image, you need to have docker and sbt installed on your machine.
+Then, you can publish the docker image by running the script:
+
+```bash
+    /bin/bash build_publish_docker.sh
+```
+
+
 
 ## Short-term Backlog
 

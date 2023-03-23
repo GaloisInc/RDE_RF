@@ -1,10 +1,10 @@
 package Types.DocumentInfos
 
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
+import Types.{DocumentType, FileType, ReferenceType}
 import Utils.FileUtil
 
-class SawDocumentInfo(
+case class SawDocumentInfo(
                        override val documentName: String,
                        override val filePath: String,
                      ) extends DocumentInfo[SawDocumentInfo] {
@@ -13,13 +13,6 @@ class SawDocumentInfo(
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.System, ReferenceType.SubSystem)
   override val latexLanguageName = "Saw"
   override val documentType: DocumentType.Value = DocumentType.Saw
-
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-          ): SawDocumentInfo = {
-    new SawDocumentInfo(documentName, filePath)
-  }
 
   override def updateReference(ref: DocReference): SawDocumentInfo = {
     copy()

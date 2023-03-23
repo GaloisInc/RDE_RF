@@ -6,6 +6,7 @@ import org.apache.logging.log4j.scala.Logging
 
 object BlueSpecInterpreter extends Logging with CommandLineTool {
   def command: String = "bsc"
+
   def toolName: String = "BlueSpecVerilog"
 
   def isWellFormed(filePath: String): Boolean = {
@@ -36,16 +37,16 @@ object BlueSpecInterpreter extends Logging with CommandLineTool {
       logger.info(s"Failed to generate file for $filePath.")
       ""
     }
-  } ensuring(FileUtil.fileExists(_), "The file does not exist.")
+  } ensuring(file => FileUtil.fileExists(file), "The file does not exist.")
 
   def generateVerilogFile(filePath: String): String = {
     logger.info("BlueSpec generating verilog file " + filePath)
     generateFile(filePath, "-u", ".v")
-  } ensuring(FileUtil.fileExists(_), "The file does not exist.")
+  } ensuring(file => FileUtil.fileExists(file), "The file does not exist.")
 
   def generateBluesimObject(filePath: String): String = {
     bscCheck(filePath)
     logger.info("BlueSpec generating bluesim object " + filePath)
     generateFile(filePath, "-sim", ".bo")
-  } ensuring(FileUtil.fileExists(_), "The file does not exist.")
+  } ensuring(file => FileUtil.fileExists(file), "The file does not exist.")
 }

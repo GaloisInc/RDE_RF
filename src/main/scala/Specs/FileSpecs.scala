@@ -4,6 +4,8 @@ import Report.ReportTypes.ReportReference
 import Types.DocumentInfos.DocumentInfo
 import Utils.FileUtil
 
+import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
+
 /**
  * Trait that contains methods to check that files exist and are of the correct type
  */
@@ -48,7 +50,7 @@ object FileSpecs {
 
   private def filesAnalyzed[T <: DocumentInfo[T]](filesToAnalyze: Set[String], documents: Array[T], documentType: Types.DocumentType.Value): Boolean = {
     val extension = documentType.toString
-    val files = documents.filter(_.filePath.endsWith(extension))
+    val files = documents.par.filter(_.filePath.endsWith(extension))
     val filesAnalyzedOfType = filesToAnalyze.filter(_.endsWith(extension))
 
     files.forall(doc => {

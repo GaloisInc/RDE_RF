@@ -1,38 +1,20 @@
 package Types.DocumentInfos
 
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
+import Types.{DocumentType, FileType, ReferenceType}
 
-class CryptolDocumentInfo(
-                           override val documentName: String,
-                           override val filePath: String,
-                           imports: Set[DocReference],
-                           types: Set[DocReference],
-                           functions: Set[DocReference],
-                           properties: Set[DocReference],
-                         ) extends DocumentInfo[CryptolDocumentInfo] {
+case class CryptolDocumentInfo(
+                                override val documentName: String,
+                                override val filePath: String,
+                                imports: Set[DocReference],
+                                types: Set[DocReference],
+                                functions: Set[DocReference],
+                                properties: Set[DocReference],
+                              ) extends DocumentInfo[CryptolDocumentInfo] {
 
   override val documentType: DocumentType.Value = DocumentType.Cryptol
   val validReferenceTypesTypes: Set[ReferenceType.Value] = Set(ReferenceType.Requirement, ReferenceType.Event, ReferenceType.Import, ReferenceType.Type)
   override val latexLanguageName = "Cryptol"
-
-  def copy(
-            documentName: String = documentName,
-            filePath: String = filePath,
-            imports: Set[DocReference] = imports,
-            types: Set[DocReference] = types,
-            functions: Set[DocReference] = functions,
-            properties: Set[DocReference] = properties): CryptolDocumentInfo = {
-    new CryptolDocumentInfo(
-      documentName,
-      filePath,
-      imports,
-      types,
-      functions,
-      properties
-    )
-  }
-
 
   require(functions.forall(ref => ref.getReferenceType == ReferenceType.Event && ref.getDocumentType == DocumentType.Cryptol), "All functions must be of type Event")
   require(imports.forall(ref => ref.getReferenceType == ReferenceType.Import && ref.getDocumentType == DocumentType.Cryptol), "All imports must be of type Import")

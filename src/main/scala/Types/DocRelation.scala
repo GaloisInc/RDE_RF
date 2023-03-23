@@ -1,7 +1,7 @@
 package Types
 
 import Formatter.{LatexSanitizer, ReferenceFormatter}
-import Types.DocReference.DocReference
+import Types.DocReference.{DocReference, DocumentReference}
 
 
 class DocRelation(
@@ -37,10 +37,6 @@ class DocRelation(
 
 
   def getRelationType: RelationTypes.relationType = relationType
-
-  def getSourceRef: Option[DocReference] = sourceRef
-
-  def getTargetRef: Option[DocReference] = targetRef
 
   override def enrich(formatter: ReferenceFormatter): String = {
     val linkToSource = if (sourceRef.isDefined) formatter.addReference(sourceRef.get, documentName, LatexReferenceTypes.ConnectionArtifact) else getSourceName

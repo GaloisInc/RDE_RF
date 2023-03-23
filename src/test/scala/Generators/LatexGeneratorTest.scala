@@ -6,9 +6,9 @@ import Report._
 import Utils.LatexCompilationTester
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-
 import java.io.File
 import java.nio.file.Files
+import scala.reflect.io.Directory
 
 class LatexGeneratorTest extends AnyFlatSpec with should.Matchers with LatexCompilationTester {
   "Latex" should "be in Path" in {
@@ -75,14 +75,16 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers with LatexComp
     val tempFile = Files.createTempDirectory("test")
     buildDocumentationReport(Set(Types.DocumentType.Lando), "title", PaperLayout.A4, new InlineFormatter(), Set.empty[RefinementModel], sortFiles = false, tempFile.toAbsolutePath.toString)
     // Delete temp file
-    tempFile.toFile.delete()
+    val dir = new Directory(tempFile.toFile)
+    dir.deleteRecursively()
   }
 
   "LatexGenerator" should "be able to build B4 Latex Document" in {
     val tempFile = Files.createTempDirectory("test")
     buildDocumentationReport(Set(Types.DocumentType.Lando), "title", PaperLayout.B4, new InlineFormatter(), Set.empty[RefinementModel], sortFiles = false, tempFile.toAbsolutePath.toString)
     // Delete temp file
-    tempFile.toFile.delete()
+    val dir = new Directory(tempFile.toFile)
+    dir.deleteRecursively()
   }
 
   "LatexGenerator" should "be able to generate A4 Latex Document from References" in {
@@ -96,6 +98,8 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers with LatexComp
     }
     val latexName = "Test_SourceReport_A4"
     buildDocumentationReport(fileTypes, latexName, PaperLayout.A4, new InlineFormatter(), Set.empty[RefinementModel], sortFiles = false, directory.getPath)
+    val dir = new Directory(directory)
+    dir.deleteRecursively()
   }
 
   "LatexGenerator" should "be able to generate B4 Latex Document from References" in {
@@ -107,5 +111,7 @@ class LatexGeneratorTest extends AnyFlatSpec with should.Matchers with LatexComp
     }
     val latexName = "Test_SourceReport_B4"
     buildDocumentationReport(fileTypes, latexName, PaperLayout.B4, new MarginFormatter(), Set.empty[RefinementModel], sortFiles = false, directory.getPath)
+    val dir = new Directory(directory)
+    dir.deleteRecursively()
   }
 }

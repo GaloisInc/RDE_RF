@@ -1,7 +1,7 @@
 package Types.DocumentInfos
 
 import Types.DocReference.DocReference
-import Types.{DocRelation, DocumentType, FileType, ReferenceType}
+import Types.{DocumentType, FileType, ReferenceType}
 
 class SVDocumentInfo(
                       override val documentName: String,

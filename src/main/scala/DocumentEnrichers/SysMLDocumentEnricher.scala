@@ -65,7 +65,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     logger.info(s"Parsing file $filePath")
 
     val fileName = FileUtil.fileNameFromPath(filePath)
-    val references = Control.extractReferences(filePath, (l: String) => transformReference(l, fileName))
+    val references = Control.extractReferences(filePath, (l: String, lineNo: Int) => transformReference(l, lineNo: Int, fileName))
 
     val packages: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.System)
     val parts: Set[DocReference] = references.filter(_.getReferenceType == ReferenceType.SubSystem)
@@ -82,7 +82,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     val imports: Set[DocReference] = Set.empty[DocReference]
     //val ports: Set[DocReference] = extractReferences(filePath, ReferenceType.Port)
 
-    new SysMLDocumentInfo(
+    SysMLDocumentInfo(
       fileName,
       filePath,
       packages,
@@ -120,7 +120,7 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     line.trim().stripSuffix(";;").stripSuffix(";").stripSuffix("}").stripSuffix("{").trim()
   }
 
-  def transformReference(line: String, fileName: String): Option[DocReference] = {
+  def transformReference(line: String, lineNo: Int, fileName: String): Option[DocReference] = {
     def emptyIfNull(s: String): String = {
       logger.debug(s"emptyIfNull: $s")
       if (s == null) "" else s
@@ -148,16 +148,16 @@ class SysMLDocumentEnricher(override val formatterType: LatexFormatter,
     }
 
     val extractedReference = cleanString(line) match {
-      case systemRegex(acronym, name, nameQuoted) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.System, DocumentType.SysML, line))
-      case componentRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Component, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case subsystemRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.SubSystem, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case attributeRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Attribute, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case requirementRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Requirement, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case actionRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Event, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case importRegex(name) => Some(new DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.Import, DocumentType.SysML, line))
-      case viewRegex(name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), None), ReferenceType.View, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
-      case viewPointRegex(name) => Some(new DocReference(fileName, ReferenceName(emptyIfNull(name), None), ReferenceType.ViewPoint, DocumentType.SysML, line))
-      case usecaseRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Scenario, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case systemRegex(acronym, name, nameQuoted) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.System, DocumentType.SysML, line))
+      case componentRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Component, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case subsystemRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.SubSystem, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case attributeRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Attribute, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case requirementRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Requirement, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case actionRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Event, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case importRegex(name) => Some(new DocReference(fileName, lineNo, ReferenceName(emptyIfNull(name), None), ReferenceType.Import, DocumentType.SysML, line))
+      case viewRegex(name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), None), ReferenceType.View, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
+      case viewPointRegex(name) => Some(new DocReference(fileName, lineNo, ReferenceName(emptyIfNull(name), None), ReferenceType.ViewPoint, DocumentType.SysML, line))
+      case usecaseRegex(acronym, name, nameQuoted, symbol, references) => Some(new DocReference(fileName, lineNo, ReferenceName(findNonEmptyString(name, nameQuoted), noneIfNull(acronym)), ReferenceType.Scenario, DocumentType.SysML, line, references = refinementRefs(symbol, references)))
       //case connectionRegex(source, target) => DocRelation(fileName, ReferenceName(name, noneIfNull(acronym)), ReferenceType.Connection, DocumentType.SysML, line,)
       case _ => None
     }

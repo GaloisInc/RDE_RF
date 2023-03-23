@@ -1,8 +1,6 @@
 package Parsers.ParserTypes
 
-import Types.DocReference.DocReference
-import Types.DocumentInfos.DocumentInfo
-import Types.{DocRelation, DocumentType, FileType}
+import Types.DocumentType
 
 
 final case class ParsedDocument(

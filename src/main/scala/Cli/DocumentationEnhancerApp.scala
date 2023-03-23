@@ -29,6 +29,8 @@ object DocumentationEnhancerApp extends App with Logging {
       val refinementFile = new File(explicitRefinements)
       // Ensure that the target folder does not contain any previous files
       FileUtil.deleteRecursivelyDecoratedFiles(targetFolder)
+      // Ensure that Target folder exists
+      FileUtil.createFolder(targetFolder)
 
       val sourceFiles = FileUtil.findSourceFiles(sourceFolder, fileTypesOfTypesOfInterest)
       val excludedFolders = config.excludeFolders

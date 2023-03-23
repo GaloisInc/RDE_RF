@@ -1,4 +1,5 @@
 ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / versionScheme := Some("early-semver")
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.15"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
@@ -9,37 +10,35 @@ lazy val root = (project in file("."))
     version := "0.1.7",
     maintainer := "STH",
     scalaVersion := scalaVersion.value,
-    organization := "org.Galois"
+    organization := "org.Galois",
+    Compile / scalacOptions += "-Xlint",
+    Compile / scalacOptions += "-deprecation",
+    Compile / console / scalacOptions --= Seq("-Ywarn-unused", "-Ywarn-unused-import"),
+    // Set display options for scalatest
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-o")
   )
 
-/*
-lazy val myproject = project.settings(
-  scalaVersion := scalaVersion.value,
-  semanticdbEnabled := true, // enable SemanticDB
-  semanticdbVersion := scalafixSemanticdb.revision, // only required for Scala 2.x
-  scalacOptions += "-Ywarn-unused-import" // Scala 2.x only, required by `RemoveUnused`
-)
-wartremoverErrors ++= Warts.unsafe
- */
 
+libraryDependencies ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, major)) if major <= 12 =>
+      Seq()
+    case _ =>
+      Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
+  }
+}
 
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
-
 // The version is chosen on purpose to be compatible with the version of Scala used in the project.
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.14.0"
-
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1"
-
 // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.19.0"
-
 // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api-scala
 libraryDependencies += "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
-
 // JSON library - needed to handle FRET's file format
 val circeVersion = "0.14.1"
-
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core",
   "io.circe" %% "circe-generic",
@@ -150,7 +149,6 @@ docker / dockerfile := {
 docker / imageNames := Seq(
   // Sets the latest tag
   ImageName(s"${organization.value}/${name.value}:latest"),
-
   // Sets a name with a tag that contains the project version
   ImageName(
     namespace = Some(organization.value),

@@ -7,6 +7,8 @@ import Utils.{FileUtil, ResourceFiles}
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
+import java.io.File
+
 class DocumentAnalyzerSpec extends AnyFlatSpec with should.Matchers {
   private val authorName: String = "TestAuthor"
   private val targetFolder = getClass.getResource("").getPath
@@ -131,6 +133,9 @@ class DocumentAnalyzerSpec extends AnyFlatSpec with should.Matchers {
     val latexDocumentation = LatexDocumentData(title, authorName, targetFolder, PaperLayout.A4, new InlineFormatter())
     val report = DocumentAnalyzer.generateReport(filesToAnalyze, latexDocumentation, references)
     report.buildDocumentationReport
+    val file = new File(targetFolder + "/Test_Enriched_with_Explicit_References.tex")
+    file.exists() should be(true)
+    file.delete()
   }
 }
 

@@ -4,6 +4,7 @@ import Report.PaperLayout.PaperLayout
 import Report.{DocumentationDocument, PaperLayout, RefinementDocument}
 import Types.DocReference.DocReference
 import Types.DocumentInfos._
+import scala.collection.parallel.CollectionConverters._
 
 final case class Documents(
                             landoDocuments: Array[LandoDocumentInfo],
@@ -41,6 +42,7 @@ final case class Documents(
         case Types.DocumentType.BSV => copy(bsvDocuments = bsvDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
         case Types.DocumentType.C => copy(cDocuments = cDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
         case Types.DocumentType.Fret => copy(fretDocuments = fretDocuments.map(d => if (d.documentName == documentName) d.updateReference(docRef) else d))
+        case _ => throw new IllegalArgumentException(s"Document $documentName has an invalid document type")
       }
       case None => throw new IllegalArgumentException(s"Document $documentName not found")
     }
@@ -79,16 +81,16 @@ final case class ReportReference(
   } //ensuring((refs: Set[DocReference]) => refs.subsetOf(getAllReferences.toSet), "All refined references must be in the set of all references")
 
   def moveFiles(folder: String): ReportReference = {
-    val lando = documents.landoDocuments.map(d => d.moveFile(folder))
-    val lobot = documents.lobotDocuments.map(d => d.moveFile(folder))
-    val sysml = documents.sysmlDocuments.map(d => d.moveFile(folder))
-    val cryptol = documents.cryptolDocuments.map(d => d.moveFile(folder))
-    val saw = documents.sawDocuments.map(d => d.moveFile(folder))
-    val bsv = documents.bsvDocuments.map(d => d.moveFile(folder))
-    val sv = documents.svDocuments.map(d => d.moveFile(folder))
-    val c = documents.cDocuments.map(d => d.moveFile(folder))
-    val fret = documents.fretDocuments.map(d => d.moveFile(folder))
-    copy(documents = Documents(lando, lobot, sysml, cryptol, saw, bsv, sv, c, fret))
+    val lando = documents.landoDocuments.par.map(d => d.moveFile(folder))
+    val lobot = documents.lobotDocuments.par.map(d => d.moveFile(folder))
+    val sysml = documents.sysmlDocuments.par.map(d => d.moveFile(folder))
+    val cryptol = documents.cryptolDocuments.par.map(d => d.moveFile(folder))
+    val saw = documents.sawDocuments.par.map(d => d.moveFile(folder))
+    val bsv = documents.bsvDocuments.par.map(d => d.moveFile(folder))
+    val sv = documents.svDocuments.par.map(d => d.moveFile(folder))
+    val c = documents.cDocuments.par.map(d => d.moveFile(folder))
+    val fret = documents.fretDocuments.par.map(d => d.moveFile(folder))
+    copy(documents = Documents(lando.toArray, lobot.toArray, sysml.toArray, cryptol.toArray, saw.toArray, bsv.toArray, sv.toArray, c.toArray, fret.toArray))
   }
 
   def buildDocumentationReport: String = {

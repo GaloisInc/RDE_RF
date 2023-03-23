@@ -44,7 +44,7 @@ object LobotAnalyzer {
       case _ => throw new Exception("Unknown declaration")
     }
 
-    new LobotDocumentInfo(
+    LobotDocumentInfo(
       documentName,
       documentName,
       references.toSet,
@@ -66,7 +66,7 @@ class DocReferencePosition(documentName: String,
                            override val originalLine: String,
                            lineNumber: Int,
                           )
-  extends DocReference(documentName, referenceName, referenceType, documentType, originalLine) {
+  extends DocReference(documentName, lineNumber, referenceName, referenceType, documentType, originalLine) {
 
   require(lineNumber > 0, "Line number must be positive")
 
